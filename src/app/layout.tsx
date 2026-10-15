@@ -29,7 +29,7 @@ export default function RootLayout({
           <div>
             <Link href="/" className="footer-brand">
               The Kurzweil Scorecard
-              <span>Independent research. Transparent criteria.</span>
+              <span>Source-backed assessments. Transparent criteria.</span>
             </Link>
             <p>
               An independent project. Not affiliated with Ray Kurzweil.

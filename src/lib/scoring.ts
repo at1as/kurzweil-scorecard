@@ -19,7 +19,7 @@ export function deadlineYear(p: Prediction) {
 }
 export function isVerified(p: Prediction, asOf: string) {
   return (
-    p.assessment.state === "VERIFIED" &&
+    ["VERIFIED", "ASSESSED"].includes(p.assessment.state) &&
     p.assessment.lastReviewedAt !== null &&
     p.assessment.lastReviewedAt <= asOf
   );
@@ -28,6 +28,10 @@ export function fullyRealized(p: Prediction) {
   return p.assessment.atDeadline === "FULL" || p.assessment.atReview === "FULL";
 }
 export function verdict(p: Prediction, asOf: string): Verdict {
+  if (p.release)
+    return p.release.assessment.verdict === "WRONG_MISSED"
+      ? "MISSED"
+      : p.release.assessment.verdict;
   if (p.assessment.state === "EXCLUDED" || p.duplicateOf) return "EXCLUDED";
   if (!isVerified(p, asOf)) return "UNREVIEWED";
   if (!p.assessment.scorable || !deadlineEnd(p)) return "UNSCORABLE";
@@ -55,12 +59,21 @@ export function canonicalRecords(records: Prediction[]) {
 }
 export function eligibleRecords(records: Prediction[], asOf: string) {
   return canonicalRecords(
-    records.filter(
-      (p) => isVerified(p, asOf) && p.assessment.scorable && isDue(p, asOf),
+    records.filter((p) =>
+      p.release
+        ? p.release.assessment.eligible_for_deadline_metrics &&
+          isVerified(p, asOf) &&
+          isDue(p, asOf)
+        : isVerified(p, asOf) && p.assessment.scorable && isDue(p, asOf),
     ),
   );
 }
 export function driftYears(p: Prediction, asOf: string): number | null {
+  if (p.release)
+    return isVerified(p, asOf) &&
+      p.release.assessment.eligible_for_deadline_metrics
+      ? p.release.assessment.drift_years
+      : null;
   const target = deadlineYear(p);
   if (
     !isVerified(p, asOf) ||
@@ -89,6 +102,19 @@ export function summarize(records: Prediction[], asOf: string) {
   const eligible = eligibleRecords(records, asOf);
   const onTime = eligible.filter((p) => p.assessment.atDeadline === "FULL");
   const realized = eligible.filter(fullyRealized);
+  const currentUnknown = eligible.filter(
+    (p) =>
+      !fullyRealized(p) &&
+      ["FULL_FULFILLMENT_NOT_ESTABLISHED", "NOT_ASSESSED"].includes(
+        p.release?.assessment.at_review ?? p.assessment.atReview,
+      ),
+  ).length;
+  const eligibleBreakdown = Object.fromEntries(
+    VERDICTS.map((v) => [
+      v,
+      eligible.filter((p) => verdict(p, asOf) === v).length,
+    ]),
+  ) as Record<Verdict, number>;
   const breakdown = Object.fromEntries(
     VERDICTS.map((v) => [
       v,
@@ -107,8 +133,14 @@ export function summarize(records: Prediction[], asOf: string) {
     eligibleIds: eligible.map((p) => p.id),
     onTime: onTime.length,
     realized: realized.length,
+    onTimeRateLabel: `Strict on-time rate within this selected reviewed subset (n=${eligible.length})`,
     onTimeRate: eligible.length ? onTime.length / eligible.length : null,
-    realizationRate: eligible.length ? realized.length / eligible.length : null,
+    currentUnknown,
+    eligibleBreakdown,
+    realizationRate:
+      eligible.length && !currentUnknown
+        ? realized.length / eligible.length
+        : null,
     breakdown,
     drifts,
     meanDrift: drifts.length

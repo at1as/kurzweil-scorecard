@@ -12,25 +12,24 @@ test("overview distinguishes collection from scoring and links charts to records
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Ray Kurzweil",
   );
+  for (const value of ["88", "50", "34", "13"])
+    await expect(page.locator(".metric-grid")).toContainText(value);
+  await expect(page.locator(".metric-grid")).not.toContainText("%");
   await expect(
-    page
-      .locator(".metric-grid")
-      .getByText("Not yet available", { exact: true }),
-  ).toHaveCount(2);
-  await expect(
-    page.getByText("88 records await verification.", { exact: true }),
+    page.getByText("Selected reviewed subset only.", { exact: true }),
   ).toBeVisible();
-  await page.getByRole("link", { name: /AI & software: 21 of 88/ }).click();
+  await expect(page.locator("#state")).toContainText("unknown for 9 of the 13");
+  await page.getByRole("link", { name: /AI & software: 8 of 50/ }).click();
   await expect(page).toHaveURL(/category=AI/);
   await expect(page.locator(".results-toolbar")).toContainText(
-    "21 of 88 records",
+    "8 of 50 records",
   );
   expect(errors).toEqual([]);
 });
 test("search, combined filters, sort, pagination, and reload preserve URL state", async ({
   page,
 }) => {
-  await page.goto("/predictions/");
+  await page.goto("/predictions/?view=intake");
   await page
     .getByLabel("Categories", { exact: true })
     .selectOption("AI & software");
@@ -61,9 +60,9 @@ test("search, combined filters, sort, pagination, and reload preserve URL state"
   await expect(
     page.getByRole("heading", { name: "No matching records." }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Show all candidates" }).click();
+  await page.getByRole("button", { name: "Show curated records" }).click();
   await expect(page.locator(".results-toolbar")).toContainText(
-    "88 of 88 records",
+    "50 of 50 records",
   );
 });
 test("exports every filtered row and copies the current view", async ({
@@ -71,7 +70,7 @@ test("exports every filtered row and copies the current view", async ({
   context,
 }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/predictions/?category=AI+%26+software");
+  await page.goto("/predictions/?category=AI+%26+software&view=intake");
   await expect(page.locator(".results-toolbar")).toContainText(
     "21 of 88 records",
   );
@@ -104,38 +103,97 @@ test("detail URLs are stable and expose unchanged provenance", async ({
   await expect(
     page.getByText("IMPORTED PARAPHRASE · NOT A VERIFIED QUOTATION"),
   ).toBeVisible();
-  await page.getByText("Inspect original imported fields").click();
+  await page.getByText("Inspect preserved source fields").click();
   await expect(page.locator(".raw-data")).toContainText(
     "Legacy quote says 2000",
   );
   await expect(page.locator(".assessment-panel")).toContainText(
     "Not yet reviewed",
   );
+  await expect(page.locator(".reconciliation-panel")).toContainText(
+    "HOLD ATTRIBUTION CONFLICT",
+  );
+  await expect(
+    page.locator(".reconciliation-panel a[href='/predictions/K001/']"),
+  ).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("chess");
   expect((await page.request.get("/predictions/NOT-A-RECORD/")).status()).toBe(
     404,
   );
 });
-test("category controls switch dimensions and keep empty accuracy honest", async ({
+test("category comparisons retain zero categories and show outcome counts without rankings", async ({
   page,
 }) => {
   await page.goto("/categories/");
   await expect(page.locator(".analysis-table tbody tr")).toHaveCount(13);
-  await page.getByLabel("Group by").selectOption("type");
-  await expect(page.locator(".analysis-table")).toContainText("Not classified");
-  await expect(page.locator(".analysis-table tbody tr")).toHaveCount(1);
-  await page.getByRole("button", { name: "Accuracy", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "No eligible forecasts yet." }),
-  ).toBeVisible();
+    page
+      .locator(".analysis-table tbody tr")
+      .filter({ hasText: "Manufacturing & materials" }),
+  ).toContainText("0");
+  await page.getByRole("button", { name: "Due outcomes", exact: true }).click();
+  await expect(page.locator(".analysis-table")).toContainText(
+    "Current outcome unknown",
+  );
+  await expect(page.locator(".analysis-table")).not.toContainText("%");
   await page.getByRole("button", { name: "Verdicts", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "No verified verdicts yet." }),
-  ).toBeVisible();
+  await expect(page.locator(".analysis-table")).toContainText("Pending");
   await page.getByLabel("Group by").selectOption("horizon");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
   await expect(page.locator(".analysis-table")).toContainText("Unresolved");
+});
+test("curated evidence preserves source limits, interval timing, and related versions", async ({
+  page,
+}) => {
+  await page.goto("/predictions/K002/");
+  await expect(page.locator(".release-context")).toContainText(
+    "Editorial paraphrase",
+  );
+  await expect(page.locator(".timeline")).toContainText("By 2008");
+  await expect(page.locator(".timeline")).toContainText(
+    "not first achievement year",
+  );
+  await expect(page.locator(".source-list")).toContainText(
+    "AUTHOR RETROSPECTIVE REPRINT",
+  );
+  await page.goto("/predictions/K033/");
+  await expect(page.locator(".assessment-panel")).toContainText(
+    "LATE — hardware proxy; approximately 3–4 years",
+  );
+  await expect(page.locator(".assessment-panel")).toContainText(
+    "Excluded from default statistics",
+  );
+  await expect(page.locator(".outcome-comparison")).toContainText(
+    "FULFILLED UNDER STATED HARDWARE PROXY",
+  );
+  await page.goto("/predictions/AUD-025/");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("2019");
+  await page
+    .locator(".reconciliation-panel a[href='/predictions/K024/']")
+    .click();
+  await expect(page.locator(".timeline")).toContainText("2029");
+  await expect(page.locator(".history-links")).toContainText("AUD-025");
+  await page.goto("/predictions/K003/");
+  await expect(page.locator(".release-context")).toContainText(
+    "remains UNREVIEWED",
+  );
+  await page.goto("/sources/");
+  await expect(page.locator("#P01")).toContainText(
+    "Original book editions were not inspected",
+  );
+  await expect(page.locator("#P01 a[target='_blank']")).toHaveAttribute(
+    "href",
+    "https://www.thekurzweillibrary.com/images/How-My-Predictions-Are-Faring.pdf",
+  );
+  const canonical = await page.request.get(
+    "/data/releases/v0.2/predictions.canonical.v0.2.json",
+  );
+  expect((await canonical.json()).records).toHaveLength(50);
+  const history = await page.request.get(
+    "/data/releases/v0.1/predictions.json",
+  );
+  expect((await history.json()).predictions).toHaveLength(88);
 });
 test("all primary pages and representative details pass automated accessibility checks", async ({
   page,
@@ -148,6 +206,7 @@ test("all primary pages and representative details pass automated accessibility 
     "/methodology/",
     "/sources/",
     "/predictions/AUD-001/",
+    "/predictions/K033/",
   ]) {
     await page.goto(route);
     await page.getByRole("heading", { level: 1 }).waitFor();
@@ -195,6 +254,7 @@ test("desktop and mobile layouts stay in the viewport", async ({ page }) => {
     "/methodology/",
     "/sources/",
     "/predictions/AUD-001/",
+    "/predictions/K033/",
   ]) {
     await page.goto(route);
     await page.getByRole("heading", { level: 1 }).waitFor();

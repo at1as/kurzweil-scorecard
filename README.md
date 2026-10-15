@@ -1,12 +1,12 @@
 # Ray Kurzweil Prediction Scorecard
 
-An evidence-based audit of technological forecasting. A complete static Next.js application for browsing a growing research dataset, with source-traceable statistics and explicit verification gates.
+A static Next.js site for exploring dated forecasts, their source history, and source-backed editorial assessments.
 
-**Release scope:** website and data infrastructure. The supplied 88 candidates remain UNREVIEWED. This is not a completed historical audit, an exhaustive prediction corpus, or a claim of any accuracy percentage. No legacy score has been promoted into a verified outcome.
+**Evidence release v0.2, snapshot 2026-10-14:** 88 original leads reconciled; 50 curated forecast/version records; 34 editorial assessments; 13 due-and-eligible assessments. These populations are distinct. This selected subset is not an estimate of Kurzweil’s lifetime accuracy. Judgments are AI-assisted, not human peer review; original book editions were not independently collated.
 
 ## Run locally
 
-Requires Node.js 22+ and Python 3 (standard library only). If your default Node is older, switch versions first (`nvm use` with the included `.nvmrc`).
+Requires Node.js 22+ and Python 3 (standard library only). Switch Node versions with `nvm use` if needed.
 
 ```sh
 npm ci
@@ -14,103 +14,83 @@ npm run data:import
 npm run dev
 ```
 
-Open the Local URL printed by Next.js, normally http://127.0.0.1:3000. The app has no API keys, database, authentication, or paid backend requirements. Fonts are bundled locally; the site does not fetch Google Fonts at runtime or build time.
+Open the Local URL printed by Next.js, normally http://127.0.0.1:3000. No API keys, database, authentication, or paid backend is required. Fonts are bundled locally.
 
 ```sh
-npm run check     # dataset validation, strict TypeScript, unit tests
-npm run build     # re-imports data and generates all routes in out/
-npm run preview   # serves the production export at http://127.0.0.1:3000
+npm run check     # integrity, schema, TypeScript, and unit tests
+npm run build     # deterministic import and static route generation
+npm run preview   # serve out/ at http://127.0.0.1:3000
 ```
 
-`PORT=4100 npm run preview` uses a different local port. `next start` does not serve this static-export configuration.
+`PORT=4100 npm run preview` selects another port. `next start` does not serve this static-export configuration.
 
-## Pages and interactions
+## Evidence and history
 
-- `/`: overview, verification progress, category coverage, target distributions, verdicts, timing drift, and automatically enabled accuracy analytics.
-- `/predictions/`: searchable TanStack table with sorting, pagination, combined filters, five views, CSV export, and shareable URL state.
-- `/predictions/AUD-001/` (and every other stable ID): original/imported wording, source attribution, criteria, timelines, evidence, research checklist, related forecasts, and unmodified import provenance.
-- `/categories/`: primary-category, target-decade, publication-decade, confirmed forecast-horizon, and claim-type comparisons.
-- `/methodology/`: definitions, denominators, date rules, duplicates, disputes, and research limitations.
-- `/sources/`: workbook source inventory and downloads of the original intake and normalized canonical JSON.
+Start with `kurzweil_verification_v0_2/README_AGENT_HANDOFF.md`. The supplied package is immutable, and every manifest hash is checked on import. The original CSV, workbook, and legacy reports also remain unchanged.
 
-Query parameters include `q`, `category`, `tag`, `source`, `publication`, `target`, `verification`, `verdict`, `type`, `horizon`, `cohort`, `view`, `sort`, `order`, `page`, and `size`. Filters combine with AND; full-text words also combine with AND. The CSV export includes the entire filtered selection in the current sort order, not just the visible page. Spreadsheet-formula prefixes in exported text are neutralized.
+- `data/generated/predictions.json`: original 88-row intake with every raw field and source checksum preserved.
+- `data/generated/reviewed.json`: 50 records adapted from the authoritative v0.2 package. The complete original object is retained under `release` in each record.
+- `src/lib/evidence-model.ts`: package schemas; `src/lib/evidence.ts`: adapter and semantic validation.
+- `src/lib/data.ts`: separate curated and original populations, source catalogue, coverage, and reconciliation joins.
+- `data/releases/v0.1/`: pre-integration site data and configuration, preserved from commit `74f77b5`.
+- `docs/CHANGELOG.md`: dated release and integration history.
+- `public/data/releases/`: immutable downloadable snapshots; `public/data/predictions.json` is the current joined dataset.
 
-## Deploy
+All 88 original routes remain research-history pages. Every reconciliation is explicit; no automatic redirects are approved. A relationship may mean a split, an unresolved attribution, or a related forecast version rather than a duplicate. In particular, a later 2029 forecast cannot silently replace an unlocated 2019 forecast.
 
-The site is **ready to deploy**; building does not publish it or create a hosting account.
+### Rebuild and future corrections
 
-### Vercel
+```sh
+npm run data:import
+npm run check
+npm run build
+```
 
-Import this directory as a Git repository into Vercel. Use Node 22+, install with `npm ci`, and build with `npm run build`. The Next.js preset understands `output: "export"`; the generated static output directory is `out`. The build environment needs Python 3 for the workbook-specification extraction step. If your host does not include Python, run `npm run data:import` locally and commit the generated data, then use `npx next build` as the host build command.
+Never edit generated JSON, original intake, or the v0.2 package to record new research. Add a new versioned evidence release and a dated change-log entry describing the affected IDs, prior assessment, new assessment, evidence, and rationale. Update the importer’s active-release configuration deliberately and retain previous release files and URLs. Existing v0.1 curation files are retained for historical compatibility; they do not override v0.2 assessments.
 
-### Other static hosts
-
-Build locally and publish the contents of `out/` to a host supporting directory index files. All record URLs are pre-rendered as `predictions/<ID>/index.html`; use trailing-slash URLs. Serve `404.html` for unknown paths. No catch-all SPA rewrite is required. Deploy at a domain root; configure Next.js `basePath` before building if you need a repository subpath.
-
-## Data workflow
-
-Original input files and the supplied `kurzweil_scorecard_v0_1_package/` are preserved unchanged. Do not edit them to record new research.
-
-1. `data/config.json` sets the dataset snapshot, input filenames, and expected original intake count. The first snapshot is **2026-10-13**, inherited from the workbook; it is not the build date.
-2. `scripts/extract-workbook.py` reads the workbook ZIP/XML with Python's standard library. It extracts taxonomy, rubric, coverage, and data dictionary into `data/generated/specification.json` and records the workbook SHA-256. It does not evaluate Excel formulas.
-3. `scripts/import-data.ts` parses the original CSV (including its BOM and quoting), preserves **every original field**, row number, legacy ID, and input checksum, and constructs the typed canonical records. No numerical endpoint is inferred from provisional target text.
-4. `data/curated/overrides.json` applies explicit editorial updates to existing intake records. Each entry is `{ "id": "AUD-001", "changes": { ... } }`. Changes are shallow: replace a whole nested object such as `assessment` or `deadline`. Stable IDs, original imported claims, and provenance cannot be overwritten through overrides.
-5. `data/curated/predictions.json` holds full canonical objects for genuinely new research records. Both curated files start empty.
-6. Validation runs before writing `data/generated/predictions.json` and `public/data/predictions.json`. Duplicate IDs or scoring keys, invalid dates, incomplete verification, and inconsistent outcomes fail the import/build.
-
-After an edit, run `npm run data:import`, then `npm run check`, then `npm run build`. Do not edit generated files by hand. A fresh build repeats the import deterministically. Static pages and client-side analytics all consume the same generated dataset.
-
-### Add a verified prediction without changing UI code
-
-Use the full model in `src/lib/model.ts` and the field guide in `docs/DATA_MODEL.md`. For an existing candidate, copy the relevant nested structures from its generated JSON into an override and complete them using actual source research. For a new prediction, add a complete object to `data/curated/predictions.json`, with a new stable ID and real provenance.
-
-A verified, scorable record needs:
-
-- Checked original wording, a normalized claim, and fixed full success criteria.
-- At least one original source with a real HTTP(S) URL, page/paragraph/timestamp locator, and `wordingVerified: true`.
-- A confirmed original deadline with explicit precision. Publication years remain provisional unless separately checked.
-- Independent, dated outcome-evidence references and separate deadline/review outcomes.
-- A review date no later than the snapshot, reviewer, confidence, and written rationale.
-- `canonical: true` and a unique `scoringKey` only after deduplication. A family ID relates revisions; it is not itself a deduplication key.
-- `state: "VERIFIED"`, `scorable: true`, and the appropriate outcomes. A future target uses `atDeadline: "NOT_DUE"`; due targets require a completed assessment after the deadline.
-
-Actual-achievement dates are nullable even for full outcomes; unknown dates leave drift unavailable. Unmet claims cannot have achievement dates. The verdict is derived, never manually entered. Once a verified, due, canonical, scorable record is present, the same dashboard, analytics, filters, and pages automatically show its results. Synthetic fixtures exist only under `tests/`; they are never imported into the site.
-
-### Correct, deduplicate, revise, or exclude
-
-- Correct editorial fields through an override and add an entry to `research.history` with the date and explanation. Keep the raw source text intact.
-- For duplicate mentions, set `duplicateOf` to a retained original ID, set `canonical: false`, and supply `assessment.exclusionReason`. Do not delete historical records to improve the score.
-- A genuinely revised deadline is a new record with its own ID/scoring key and the same family ID. Preserve the original record and deadline.
-- For misattributions/non-predictions, set the state to `EXCLUDED` and record why. Records remain available under the excluded filter.
-- New curated records can be removed from the curated file and rebuilt, but published research corrections should normally use an explicit exclusion to preserve audit history and stable URLs.
+The importer validates package integrity, source references, all original mappings, categories, review states, and eligibility before producing release data. Site statistics are recomputed from records, not read from the package’s frozen metrics snapshot. Baseline tests compare recomputed results with the supplied snapshot to detect integration errors.
 
 ## Statistical contract
 
-Strict accuracy is full at original deadline / verified, canonical, due, scorable forecasts. Full realization uses **the same denominator** and counts full at deadline or by review. No fractional partial credit. Future deadlines are excluded from both rates, including early successes. A zero-sized denominator is null and displays “Not yet available.”
+The default deadline cohort follows `eligible_for_deadline_metrics`: 13 assessments, with 2 correct, 6 partial, and 5 wrong/missed. No fractional partial credit. Pending, unreviewed, unscorable, and the qualified K033 hardware-proxy assessment are excluded.
 
-Year deadlines close after December 31. Exact dates close after the stated day. The 2026-10-13 snapshot therefore excludes whole-year 2026 deadlines. At-deadline outcomes cannot be rewritten by later achievement. Only full, verified outcomes with known achievement and deadline years get calendar-year drift.
+Full realization by review is unknown for nine members of that same cohort, so its percentage is null. Unknown outcomes are not permanent failures. The UI emphasizes outcome counts; it does not rank categories by accuracy or present a whole-career rate. Any exported on-time rate describes only the selected reviewed subset with its explicit denominator.
 
-Verdict distribution uses verified canonical records and discloses its own sample size. Timing drift has its own documented sample. Category tags do not multiply records. The unique forecast count stays unavailable until canonicalization resolves it. Collection counts include duplicates and draft labels. Family-weighted sensitivity analysis is not implemented; materially revised dated versions can each count, and this limitation is disclosed.
+Supplied verdicts are authoritative editorial judgments, not inferred from dates. `WRONG_MISSED` maps to the existing UI’s `MISSED` key without changing its displayed meaning. `SOURCE_CONFIRMED` remains UNREVIEWED. Secondary-attribution pending cases remain provisional. All claim descriptions are editorial paraphrases, not quotations.
 
-Updating the snapshot is a research action: review deadlines newly closed since the old snapshot and update relevant outcomes. Validation rejects due predictions still marked NOT_DUE or assessed before their deadline.
+No exact drift observations exist in v0.2. K033 shows **LATE — hardware proxy; approximately 3–4 years**, excluded from default aggregates. A documented-by year is an evidence bound, never a first-achievement year. Chess’s 1997 outcome does not resolve its original deadline. Approximate target intervals are for navigation only.
+
+The snapshot date comes from the release, not the build clock. All 13 original categories remain, including zero-record Manufacturing & materials.
+
+## Pages and interactions
+
+- `/`: separate population counts, outcomes, coverage, timing limitations, and linked comparisons.
+- `/predictions/`: curated records by default; Original intake view preserves the original research inventory. Search, combined filters, sorting, pagination, CSV export, and shareable URLs work in the browser.
+- `/predictions/K001/` through `/predictions/K050/`: supplied assessments, criteria, attribution, source provenance, separate deadline/review outcomes, limitations, and legacy relations.
+- Original `/predictions/AUD-…/`, `/predictions/DEC-…/`, and `/predictions/EXE-…/` routes: unchanged original content plus reconciliation history and related-version links.
+- `/categories/`: counts by all 13 categories, target/publication decades, confirmed horizon, and claim type. No accuracy ranking.
+- `/sources/`: 32 real source links, 10 coverage entries, provenance limits, original reports, and versioned downloads.
+- `/methodology/`: eligibility, uncertainty, editorial review states, date rules, and population limits.
+
+Query parameters: `q`, `category`, `tag`, `source`, `publication`, `target`, `verification`, `verdict`, `type`, `horizon`, `cohort`, `view`, `sort`, `order`, `page`, `size`. `view=intake` selects history; the legacy `view=verified` URL now displays supplied editorial assessments, not a claim of independent verification. Filters combine with AND. CSV exports include every filtered row and escape formula prefixes.
 
 ## Verification
 
 ```sh
 npm run check
 npm run build
-npx playwright install chromium  # first use on a new machine
+npx playwright install chromium   # first use
 npm run test:browser
 ```
 
-The browser suite starts the production preview on port 4100, exercises search/combined filters/sorting/pagination, exports all filtered rows, reloads stable URLs, checks clipboard sharing and analytics controls, runs axe accessibility checks on six routes, and captures desktop/mobile layouts. Screenshots and traces go to ignored `work/`.
+The browser suite starts the production preview on port 4100. It checks populated subset counts, filters, sorting, pagination, exports, clipboard, history routes, source links, qualified timing, category coverage, accessibility, and mobile layout. Screenshots/traces go to ignored `work/`. Use `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/path/to/chromium` for an existing compatible browser.
 
-Use `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/path/to/chromium npm run test:browser` to use an existing compatible Chromium installation. For a running development server, use `npm run dev`; the browser acceptance suite intentionally exercises the static production export.
+## Static deployment
+
+The site already uses Next.js static export. `npm run build` generates `out/`; building does not publish it. Deploy its contents at a domain root on a host with directory index support, trailing-slash URLs, and `404.html` handling. No SPA catch-all rewrite or application server is needed. Search and charts remain interactive; data changes require rebuilding.
+
+A hosted build needs Node 22+ and Python 3. Alternatively, run the importer locally and use `npx next build` on a host without Python. Repository-subpath hosting needs Next.js `basePath` and adjustments to plain absolute data-download links before building.
 
 ## Implementation
 
-Next.js App Router, TypeScript, Tailwind CSS, TanStack Table v8, Zod, Lucide, locally bundled Inter and Newsreader fonts. Small accessible linked bar charts use HTML/CSS rather than a heavy chart runtime. The decorative hero illustration is explicitly labeled as conceptual, not data.
-
-Data and scoring are pure functions in `src/lib/`; page composition lives in `src/app/`; shared visual and interactive components live in `src/components/`. The canonical arrays are appropriate for hundreds or thousands of records. A future large corpus can move search to a prebuilt index without changing the underlying research model.
-
-Design reference: [TechEngage’s scorecard](https://techengage.com/ray-kurzweil-predictions-scorecard-what-he-got-right-and-wrong/), used for presentation context only. Its aggregate percentages are not evidence for this dataset.
+Next.js App Router, TypeScript, Tailwind CSS, TanStack Table v8, Zod, Lucide, locally bundled Inter and Newsreader fonts. Charts use accessible HTML/CSS. The hero illustration is conceptual, not observed data.

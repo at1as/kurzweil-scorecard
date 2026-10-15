@@ -1,6 +1,6 @@
 # Canonical prediction field guide
 
-`src/lib/model.ts` is the authoritative Zod schema and inferred TypeScript `Prediction` type. `src/lib/validation.ts` enforces cross-record and chronological integrity. The site derives verdicts and statistics from these fields; there is no editable score or fractional-weight field.
+`src/lib/model.ts` is the authoritative Zod schema and inferred TypeScript `Prediction` type. `src/lib/validation.ts` enforces cross-record and chronological integrity. The site uses supplied v0.2 editorial verdicts when a release payload is present; legacy fixture verdicts remain derived. Statistics are recomputed from eligibility flags, with no fractional weights.
 
 | Field                                                | Meaning and rule                                                                                                                                                                                                  |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -35,7 +35,21 @@
 
 All sources, criteria, and evidence must be populated by actual research. An apparently complete schema does not prove historical truth; validation enforces consistency, while human research establishes correctness.
 
-## Editing workflow
+## Evidence release v0.2
+
+`src/lib/evidence-model.ts` validates the immutable package. Each adapted record retains the entire authoritative object in `release`, including separate deadline/review outcomes, review state, source verification, publication provenance, target precision/interpretation, eligibility, documented-by bounds, exact/interval drift, and legacy relations. Read these original fields for semantic display rather than inferring from normalized browsing fields.
+
+`ASSESSED` is an AI-assisted editorial assessment, not human verification. `SOURCE_CONFIRMED` and `ATTRIBUTION_UNRESOLVED` are unreviewed. `EDITORIAL_PARAPHRASE` never renders as a quotation. `WRONG_MISSED` maps to the display key `MISSED`; the raw value remains in `release`. Supplied outcome enums remain unchanged in details and CSV exports.
+
+Original intake records receive a separate `reconciliation` object when served, with action, explanation, canonical links, source references, and explicit no-redirect/retain-original decisions. This does not mutate their imported fields or confer a score. Curated and original arrays are separate; aggregate metrics only consume curated records.
+
+Publication years are attributed, not asserted to be checked original first editions. Approximate navigation intervals are retained in `release.target`; they are not numeric exact deadlines. `full_achievement_documented_by_year` never populates `firstAchievementYear`. Exact drift requires an explicit supplied exact observation; K033's interval cannot enter default aggregates.
+
+The current UI displays all 13 taxonomy entries even when a category is empty. Counts and filters are based on canonical versions, not 88 minus duplicates. Category outcome counts are descriptive, not an accuracy ranking.
+
+## Historical v0.1 curation mechanism
+
+These files remain for compatibility with the original intake pipeline. They are not a way to overwrite immutable v0.2 assessments. For new research, add a versioned evidence release and an entry in `docs/CHANGELOG.md`.
 
 Existing candidates: add `{ "id": "AUD-001", "changes": { ... } }` to `data/curated/overrides.json`. A nested update replaces the entire nested object, so copy that object from `data/generated/predictions.json` before editing. The override schema rejects unknown fields and immutable provenance changes.
 

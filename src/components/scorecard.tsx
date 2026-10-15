@@ -25,7 +25,13 @@ import {
   X,
   ArrowUpRight,
 } from "lucide-react";
-import { AS_OF, categories, predictions } from "@/lib/data";
+import {
+  AS_OF,
+  categories,
+  predictions,
+  allRecords,
+  originalIntake,
+} from "@/lib/data";
 import {
   claim,
   CLAIM_TYPES,
@@ -50,8 +56,9 @@ import {
 } from "@/lib/filters";
 import { Badge } from "./ui";
 const VIEW_LABELS = {
-  all: "All candidates",
-  verified: "Verified",
+  all: "Curated records",
+  intake: "Original intake",
+  verified: "Assessed",
   fulfilled: "Fulfilled",
   misses: "Misses",
   future: "Future targets",
@@ -68,6 +75,7 @@ export function Scorecard() {
     () => parseFilters(new URLSearchParams(search.toString())),
     [search],
   );
+  const population = filters.view === "intake" ? originalIntake : predictions;
   const [more, setMore] = useState(false);
   const [copyStatus, setCopyStatus] = useState("");
   function update(values: Partial<Filters>, resetPage = true) {
@@ -81,7 +89,7 @@ export function Scorecard() {
     );
   }
   const filtered = useMemo(
-    () => filterRecords(predictions, filters, AS_OF),
+    () => filterRecords(allRecords, filters, AS_OF),
     [filters],
   );
   const columns = useMemo<ColumnDef<Prediction>[]>(
@@ -150,10 +158,25 @@ export function Scorecard() {
         header: "Verdict",
         accessorFn: (p) => verdict(p, AS_OF),
         cell: ({ row }) => (
-          <Badge
-            verdict={verdict(row.original, AS_OF)}
-            disputed={row.original.assessment.disputed}
-          />
+          <div>
+            <Badge
+              verdict={verdict(row.original, AS_OF)}
+              disputed={row.original.assessment.disputed}
+            />
+            {row.original.release?.assessment.drift_range_years && (
+              <small className="qualifier">
+                Hardware proxy; approximately 3–4 years. Excluded from default
+                statistics.
+              </small>
+            )}
+            {row.original.release?.source_verification.state.startsWith(
+              "REPORTED_ATTRIBUTION",
+            ) && (
+              <small className="qualifier">
+                Provisional secondary attribution
+              </small>
+            )}
+          </div>
         ),
       },
       {
@@ -174,7 +197,9 @@ export function Scorecard() {
         sortUndefined: "last",
         cell: ({ row }) => (
           <span className="numeric">
-            {driftLabel(driftYears(row.original, AS_OF))}
+            {row.original.release?.assessment.drift_range_years
+              ? "≈ +3–4y (proxy)"
+              : driftLabel(driftYears(row.original, AS_OF))}
           </span>
         ),
       },
@@ -286,6 +311,7 @@ export function Scorecard() {
           >
             {VIEW_LABELS[view]}
             {view === "all" && <span>{predictions.length}</span>}
+            {view === "intake" && <span>{originalIntake.length}</span>}
           </button>
         ))}
       </div>
@@ -337,7 +363,7 @@ export function Scorecard() {
             "source",
             "Sources",
             unique(
-              predictions.flatMap((p) => p.sources.map((s) => s.title)),
+              population.flatMap((p) => p.sources.map((s) => s.title)),
             ).map((value) => ({ value, label: cleanSource(value) })),
           )}
         </div>
@@ -345,17 +371,17 @@ export function Scorecard() {
           {select(
             "tag",
             "Subcategories",
-            opts(unique(predictions.flatMap((p) => p.tags))),
+            opts(unique(population.flatMap((p) => p.tags))),
           )}
           {select(
             "publication",
             "Publication decades",
-            opts(unique(predictions.map(publicationDecade))),
+            opts(unique(population.map(publicationDecade))),
           )}
           {select(
             "target",
             "Target decades",
-            opts(unique(predictions.map(targetDecade))),
+            opts(unique(population.map(targetDecade))),
           )}
           {select(
             "verification",
@@ -368,9 +394,9 @@ export function Scorecard() {
             CLAIM_TYPES.map((value) => ({ value, label: TYPE_LABELS[value] })),
           )}
           {select("cohort", "Statistical populations", [
-            { value: "eligible", label: "Due, verified, canonical & scorable" },
+            { value: "eligible", label: "Due & eligible selected subset" },
             { value: "canonical", label: "Canonical only" },
-            { value: "drift", label: "Verified with known timing drift" },
+            { value: "drift", label: "Eligible with exact timing drift" },
           ])}
         </div>
         {activeKeys.length > 0 && (
@@ -393,7 +419,7 @@ export function Scorecard() {
       </div>
       <div className="results-toolbar">
         <p role="status" aria-live="polite">
-          <strong>{filtered.length}</strong> of {predictions.length} records
+          <strong>{filtered.length}</strong> of {population.length} records
           <span> · Snapshot {AS_OF}</span>
         </p>
         <div>
@@ -414,11 +440,18 @@ export function Scorecard() {
           </button>
         </div>
       </div>
+      {filters.view === "intake" && (
+        <p className="table-note">
+          Research history: all original leads remain unchanged and unscored.
+          Open a record for its reconciliation, related versions, and reasons.
+          Links do not imply equivalence.
+        </p>
+      )}
       {filters.view === "future" && (
         <p className="table-note">
-          Future targets includes unreviewed leads whose target text clearly
-          points beyond the snapshot year. These records retain UNREVIEWED
-          status; they are not verified pending forecasts.
+          Future targets are navigation labels. Pending assessments may still
+          have provisional secondary attribution; none enters the deadline
+          denominator.
         </p>
       )}
       <div className="table-scroll scorecard-table-wrap">
@@ -476,20 +509,20 @@ export function Scorecard() {
           <div className="no-results">
             <Search size={25} />
             <h3>
-              {filters.view === "all"
+              {filters.q || activeKeys.length || filters.view === "all"
                 ? "No matching records."
                 : "No records in this view yet."}
             </h3>
             <p>
               {filters.view === "all"
                 ? "Try a broader search or remove a filter."
-                : "Verification is in progress. Imported leads remain available in All candidates."}
+                : "Try another view or remove a filter. Original leads remain available in Original intake."}
             </p>
             <button
               className="button button-small"
               onClick={() => router.replace(pathname, { scroll: false })}
             >
-              Show all candidates <ArrowUpRight size={14} />
+              Show curated records <ArrowUpRight size={14} />
             </button>
           </div>
         )}
@@ -536,8 +569,9 @@ export function Scorecard() {
         </div>
       </div>
       <p className="footnote">
-        Draft source years, target text, and categories are preserved for
-        research navigation. A blank actual year or drift means the required
+        Publication years are attributed to the listed source; original editions
+        were not independently collated. The selected subset is not a lifetime
+        accuracy estimate. A blank actual year or drift means the required
         evidence has not been established. Exports include all filtered records,
         not just this page.
       </p>

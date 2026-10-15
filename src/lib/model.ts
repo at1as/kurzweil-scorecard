@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { evidenceRecordSchema, reconciliationSchema } from "./evidence-model";
 
 export const VERDICTS = [
   "CORRECT",
@@ -13,6 +14,9 @@ export const VERDICTS = [
 export type Verdict = (typeof VERDICTS)[number];
 export const REVIEW_STATES = [
   "UNREVIEWED",
+  "ASSESSED",
+  "SOURCE_CONFIRMED",
+  "ATTRIBUTION_UNRESOLVED",
   "ATTRIBUTION_CHECKED",
   "EVIDENCE_CHECKED",
   "VERIFIED",
@@ -49,6 +53,8 @@ const outcome = z.enum([
 ]);
 export const predictionSchema = z
   .object({
+    release: evidenceRecordSchema.optional(),
+    reconciliation: reconciliationSchema.optional(),
     id: z.string().regex(/^[A-Z0-9][A-Z0-9-]*$/),
     familyId: nullableText,
     parentStatementId: nullableText,
@@ -61,6 +67,7 @@ export const predictionSchema = z
     importedClaim: z.string().min(1),
     originalWording: nullableText,
     wordingKind: z.enum([
+      "EDITORIAL_PARAPHRASE",
       "UNVERIFIED_PARAPHRASE",
       "VERIFIED_QUOTE",
       "VERIFIED_PARAPHRASE",

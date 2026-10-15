@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { importEvidence } from "./import-evidence";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { parse } from "csv-parse/sync";
@@ -138,4 +139,11 @@ fs.writeFileSync(
 );
 console.log(
   `Imported ${input.length} leads; ${overrides.length} curated updates; ${predictions.length} total records. Original SHA-256 ${hash}`,
+);
+
+importEvidence(
+  predictions,
+  spec.categories.map((c: { name: string }) => c.name),
+  config.asOf,
+  hash,
 );

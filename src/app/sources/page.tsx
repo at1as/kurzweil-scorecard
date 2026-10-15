@@ -1,42 +1,43 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowDownToLine, ArrowUpRight, BookOpen } from "lucide-react";
-import { coverage, AS_OF_LABEL, predictions } from "@/lib/data";
+import { ArrowDownToLine, BookOpen } from "lucide-react";
+import {
+  coverage,
+  evidenceCoverage,
+  evidenceSources,
+  AS_OF_LABEL,
+  predictions,
+  originalIntake,
+  release,
+} from "@/lib/data";
 import { Eyebrow, External, Notice, SectionHeading } from "@/components/ui";
 export const metadata: Metadata = { title: "Sources & research coverage" };
 export default function Sources() {
-  const primary = coverage.filter((s) => s.id.startsWith("CORPUS"));
   const legacy = coverage.filter((s) => s.id.startsWith("LEGACY"));
-  const references = coverage.filter((s) => s.id.startsWith("REFERENCE"));
   return (
     <div className="container page-container">
       <div className="page-intro">
         <Eyebrow>THE CORPUS, IN THE OPEN</Eyebrow>
         <h1>A collection, not the complete picture.</h1>
-        <p>
-          What has been collected, what has been located,
-          <br />
-          and what remains to be examined.
-        </p>
+        <p>Source links, what was examined, and what remains to extract.</p>
       </div>
       <Notice>
-        <strong>Coverage is not verification.</strong> These states come from
-        the supplied workbook as of {AS_OF_LABEL}. A located source is a
-        research lead, not proof that its claims or outcomes have been
-        independently checked.
+        <strong>Evidence release v0.2 · {AS_OF_LABEL}.</strong>{" "}
+        {release.disclosure} Source confirmation is distinct from outcome
+        review. A rebuild does not renew the research date.
       </Notice>
       <div className="coverage-metrics">
         <div>
+          <strong>{originalIntake.length}</strong>
+          <span>original leads reconciled</span>
+        </div>
+        <div>
           <strong>{predictions.length}</strong>
-          <span>candidate records imported</span>
+          <span>curated forecast/version records</span>
         </div>
         <div>
-          <strong>{legacy.length}</strong>
-          <span>earlier reports preserved</span>
-        </div>
-        <div>
-          <strong>{primary.length}</strong>
-          <span>primary corpus entries tracked</span>
+          <strong>{evidenceSources.length}</strong>
+          <span>linked source entries</span>
         </div>
         <div>
           <strong>Open</strong>
@@ -44,62 +45,101 @@ export default function Sources() {
         </div>
       </div>
       <section className="section">
-        <SectionHeading index="01" title="The primary-source reading list.">
-          Books, retrospective reports, wagers, and interviews. Scope and
-          extraction status are shown separately.
+        <SectionHeading index="01" title="What has actually been examined.">
+          Selected passages and versions, not complete book extraction. The
+          original 147-item 2009 corpus is the next bounded audit population.
         </SectionHeading>
         <div className="source-coverage-list">
-          {primary.map((s, i) => (
+          {evidenceCoverage.map((s, i) => (
             <article className="coverage-card" key={s.id}>
               <span className="coverage-index">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
                 <div className="coverage-heading">
-                  <h3>{s.title}</h3>
+                  <h3>{s.source_or_corpus}</h3>
                   <span className="coverage-state">
-                    {s.state.toLowerCase()}
+                    {s.status.replaceAll("_", " ").toLowerCase()}
                   </span>
                 </div>
-                <p className="coverage-scope">{s.scope}</p>
-                <p>{s.notes}</p>
-                <External href={s.reference}>Open source locator</External>
+                <p className="coverage-scope">{s.scope_checked}</p>
+                <p>
+                  <strong>Remaining:</strong> {s.remaining_work}
+                </p>
+                <p>
+                  {s.source_ids.map((id) => (
+                    <Link className="source-id-link" key={id} href={`#${id}`}>
+                      {id}
+                    </Link>
+                  ))}
+                </p>
               </div>
             </article>
           ))}
         </div>
       </section>
       <section className="section">
-        <SectionHeading index="02" title="Where the intake came from.">
-          Earlier research is preserved as provenance. Its conclusions are not
-          inherited.
+        <SectionHeading index="02" title="The source catalogue.">
+          Forecast attribution and outcome evidence are labelled separately.
+          Locators on detail pages use printed page numbers, not PDF viewer
+          indices.
+        </SectionHeading>
+        <div className="source-coverage-list">
+          {evidenceSources.map((s) => (
+            <article className="coverage-card" key={s.id} id={s.id}>
+              <span className="coverage-index">{s.id}</span>
+              <div>
+                <div className="coverage-heading">
+                  <h3>
+                    <External href={s.url}>{s.title}</External>
+                  </h3>
+                  <span className="coverage-state">
+                    {s.kind.replaceAll("_", " ").toLowerCase()}
+                  </span>
+                </div>
+                <p className="coverage-scope">
+                  Published: {s.publication_date ?? "not recorded"} · Checked:{" "}
+                  {s.checked_as_of} ·{" "}
+                  {s.access.replaceAll("_", " ").toLowerCase()}
+                </p>
+                {s.provenance_note && <p>{s.provenance_note}</p>}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="section">
+        <SectionHeading index="03" title="Where the intake came from.">
+          Original reports and their record history remain available. Legacy
+          grades are not inherited.
         </SectionHeading>
         <div className="legacy-cards">
           {legacy.map((s) => (
             <article className="panel" key={s.id}>
               <BookOpen size={22} />
               <h3>{s.title}</h3>
-              <span className="coverage-state">{s.state.toLowerCase()}</span>
               <p>
                 <strong>{s.scope}</strong>
               </p>
               <p>{s.notes}</p>
               <code>{s.reference}</code>
-              <span className="missing-field">
-                Preserved in the repository’s supplied source package
-              </span>
             </article>
           ))}
         </div>
+        <Link className="text-link" href="/predictions/?view=intake">
+          Browse all {originalIntake.length} original leads and reconciliations
+          →
+        </Link>
       </section>
       <section className="section dataset-section">
         <div>
           <Eyebrow>REPRODUCIBLE BY DESIGN</Eyebrow>
           <h2>Follow the data.</h2>
           <p>
-            The raw intake remains unchanged. Normalized records preserve
-            provenance, research state, and the original imported fields. No
-            Excel formulas run on this site.
+            Immutable releases preserve original dates, prior assessments,
+            unresolved cases, and source limitations. The current download
+            contains the site’s joined records; original release files remain
+            unchanged.
           </p>
           <div className="hero-actions">
             <a
@@ -110,22 +150,46 @@ export default function Sources() {
               Original intake CSV <ArrowDownToLine size={16} />
             </a>
             <a className="button" href="/data/predictions.json" download>
-              Canonical JSON <ArrowDownToLine size={16} />
+              Current canonical JSON <ArrowDownToLine size={16} />
             </a>
           </div>
         </div>
         <div className="reference-note">
-          <span className="micro-label">DESIGN REFERENCE</span>
-          {references.map((s) => (
-            <div key={s.id}>
-              <h3>
-                <External href={s.reference}>{s.title}</External>
-              </h3>
-              <p>{s.notes}</p>
-            </div>
-          ))}
-          <Link href="/methodology/" className="text-link">
-            See the scoring methodology <ArrowUpRight size={16} />
+          <span className="micro-label">VERSIONED RESEARCH DOWNLOADS</span>
+          <ul className="question-list">
+            {[
+              [
+                "predictions.canonical.v0.2.json",
+                "v0.2 authoritative assessments",
+              ],
+              [
+                "legacy-reconciliation.v0.2.json",
+                "All 88 reconciliation decisions",
+              ],
+              ["sources.v0.2.json", "Source catalogue"],
+              ["source-coverage.v0.2.json", "Examined scope & remaining work"],
+              ["verification-dossiers.md", "Detailed evidence dossiers"],
+              ["MANIFEST.json", "Release file checksums"],
+            ].map(([file, label]) => (
+              <li key={file}>
+                <a href={`/data/releases/v0.2/${file}`} download>
+                  {label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a href="/data/releases/v0.1/predictions.json" download>
+                v0.1 original site snapshot
+              </a>
+            </li>
+            <li>
+              <a href="/data/metrics.json" download>
+                Recomputed current subset metrics
+              </a>
+            </li>
+          </ul>
+          <Link className="text-link" href="/methodology/">
+            Read scope and methodology →
           </Link>
         </div>
       </section>

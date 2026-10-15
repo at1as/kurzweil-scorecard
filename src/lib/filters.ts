@@ -10,6 +10,7 @@ import {
 } from "./scoring";
 export const VIEWS = [
   "all",
+  "intake",
   "verified",
   "fulfilled",
   "misses",
@@ -150,6 +151,10 @@ export function filterRecords(
   const words = filters.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
   return records.filter((p) => {
     const v = verdict(p, asOf);
+    if (
+      filters.view === "intake" ? !p.reconciliation : Boolean(p.reconciliation)
+    )
+      return false;
     if (filters.view === "verified" && !isVerified(p, asOf)) return false;
     if (filters.view === "fulfilled" && !["CORRECT", "LATE"].includes(v))
       return false;
@@ -176,6 +181,8 @@ export function filterRecords(
       return false;
     const haystack = [
       p.id,
+      p.release?.legacy_relations.map((r) => r.legacy_id).join(" "),
+      p.reconciliation?.reason,
       p.importedClaim,
       p.originalWording,
       p.normalizedClaim,
@@ -239,6 +246,12 @@ export function exportCsv(records: Prediction[], asOf: string) {
     "Provenance file",
     "Provenance row",
     "Snapshot date",
+    "Deadline metrics eligible",
+    "Verdict qualifier",
+    "Documented by year (not first year)",
+    "Drift interval",
+    "Metric exclusion",
+    "Scope",
   ];
   const escape = (value: unknown) => {
     const text = String(value ?? "");
@@ -263,8 +276,8 @@ export function exportCsv(records: Prediction[], asOf: string) {
       verdict(p, asOf),
       p.assessment.state,
       p.canonical,
-      p.assessment.atDeadline,
-      p.assessment.atReview,
+      p.release?.assessment.at_deadline ?? p.assessment.atDeadline,
+      p.release?.assessment.at_review ?? p.assessment.atReview,
       p.assessment.firstAchievementYear,
       driftYears(p, asOf),
       p.assessment.lastReviewedAt,
@@ -276,6 +289,16 @@ export function exportCsv(records: Prediction[], asOf: string) {
       p.provenance.inputFile,
       p.provenance.row,
       asOf,
+      eligibleRecords([p], asOf).length > 0,
+      p.release?.assessment.drift_range_years
+        ? "Hardware proxy; approximately 3–4 years; excluded from default statistics"
+        : "",
+      p.release?.assessment.full_achievement_documented_by_year,
+      p.release?.assessment.drift_range_years?.join("–"),
+      p.assessment.exclusionReason,
+      p.release
+        ? "Selected curated subset; not lifetime accuracy"
+        : "Original intake research history",
     ]),
   ]
     .map((row) => row.map(escape).join(","))

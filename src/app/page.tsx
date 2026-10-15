@@ -7,7 +7,14 @@ import {
   CheckCheck,
   ScanText,
 } from "lucide-react";
-import { AS_OF, AS_OF_LABEL, categories, predictions } from "@/lib/data";
+import {
+  AS_OF,
+  AS_OF_LABEL,
+  categories,
+  predictions,
+  originalIntake,
+  release,
+} from "@/lib/data";
 import { summarize, rate, verdict } from "@/lib/scoring";
 import { scorecardUrl, targetDecade } from "@/lib/filters";
 import { claim, LABELS } from "@/lib/model";
@@ -28,7 +35,7 @@ export default function Overview() {
       name,
       count: predictions.filter((p) => targetDecade(p) === name).length,
     }));
-  const featured = ["AUD-001", "AUD-004", "AUD-014"]
+  const featured = ["K002", "K024", "K033"]
     .map((id) => predictions.find((p) => p.id === id))
     .filter((p) => p !== undefined);
   return (
@@ -37,7 +44,7 @@ export default function Overview() {
         <div className="hero-copy">
           <Eyebrow>
             <span className="live-dot" />A living research project{" "}
-            <span className="eyebrow-divider">/</span> Edition 01
+            <span className="eyebrow-divider">/</span> Edition 02
           </Eyebrow>
           <h1>
             Ray Kurzweil
@@ -145,63 +152,34 @@ export default function Overview() {
           meaningful.
         </SectionHeading>
         <div className="metric-grid">
-          <Link className="metric" href="/predictions/">
-            <span>Candidate records collected</span>
+          <Link className="metric" href={scorecardUrl({ view: "intake" })}>
+            <span>Original leads reconciled</span>
             <strong>
-              {stats.collected}
+              {originalIntake.length}
               <ArrowUpRight size={23} />
             </strong>
-            <p>Includes possible repetitions</p>
+            <p>Original wording and routes preserved</p>
           </Link>
-          <Link
-            className="metric"
-            href={scorecardUrl({ view: "verified", cohort: "canonical" })}
-          >
-            <span>Verified & canonical</span>
-            <strong>
-              {stats.verified}
-              <span className="metric-denominator">/ {stats.collected}</span>
-            </strong>
-            <p>Source, scope, and outcome checked</p>
+          <Link className="metric" href="/predictions/">
+            <span>Curated forecast/version records</span>
+            <strong>{stats.collected}</strong>
+            <p>A selected collection, not a lifetime total</p>
           </Link>
-          <Link className="metric" href={scorecardUrl({ cohort: "eligible" })}>
-            <span>Strict on-time accuracy</span>
-            <strong className={stats.onTimeRate === null ? "unavailable" : ""}>
-              {stats.onTimeRate === null ? "—" : rate(stats.onTimeRate)}
-            </strong>
-            <p>
-              {stats.onTimeRate === null
-                ? "Not yet available"
-                : `${stats.onTime} of ${stats.eligible} eligible forecasts`}
-            </p>
+          <Link className="metric" href={scorecardUrl({ view: "verified" })}>
+            <span>Editorial assessments</span>
+            <strong>{stats.verified}</strong>
+            <p>Includes future and unscorable claims</p>
           </Link>
           <Link className="metric" href={scorecardUrl({ cohort: "eligible" })}>
-            <span>Full realization by review</span>
-            <strong
-              className={stats.realizationRate === null ? "unavailable" : ""}
-            >
-              {stats.realizationRate === null
-                ? "—"
-                : rate(stats.realizationRate)}
-            </strong>
-            <p>
-              {stats.realizationRate === null
-                ? "Not yet available"
-                : `${stats.realized} of ${stats.eligible} eligible forecasts`}
-            </p>
+            <span>Due forecasts assessed</span>
+            <strong>{stats.eligible}</strong>
+            <p>Eligible for the default deadline subset</p>
           </Link>
         </div>
         <Notice>
-          <strong>{stats.unreviewed} records await verification.</strong>{" "}
-          Imported statements are research leads, not established quotations or
-          scored outcomes. Unique forecast count is{" "}
-          {stats.canonical
-            ? `${stats.canonical} resolved canonical forecasts; deduplication may be incomplete`
-            : "not yet established; deduplication is still pending"}
-          .{" "}
-          <Link href="/methodology/">
-            What counts as verified? <ArrowUpRight size={13} />
-          </Link>
+          <strong>Selected reviewed subset only.</strong> These results are not
+          an estimate of Kurzweil’s lifetime accuracy. {release.disclosure}{" "}
+          <Link href="/methodology/">Read the scope and exclusions.</Link>
         </Notice>
         <div className="outcome-strip">
           {(["CORRECT", "LATE", "PARTIAL", "MISSED", "PENDING"] as const).map(
@@ -221,28 +199,24 @@ export default function Overview() {
           )}
         </div>
         <p className="footnote">
-          Outcome counts use verified canonical forecasts only. “—” means no
-          verified population, not a zero success rate. Deadline-based rates
-          exclude all future deadlines.
+          Outcome counts above cover {stats.verified} editorial assessments,
+          including future and unscorable records. The due-and-eligible subset
+          contains {stats.eligibleBreakdown.CORRECT} correct,{" "}
+          {stats.eligibleBreakdown.PARTIAL} partial, and{" "}
+          {stats.eligibleBreakdown.MISSED} wrong/missed assessments. Partials
+          receive no fractional credit. K033 is a qualified hardware-proxy
+          result, excluded from default statistics.
         </p>
         <p className="footnote population-note">
           <Link href={scorecardUrl({ cohort: "eligible" })}>
-            Eligible denominator: {stats.eligible}
+            Inspect all {stats.eligible} eligible assessments
           </Link>
-          <span>Verified &amp; scorable: {stats.scored}</span>
-          <Link
-            href={scorecardUrl({
-              verdict: "UNSCORABLE",
-              cohort: "canonical",
-              view: "verified",
-            })}
-          >
-            Unscorable: {stats.breakdown.UNSCORABLE}
-          </Link>
-          <Link href={scorecardUrl({ verdict: "EXCLUDED" })}>
-            Excluded: {stats.excluded}
-          </Link>
-          <span>Disputed among verified canonical: {stats.disputed}</span>
+          <span>{stats.unreviewed} curated records remain unreviewed</span>
+        </p>
+        <p className="footnote">
+          Full realization by review: unknown for {stats.currentUnknown} of the{" "}
+          {stats.eligible} eligible forecasts; percentage withheld. Unknown
+          outcomes are not permanent failures.
         </p>
       </section>
       <section className="section">
@@ -260,14 +234,14 @@ export default function Overview() {
             <div className="panel-heading">
               <h3>Across the disciplines</h3>
               <span className="micro-label">
-                {predictions.length} CANDIDATES
+                {predictions.length} CURATED RECORDS
               </span>
             </div>
             <BarChart
               items={domains.slice(0, 7)}
               filter="category"
               total={predictions.length}
-              label="Candidate records by draft category"
+              label="Curated records by category"
             />
             <Link className="panel-bottom-link" href="/categories/">
               Explore all {categories.length} categories{" "}
@@ -283,11 +257,11 @@ export default function Overview() {
               items={decades}
               filter="target"
               total={predictions.length}
-              label="Candidate records by provisional target decade"
+              label="Curated records by target decade"
               color="sand"
             />
             <p className="chart-caption">
-              Grouped from imported target text. Ambiguous or multi-decade
+              Grouped from supplied target wording. Ambiguous or multi-decade
               targets stay unresolved. No deadline has been inferred for
               scoring.
             </p>
@@ -295,15 +269,15 @@ export default function Overview() {
         </div>
       </section>
       <section className="section">
-        <SectionHeading index="03" title="Accuracy, without shortcuts.">
-          A forecast can get the direction right and still get the date wrong.
-          We measure both.
+        <SectionHeading index="03" title="Outcomes, with their limits.">
+          Deadline outcomes and review outcomes remain separate. Small selected
+          groups do not support an accuracy ranking.
         </SectionHeading>
         <div className="chart-grid">
           <article className="panel">
             <div className="panel-heading">
               <h3>Verdict distribution</h3>
-              <span className="micro-label">n = {stats.verified} VERIFIED</span>
+              <span className="micro-label">n = {stats.verified} ASSESSED</span>
             </div>
             <VerdictChart records={predictions} asOf={AS_OF} />
           </article>
@@ -311,7 +285,7 @@ export default function Overview() {
             <div className="panel-heading">
               <h3>Timing drift</h3>
               <span className="micro-label">
-                n = {stats.drifts.length} REALIZED
+                n = {stats.drifts.length} EXACT OBSERVATIONS
               </span>
             </div>
             <DriftChart records={predictions} asOf={AS_OF} />
@@ -358,7 +332,15 @@ export default function Overview() {
                       : "Confirmed"}
                   </small>
                 </span>
-                <Badge verdict={verdict(p, AS_OF)} />
+                <div>
+                  <Badge verdict={verdict(p, AS_OF)} />
+                  {p.release?.assessment.drift_range_years && (
+                    <small className="qualifier">
+                      Hardware proxy; approximately 3–4 years. Excluded from
+                      default statistics.
+                    </small>
+                  )}
+                </div>
               </div>
             </Link>
           ))}

@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowUpRight, Check, Minus, FileText } from "lucide-react";
-import { predictions, AS_OF, AS_OF_LABEL } from "@/lib/data";
+import { predictions, allRecords, AS_OF, AS_OF_LABEL } from "@/lib/data";
+import {
+  EvidenceContext,
+  LegacyRelations,
+  SourceProvenance,
+} from "@/components/evidence-context";
 import { claim, TYPE_LABELS } from "@/lib/model";
 import {
   driftLabel,
@@ -21,7 +26,7 @@ import {
 } from "@/components/ui";
 export const dynamicParams = false;
 export function generateStaticParams() {
-  return predictions.map((p) => ({ id: p.id }));
+  return allRecords.map((p) => ({ id: p.id }));
 }
 export async function generateMetadata({
   params,
@@ -29,7 +34,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const p = predictions.find((p) => p.id === id);
+  const p = allRecords.find((p) => p.id === id);
   return { title: p ? `${id}: ${claim(p)}` : "Prediction not found" };
 }
 export default async function PredictionPage({
@@ -38,7 +43,7 @@ export default async function PredictionPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const p = predictions.find((p) => p.id === id);
+  const p = allRecords.find((p) => p.id === id);
   if (!p) notFound();
   const status = verdict(p, AS_OF);
   const source = p.sources[0];
@@ -54,33 +59,52 @@ export default async function PredictionPage({
         (p.parentStatementId &&
           other.parentStatementId === p.parentStatementId)),
   );
-  const checks = [
-    {
-      name: "Original wording and attribution",
-      done:
-        p.wordingKind !== "UNVERIFIED_PARAPHRASE" &&
-        p.sources.some((s) => s.wordingVerified),
-    },
-    {
-      name: "Deadline and success criteria",
-      done:
-        p.deadline.precision !== "UNCONFIRMED" && Boolean(p.successCriteria),
-    },
-    {
-      name: "Outcome evidence reviewed",
-      done:
-        ["EVIDENCE_CHECKED", "VERIFIED"].includes(p.assessment.state) &&
-        p.evidence.length > 0,
-    },
-    {
-      name: "Deduplication / canonical decision",
-      done: p.canonical || Boolean(p.duplicateOf),
-    },
-    {
-      name: "Independent assessment complete",
-      done: p.assessment.state === "VERIFIED",
-    },
-  ];
+  const checks = p.release
+    ? [
+        {
+          name: "Text confirmed in listed source",
+          done:
+            p.release.source_verification.state ===
+            "TEXT_CONFIRMED_IN_LISTED_SOURCE",
+        },
+        {
+          name: "Original book edition independently collated",
+          done: p.release.publication.original_book_edition_checked,
+        },
+        {
+          name: "Editorial assessment supplied",
+          done: p.release.assessment.review_state === "ASSESSED",
+        },
+        { name: "Eligible for default deadline statistics", done: eligible },
+      ]
+    : [
+        {
+          name: "Original wording and attribution",
+          done:
+            p.wordingKind !== "UNVERIFIED_PARAPHRASE" &&
+            p.sources.some((s) => s.wordingVerified),
+        },
+        {
+          name: "Deadline and success criteria",
+          done:
+            p.deadline.precision !== "UNCONFIRMED" &&
+            Boolean(p.successCriteria),
+        },
+        {
+          name: "Outcome evidence reviewed",
+          done:
+            ["EVIDENCE_CHECKED", "VERIFIED"].includes(p.assessment.state) &&
+            p.evidence.length > 0,
+        },
+        {
+          name: "Deduplication / canonical decision",
+          done: p.canonical || Boolean(p.duplicateOf),
+        },
+        {
+          name: "Independent assessment complete",
+          done: p.assessment.state === "VERIFIED",
+        },
+      ];
   return (
     <div className="container page-container detail-page">
       <Link className="back-link" href="/predictions/">
@@ -101,7 +125,8 @@ export default async function PredictionPage({
           <span>Research snapshot · {AS_OF_LABEL}</span>
         </div>
       </div>
-      {status === "UNREVIEWED" && (
+      <EvidenceContext p={p} />
+      {status === "UNREVIEWED" && !p.release && !p.reconciliation && (
         <Notice>
           <strong>This is a research lead.</strong> The imported statement,
           attribution, and target have not completed verification. It is
@@ -111,7 +136,14 @@ export default async function PredictionPage({
       <div className="detail-grid">
         <div className="detail-main">
           <section className="detail-section">
-            <SectionHeading index="01" title="The original prediction." />
+            <SectionHeading
+              index="01"
+              title={
+                p.release
+                  ? "The forecast and its attribution."
+                  : "The original imported lead."
+              }
+            />
             <div className="quote-panel">
               <span className="micro-label">
                 {p.wordingKind === "UNVERIFIED_PARAPHRASE"
@@ -141,8 +173,9 @@ export default async function PredictionPage({
                       {s.locator ??
                         "Page, edition, or timestamp not yet established"}
                     </p>
+                    <SourceProvenance id={s.id} />
                     {s.url ? (
-                      <External href={s.url}>Open original source</External>
+                      <External href={s.url}>Open listed source</External>
                     ) : (
                       <span className="missing-field">
                         No verified source URL recorded
@@ -191,7 +224,9 @@ export default async function PredictionPage({
                 <small>
                   {source.publicationYearVerified
                     ? "Confirmed publication"
-                    : "Unconfirmed source year"}
+                    : p.release
+                      ? "Attributed forecast year; original edition not collated"
+                      : "Unconfirmed source year"}
                 </small>
               </div>
               <div>
@@ -204,33 +239,51 @@ export default async function PredictionPage({
                 </strong>
                 <small>
                   {p.deadline.precision === "UNCONFIRMED"
-                    ? "Unconfirmed target text"
-                    : "Confirmed deadline"}
+                    ? "No exact deadline used in statistics"
+                    : "Deadline supplied by this assessment"}
                 </small>
               </div>
               <div>
                 <span className="timeline-dot" />
                 <span className="micro-label">FULL REALIZATION</span>
-                <strong>{p.assessment.firstAchievementYear ?? "—"}</strong>
+                <strong>
+                  {p.assessment.firstAchievementYear ??
+                    (p.release?.assessment.full_achievement_documented_by_year
+                      ? `By ${p.release.assessment.full_achievement_documented_by_year}`
+                      : "—")}
+                </strong>
                 <small>
                   {p.assessment.firstAchievementYear
                     ? `Drift: ${driftLabel(driftYears(p, AS_OF))}`
-                    : "No achievement year established"}
+                    : p.release?.assessment.full_achievement_documented_by_year
+                      ? "Evidence bound, not first achievement year"
+                      : "No achievement year established"}
                 </small>
               </div>
             </div>
+            {p.release?.target.interpretation && (
+              <p className="footnote">{p.release.target.interpretation}</p>
+            )}
             <div className="outcome-comparison">
               <div>
                 <span>Outcome at original deadline</span>
-                <strong>{p.assessment.atDeadline.replaceAll("_", " ")}</strong>
+                <strong>
+                  {(
+                    p.release?.assessment.at_deadline ?? p.assessment.atDeadline
+                  ).replaceAll("_", " ")}
+                </strong>
               </div>
               <div>
                 <span>Outcome at review</span>
-                <strong>{p.assessment.atReview.replaceAll("_", " ")}</strong>
+                <strong>
+                  {(
+                    p.release?.assessment.at_review ?? p.assessment.atReview
+                  ).replaceAll("_", " ")}
+                </strong>
               </div>
             </div>
             <p className="footnote">
-              Imported target wording: {p.deadline.originalText}.{" "}
+              Supplied target wording: {p.deadline.originalText}.{" "}
               {p.deadline.precision === "UNCONFIRMED"
                 ? "No confirmed date is used in calculations."
                 : "The original deadline is preserved if a later forecast revises it."}{" "}
@@ -256,7 +309,12 @@ export default async function PredictionPage({
                       <External href={e.url}>{e.title}</External>
                     </h3>
                     <p>{e.note}</p>
-                    <small>Accessed {e.accessedAt}</small>
+                    <small>Source checked as of {e.accessedAt}</small>
+                    {p.release && (
+                      <SourceProvenance
+                        id={p.release.evidence[p.evidence.indexOf(e)].source_id}
+                      />
+                    )}
                   </article>
                 ))}
               </div>
@@ -288,6 +346,7 @@ export default async function PredictionPage({
           <section className="detail-section">
             <SectionHeading index="04" title="Research notes & provenance." />
             <p>{p.research.notes}</p>
+            <LegacyRelations p={p} />
             {p.research.unresolvedQuestions.length > 0 && (
               <>
                 <h3 className="subheading">Open questions</h3>
@@ -326,7 +385,7 @@ export default async function PredictionPage({
               </div>
             </dl>
             <details className="raw-data">
-              <summary>Inspect original imported fields</summary>
+              <summary>Inspect preserved source fields</summary>
               <dl>
                 {Object.entries(p.provenance.raw).map(([key, value]) => (
                   <div key={key}>
@@ -376,9 +435,15 @@ export default async function PredictionPage({
             {p.assessment.rationale ??
               "The original source and outcome have not been verified. No accuracy judgment has been assigned."}
           </p>
+          {p.release?.assessment.drift_range_years && (
+            <p className="qualifier">
+              LATE — hardware proxy; approximately 3–4 years. Excluded from
+              default statistics.
+            </p>
+          )}
           <dl>
             <div>
-              <dt>Verification</dt>
+              <dt>Review state</dt>
               <dd>{p.assessment.state.replaceAll("_", " ")}</dd>
             </div>
             <div>
@@ -394,11 +459,11 @@ export default async function PredictionPage({
               <dd>{p.assessment.reviewer ?? "Not assigned"}</dd>
             </div>
             <div>
-              <dt>In accuracy denominator</dt>
+              <dt>In selected due denominator</dt>
               <dd>{eligible ? "Yes" : "No"}</dd>
             </div>
             <div>
-              <dt>Canonical for statistics</dt>
+              <dt>Curated forecast version</dt>
               <dd>{p.canonical ? "Yes" : "No"}</dd>
             </div>
           </dl>
@@ -407,7 +472,7 @@ export default async function PredictionPage({
               <strong>Exclusion:</strong> {p.assessment.exclusionReason}
             </p>
           )}
-          <h3>Verification checklist</h3>
+          <h3>Source & review checklist</h3>
           <ul className="checklist">
             {checks.map((check) => (
               <li key={check.name}>

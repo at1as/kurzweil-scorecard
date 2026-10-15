@@ -11,11 +11,12 @@ export default function CategoriesPage() {
     <div className="container page-container">
       <div className="page-intro">
         <Eyebrow>THE PATTERNS BEHIND THE PREDICTIONS</Eyebrow>
-        <h1>Where does the forecast hold up?</h1>
+        <h1>How is the collection distributed?</h1>
         <p>
           Compare disciplines, decades, forecast horizons, and types of claims.
           <br />
-          One primary category per forecast. No extra votes for extra tags.
+          Selected subset only. Small category counts do not support an accuracy
+          ranking.
         </p>
       </div>
       <div className="panel">
@@ -32,7 +33,7 @@ export default function CategoriesPage() {
                 <span className="mono">{String(i + 1).padStart(2, "0")}</span>
                 <span className="micro-label">
                   {predictions.filter((p) => p.category === c.name).length}{" "}
-                  CANDIDATES
+                  CURATED RECORDS
                 </span>
               </div>
               <h3>

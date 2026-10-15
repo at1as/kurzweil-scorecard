@@ -1,3 +1,4 @@
+import { validateEvidenceRecord } from "./evidence";
 import { predictionSchema, type Prediction } from "./model";
 import { deadlineEnd, deadlineYear, isDue, fullyRealized } from "./scoring";
 export function validateDataset(
@@ -71,6 +72,13 @@ export function validateDataset(
         (p.assessment.lastReviewedAt ??
           asOf), "achievement date is after the review");
     }
+    require(![
+      "ASSESSED",
+      "SOURCE_CONFIRMED",
+      "ATTRIBUTION_UNRESOLVED",
+    ].includes(p.assessment.state) ||
+      p.release, "evidence review state needs an authoritative release record");
+    if (p.release) validateEvidenceRecord(p, asOf);
     if (p.assessment.state === "VERIFIED") {
       require(p.assessment.lastReviewedAt &&
         p.assessment.lastReviewedAt <=

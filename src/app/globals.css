@@ -2805,3 +2805,50 @@ summary {
   font-size: 10px;
   font-weight: 500;
 }
+
+/* Evidence release annotations reuse the existing editorial layout. */
+.qualifier {
+  display: block;
+  max-width: 28rem;
+  margin-top: 0.6rem;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--muted, #58635a);
+  white-space: normal;
+}
+.release-context,
+.reconciliation-panel {
+  margin: 1.5rem 0 2rem;
+}
+.release-context .notice + .notice {
+  margin-top: 1rem;
+}
+.history-links {
+  margin: 1.5rem 0;
+}
+.history-links h2 {
+  font-size: 1.7rem;
+}
+.source-provenance {
+  margin: 0.8rem 0;
+  padding: 0.8rem 1rem;
+  border-left: 2px solid #d4dacf;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.source-provenance p {
+  margin: 0.4rem 0;
+}
+.source-id-link {
+  display: inline-block;
+  margin-right: 0.8rem;
+  text-decoration: underline;
+}
+.coverage-card {
+  scroll-margin-top: 6rem;
+}
+.coverage-heading,
+.coverage-heading h3,
+.coverage-state {
+  overflow-wrap: anywhere;
+}

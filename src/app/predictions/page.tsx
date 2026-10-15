@@ -7,7 +7,7 @@ export default function PredictionsPage() {
   return (
     <div className="container page-container">
       <div className="page-intro">
-        <Eyebrow>THE RESEARCH INTAKE</Eyebrow>
+        <Eyebrow>THE FORECAST RECORD</Eyebrow>
         <h1>The prediction ledger.</h1>
         <p>
           Every claim, its original deadline, and the evidence behind the
@@ -17,9 +17,10 @@ export default function PredictionsPage() {
         </p>
       </div>
       <Notice>
-        <strong>Research in progress.</strong> Imported records start as
-        UNREVIEWED. A candidate is never counted as a success or failure until
-        its source, criteria, and outcomes have been checked.
+        <strong>Selected reviewed subset only.</strong> Source-backed editorial
+        assessments are AI-assisted, not human peer review or a lifetime
+        accuracy estimate. Original leads remain available in the Original
+        intake view.
       </Notice>
       <Suspense
         fallback={

@@ -50,8 +50,8 @@ export function VerdictChart({
   if (!stats.verified)
     return (
       <EmptyChart>
-        Verdict distributions will appear after predictions have been
-        independently verified. There are no scored results in this release.
+        Verdict distributions will appear after editorial outcome review. There
+        are no scored results in this release.
       </EmptyChart>
     );
   const entries = Object.entries(stats.breakdown).filter(
@@ -60,8 +60,8 @@ export function VerdictChart({
   return (
     <div className="verdict-chart">
       <p className="chart-caption">
-        {stats.verified} verified, canonical forecasts · future outcomes shown
-        separately
+        {stats.verified} editorially assessed forecast versions · future
+        outcomes shown separately
       </p>
       <div className="verdict-stack">
         {entries.map(([key, count]) => (
@@ -106,8 +106,10 @@ export function DriftChart({
   if (!stats.drifts.length)
     return (
       <EmptyChart title="When did the future arrive?" compact>
-        Timing drift needs a verified deadline and a documented year of full
-        realization. Neither is assumed from an imported lead.
+        No exact drift observations are available in this release. “Documented
+        by” dates are evidence bounds, not first-achievement years. K033 has a
+        qualified hardware-proxy interval of approximately 3–4 years, excluded
+        from default statistics.
       </EmptyChart>
     );
   const max = Math.max(...stats.drifts.map((d) => Math.abs(d.years)), 1);

@@ -7,3 +7,6 @@ work
 package-lock.json
 PROMPT.md
 kurzweil_scorecard_v0_1_package
+
+kurzweil_verification_v0_2
+data/releases

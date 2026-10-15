@@ -43,7 +43,7 @@ export function Navigation() {
             </Link>
           ))}
         </nav>
-        <a href="/data/intake.csv" className="header-data" download>
+        <a href="/data/predictions.json" className="header-data" download>
           Open dataset <ArrowUpRight size={15} />
         </a>
       </div>
