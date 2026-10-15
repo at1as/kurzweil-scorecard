@@ -1,0 +1,5 @@
+# Preserve original research and downloadable intake bytes on every platform.
+# The importer records source checksums, so newline conversion is inappropriate.
+*.csv -text
+*.xlsx binary
+kurzweil_scorecard_v0_1_package/** -text

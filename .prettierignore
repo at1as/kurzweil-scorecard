@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+data/generated
+public/data
+work
+package-lock.json
+PROMPT.md
+kurzweil_scorecard_v0_1_package

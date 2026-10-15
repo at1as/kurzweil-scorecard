@@ -1,0 +1,477 @@
+{
+  "workbookFile": "kurzweil_scorecard_v0_1.xlsx",
+  "sha256": "186de0978a058280dae5c54c858e4f2e3568d4068a1e2e5e9d2623217828e34a",
+  "categories": [
+    {
+      "name": "Computing hardware",
+      "subcategories": [
+        "Processors",
+        "memory",
+        "storage",
+        "price/performance"
+      ],
+      "rule": "Claims about computing capacity, size and cost."
+    },
+    {
+      "name": "Networks & communications",
+      "subcategories": [
+        "Internet",
+        "wireless",
+        "connectivity"
+      ],
+      "rule": "Transport and availability of information, not language understanding."
+    },
+    {
+      "name": "AI & software",
+      "subcategories": [
+        "Speech",
+        "translation",
+        "reasoning",
+        "agents",
+        "machine intelligence"
+      ],
+      "rule": "Software abilities. Tag commercial adoption separately."
+    },
+    {
+      "name": "Interfaces & virtual worlds",
+      "subcategories": [
+        "Displays",
+        "wearables",
+        "AR",
+        "VR",
+        "human-computer interaction"
+      ],
+      "rule": "Distinguish headsets, retinal displays, contact lenses and direct neural interfaces."
+    },
+    {
+      "name": "Biology & medicine",
+      "subcategories": [
+        "Genomics",
+        "drug discovery",
+        "diagnosis",
+        "treatment",
+        "organs"
+      ],
+      "rule": "Separate computational research milestones from human clinical outcomes."
+    },
+    {
+      "name": "Longevity",
+      "subcategories": [
+        "Life expectancy",
+        "aging",
+        "escape velocity"
+      ],
+      "rule": "Keep population, age group, access and life-expectancy definition explicit."
+    },
+    {
+      "name": "Neuroscience & human augmentation",
+      "subcategories": [
+        "Brain mapping",
+        "brain simulation",
+        "implants",
+        "brain-cloud links"
+      ],
+      "rule": "Brain hardware, brain understanding and cognition augmentation."
+    },
+    {
+      "name": "Robotics & transportation",
+      "subcategories": [
+        "Vehicles",
+        "robots",
+        "autonomy",
+        "logistics"
+      ],
+      "rule": "Distinguish prototype, commercial service and widespread use."
+    },
+    {
+      "name": "Manufacturing & materials",
+      "subcategories": [
+        "3-D printing",
+        "molecular assembly",
+        "nanomaterials"
+      ],
+      "rule": "Medical nanobots: primary category Biology & medicine; nanotech as a tag."
+    },
+    {
+      "name": "Energy & environment",
+      "subcategories": [
+        "Solar",
+        "generation",
+        "costs",
+        "resources"
+      ],
+      "rule": "Preserve energy versus electricity, capacity versus generation."
+    },
+    {
+      "name": "Economy & society",
+      "subcategories": [
+        "Employment",
+        "income",
+        "institutions",
+        "demographics",
+        "politics"
+      ],
+      "rule": "Track geography and population; separate causal claims from observed events."
+    },
+    {
+      "name": "Media, education & culture",
+      "subcategories": [
+        "Publishing",
+        "entertainment",
+        "learning",
+        "arts"
+      ],
+      "rule": "Do not confuse availability with dominant use."
+    },
+    {
+      "name": "Security & warfare",
+      "subcategories": [
+        "Weapons",
+        "conflict",
+        "security",
+        "surveillance"
+      ],
+      "rule": "Distinguish device existence from prevalence or displacement of personnel."
+    }
+  ],
+  "coverage": [
+    {
+      "id": "LEGACY-1",
+      "title": "Earlier report: Ray Kurzweil Predictions Audit",
+      "scope": "30 candidate rows",
+      "state": "IMPORTED / UNVERIFIED",
+      "reference": "legacy/Ray Kurzweil Predictions Audit.txt",
+      "notes": "Retained unchanged; aggregate percentages are not an audited denominator."
+    },
+    {
+      "id": "LEGACY-2",
+      "title": "Earlier report: Decade-by-Decade Analysis",
+      "scope": "32 candidate rows",
+      "state": "IMPORTED / UNVERIFIED",
+      "reference": "legacy/Ray Kurzweil’s Predictions: Decade-by-Decade Analysis.txt",
+      "notes": "Legacy CSV contains a malformed unquoted field; raw text preserved."
+    },
+    {
+      "id": "LEGACY-3",
+      "title": "Earlier report: Executive Summary",
+      "scope": "26 candidates + 5 aggregate rows",
+      "state": "IMPORTED / UNVERIFIED",
+      "reference": "legacy/Executive Summary.txt",
+      "notes": "Aggregate rows preserved in archive, omitted from candidate ledger."
+    },
+    {
+      "id": "CORPUS-1",
+      "title": "The Age of Spiritual Machines: 2009 section",
+      "scope": "147 items in author's retrospective count",
+      "state": "LOCATED / NOT EXTRACTED",
+      "reference": "https://www.thekurzweillibrary.com/how-my-predictions-are-faring-an-update-by-ray-kurzweil",
+      "notes": "Use the 2010 audit to locate claims, then check the original 1999 edition. Self-scores are not independent evidence."
+    },
+    {
+      "id": "CORPUS-2",
+      "title": "How My Predictions Are Faring (2010)",
+      "scope": "Primary retrospective locator",
+      "state": "LOCATED / SAMPLED",
+      "reference": "https://www.thekurzweillibrary.com/images/How-My-Predictions-Are-Faring.pdf",
+      "notes": "Includes the author's 147-item assessment plus other claims. Not a second independent corpus."
+    },
+    {
+      "id": "CORPUS-3",
+      "title": "The Age of Spiritual Machines: 2019 / 2029 / 2099 sections",
+      "scope": "Unknown until extracted",
+      "state": "TO EXTRACT",
+      "reference": "https://www.thekurzweillibrary.com/images/How-My-Predictions-Are-Faring.pdf",
+      "notes": "Separate each target period; official retrospective confirms these horizons."
+    },
+    {
+      "id": "CORPUS-4",
+      "title": "The Age of Intelligent Machines",
+      "scope": "Unknown until extracted",
+      "state": "TO EXTRACT",
+      "reference": "https://www.booksbyraykurzweil.com/",
+      "notes": "Find original editions/pages. Do not rely only on retrospective paraphrases."
+    },
+    {
+      "id": "CORPUS-5",
+      "title": "The Singularity Is Near",
+      "scope": "Unknown until extracted",
+      "state": "TO EXTRACT",
+      "reference": "https://www.booksbyraykurzweil.com/",
+      "notes": "Extract dated and conditional predictions; preserve scenario wording."
+    },
+    {
+      "id": "CORPUS-6",
+      "title": "Fantastic Voyage; Transcend; How to Create a Mind",
+      "scope": "Unknown until extracted",
+      "state": "TO LOCATE / EXTRACT",
+      "reference": "https://www.booksbyraykurzweil.com/",
+      "notes": "Include co-authorship; distinguish forecasts from present-day health advice or explanatory claims."
+    },
+    {
+      "id": "CORPUS-7",
+      "title": "The Singularity Is Nearer",
+      "scope": "Unknown until extracted",
+      "state": "TO EXTRACT",
+      "reference": "https://www.booksbyraykurzweil.com/",
+      "notes": "Link updated versions without overwriting original deadlines."
+    },
+    {
+      "id": "CORPUS-8",
+      "title": "Long Bets: Kurzweil / Kapor wager",
+      "scope": "Dated wager and exact adjudication rules",
+      "state": "LOCATED / SAMPLED",
+      "reference": "https://longbets.org/1/",
+      "notes": "2029 contractual test must not be silently replaced with a different conversational benchmark."
+    },
+    {
+      "id": "CORPUS-9",
+      "title": "Dated essays, talks and interviews",
+      "scope": "Open-ended, report coverage honestly",
+      "state": "TO LOCATE / EXTRACT",
+      "reference": "https://www.thekurzweillibrary.com/",
+      "notes": "Transcripts, timestamps, first-recorded dates, archive links, revisions and duplicates."
+    },
+    {
+      "id": "REFERENCE-1",
+      "title": "TechEngage 2026 visual scorecard",
+      "scope": "Layout reference, not audit authority",
+      "state": "REVIEWED FOR FORMAT",
+      "reference": "https://techengage.com/ray-kurzweil-predictions-scorecard-what-he-got-right-and-wrong/",
+      "notes": "Use its readable presentation, not its aggregate percentages or undifferentiated verdicts."
+    }
+  ],
+  "rubric": [
+    [
+      "RUBRIC",
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      "Store outcome at the original deadline AND outcome at the review date. The display badge is only a summary.",
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      "Display label / qualifier",
+      "Meaning",
+      "Important guardrail",
+      "Statistical treatment"
+    ],
+    [
+      "CORRECT",
+      "Full stated outcome achieved by its deadline (or already achieved ahead of a future deadline).",
+      "Outcome and scope must match. Early is a timing qualifier, not a separate success bucket.",
+      "1 if due / canonical / verified"
+    ],
+    [
+      "LATE",
+      "Full stated outcome achieved, but only after the original deadline.",
+      "Keep the original deadline verdict. Do not change it to on-time correct.",
+      "0 on-time; 1 realized"
+    ],
+    [
+      "PARTIAL",
+      "A material part was achieved, but the full test was not met.",
+      "Record which component, threshold, geography or adoption level remains unmet.",
+      "0 strict; partial counts separate"
+    ],
+    [
+      "WRONG / MISSED",
+      "The due prediction was not materially achieved.",
+      "Means the dated forecast failed, not that the event is impossible forever.",
+      "0"
+    ],
+    [
+      "PENDING",
+      "The deadline has not passed and the full claim has not yet been met.",
+      "Log partial progress separately; being behind expectations does not close the forecast.",
+      "Excluded from due denominator"
+    ],
+    [
+      "UNSCORABLE",
+      "Verified wording cannot be assessed under a defensible, fixed criterion.",
+      "Explain ambiguity, missing deadline, inapplicable condition or incompatible metrics. Never use just to hide a miss.",
+      "Excluded, count disclosed"
+    ],
+    [
+      "UNREVIEWED",
+      "Attribution and/or outcome checks are incomplete.",
+      "A workflow state, not a forecast verdict. All 88 imported candidates start here.",
+      "Excluded, count disclosed"
+    ],
+    [
+      "EXCLUDED",
+      "Duplicate for scoring, misattribution, non-prediction or another documented exclusion.",
+      "Keep the row and reason. Do not delete inconvenient forecasts.",
+      "Excluded, count disclosed"
+    ],
+    [
+      "EARLY / OVERDUE",
+      "Timing qualifiers, not independent outcome buckets.",
+      "Use actual achievement minus deadline for drift. Unmet claims have overdue time, not invented achievement dates.",
+      "No additional points"
+    ],
+    [
+      "DISPUTED",
+      "Separate qualifier for reasonable disagreement about interpretation or evidence.",
+      "Record strict and alternative readings and why they differ; do not silently relax the criterion.",
+      "Separate sensitivity analysis"
+    ]
+  ],
+  "dictionary": [
+    [
+      "DATA DICTIONARY",
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null
+    ],
+    [
+      "Field / topic",
+      "Meaning",
+      "Guardrail"
+    ],
+    [
+      "Record ID",
+      "Stable import identifier; do not reuse after merging or excluding.",
+      "Keeps original notes and future audit decisions traceable."
+    ],
+    [
+      "Prediction — imported lead",
+      "Legacy paraphrase, unchanged.",
+      "Not a substitute for checked original wording."
+    ],
+    [
+      "Confirmed deadline year",
+      "Numerical endpoint supported by original source.",
+      "Keep original interval and words in Date precision. Use full-date logic for exact day/month targets."
+    ],
+    [
+      "Source year — unconfirmed",
+      "Year parsed from the earlier source label.",
+      "Do not use for forecast-horizon statistics until Publication year confirmed is filled."
+    ],
+    [
+      "At-deadline outcome",
+      "FULL / PARTIAL / NOT_FULFILLED / NOT_DUE / UNASSESSABLE / UNREVIEWED.",
+      "Historical verdict stays fixed when a forecast later comes true."
+    ],
+    [
+      "Outcome at review",
+      "FULL / PARTIAL / NOT_FULFILLED / UNASSESSABLE / UNREVIEWED.",
+      "Separate from deadline verdict; use review-specific evidence."
+    ],
+    [
+      "First full-achievement year",
+      "First documented year the entire criterion was met.",
+      "Not the year a related prototype appeared. Leave blank for partial/unmet claims."
+    ],
+    [
+      "Review year",
+      "2026 in this version, with snapshot date 2026-10-13.",
+      "Year-only deadlines in 2026 remain open; due cohort is deadlines through 2025."
+    ],
+    [
+      "Review state",
+      "UNREVIEWED / ATTRIBUTION_CHECKED / EVIDENCE_CHECKED / VERIFIED / EXCLUDED.",
+      "VERIFIED requires both source and outcome review plus explicit criteria."
+    ],
+    [
+      "Canonical for statistics?",
+      "YES only after deduplication and claim-unit review.",
+      "Repeated mentions do not create additional hits or misses."
+    ],
+    [
+      "Forecast family ID",
+      "Shared identifier for materially related forecast versions.",
+      "Revised deadlines remain separate historical versions, but family-level summary controls repetition."
+    ],
+    [
+      "Parent statement ID",
+      "Identifier linking atomic subclaims to the original sentence or paragraph.",
+      "Do not split a quantity or adoption threshold into weaker claims just to manufacture partial credit."
+    ],
+    [
+      "Prediction source URL / locator",
+      "Original document plus page, paragraph, edition or timestamp.",
+      "Use an archived URL when needed; record source-access limits."
+    ],
+    [
+      "Outcome evidence URLs",
+      "Independent historical or current outcome evidence.",
+      "Source attribution and outcome evidence are separate checks."
+    ],
+    [
+      "Success criteria / scope",
+      "Capability, degree, price, population, geography, deadline, conditions and units.",
+      "Preserve words such as most, common, routine, possible and all."
+    ],
+    [
+      "Display status",
+      "Formula-derived compact label.",
+      "UNREVIEWED is a workflow state; uncertainty/dispute should be explained in notes."
+    ],
+    [
+      "Drift — years",
+      "First full-achievement year minus confirmed deadline year.",
+      "Negative = early; positive = late. Never fill for unmet claims."
+    ],
+    [
+      "Overdue — years",
+      "Review year minus deadline for verified overdue unmet/partial claims.",
+      "Approximate calendar-year count, not an exact duration since December 31."
+    ],
+    [
+      "Due and eligible",
+      "Verified, canonical, scorable, numerical deadline before review year.",
+      "No future predictions, even early successes, in the mature-cohort denominator."
+    ],
+    [
+      "On-time full hit",
+      "1 only for eligible rows with FULL at the deadline.",
+      "Strict primary accuracy measure."
+    ],
+    [
+      "Full realization hit",
+      "1 for eligible rows FULL at deadline or FULL by review.",
+      "Not a promise of eventual truth for remaining claims."
+    ],
+    [
+      "Missing fields for richer data",
+      "As-of date; original publication date; exact quote; country; condition; units; alternative reading; reviewer; history.",
+      "Retain these in notes initially and promote them to columns during canonicalization."
+    ],
+    [
+      "Capacity",
+      "Formula-ready Ledger rows 6–505; 88 are currently populated.",
+      "These blank rows are capacity, not extracted predictions. Extend formulas and summaries if expanding beyond 500."
+    ]
+  ]
+}
