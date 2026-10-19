@@ -9,6 +9,7 @@ import {
   predictions,
   originalIntake,
   release,
+  researchSupplement,
 } from "@/lib/data";
 import { Eyebrow, External, Notice, SectionHeading } from "@/components/ui";
 export const metadata: Metadata = { title: "Sources & research coverage" };
@@ -22,9 +23,20 @@ export default function Sources() {
         <p>Source links, what was examined, and what remains to extract.</p>
       </div>
       <Notice>
-        <strong>Evidence release v0.2 · {AS_OF_LABEL}.</strong>{" "}
+        <strong>Evidence release v0.3 · {AS_OF_LABEL}.</strong>{" "}
         {release.disclosure} Source confirmation is distinct from outcome
         review. A rebuild does not renew the research date.
+      </Notice>
+      <Notice>
+        <strong>Research supplement · {researchSupplement.checked_at}.</strong>{" "}
+        Verified section locators for all 15 previously blank references,
+        clarified source-specific support, and added{" "}
+        {researchSupplement.sources.length} primary sources. Outcome assessments
+        retain the {researchSupplement.outcome_cutoff} cutoff.{" "}
+        <a href="/data/research/citation-supplement-2026-10-18.json" download>
+          Download the supplement
+        </a>
+        .
       </Notice>
       <div className="coverage-metrics">
         <div>
@@ -100,7 +112,9 @@ export default function Sources() {
                 <p className="coverage-scope">
                   Published: {s.publication_date ?? "not recorded"} · Checked:{" "}
                   {s.checked_as_of} ·{" "}
-                  {s.access.replaceAll("_", " ").toLowerCase()}
+                  {(s.access_method ?? s.access ?? "not recorded")
+                    .replaceAll("_", " ")
+                    .toLowerCase()}
                 </p>
                 {s.provenance_note && <p>{s.provenance_note}</p>}
               </div>
@@ -159,24 +173,37 @@ export default function Sources() {
           <ul className="question-list">
             {[
               [
-                "predictions.canonical.v0.2.json",
-                "v0.2 authoritative assessments",
+                "predictions.canonical.v0.3.json",
+                "v0.3 authoritative assessments",
               ],
               [
-                "legacy-reconciliation.v0.2.json",
+                "legacy-reconciliation.v0.3.json",
                 "All 88 reconciliation decisions",
               ],
-              ["sources.v0.2.json", "Source catalogue"],
-              ["source-coverage.v0.2.json", "Examined scope & remaining work"],
-              ["verification-dossiers.md", "Detailed evidence dossiers"],
+              ["sources.v0.3.json", "Source catalogue"],
+              ["source-coverage.v0.3.json", "Examined scope & remaining work"],
+              ["verification-dossiers.v0.3.md", "Detailed evidence dossiers"],
               ["MANIFEST.json", "Release file checksums"],
+              ["changes.v0.3.csv", "Assessment changes from v0.2"],
+              [
+                "legacy-conditional-outcomes.v0.3.csv",
+                "Conditional legacy outcome ledger",
+              ],
             ].map(([file, label]) => (
               <li key={file}>
-                <a href={`/data/releases/v0.2/${file}`} download>
+                <a href={`/data/releases/v0.3/${file}`} download>
                   {label}
                 </a>
               </li>
             ))}
+            <li>
+              <a
+                href="/data/releases/v0.2/predictions.canonical.v0.2.json"
+                download
+              >
+                v0.2 previous assessments
+              </a>
+            </li>
             <li>
               <a href="/data/releases/v0.1/predictions.json" download>
                 v0.1 original site snapshot

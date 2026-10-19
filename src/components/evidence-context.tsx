@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { allRecords, evidenceSources, release } from "@/lib/data";
+import {
+  allRecords,
+  evidenceSources,
+  release,
+  researchSupplement,
+} from "@/lib/data";
 import type { Prediction } from "@/lib/model";
 import { Notice, External } from "./ui";
 export function SourceProvenance({ id }: { id: string }) {
@@ -10,9 +15,18 @@ export function SourceProvenance({ id }: { id: string }) {
       <span className="micro-label">{s.kind.replaceAll("_", " ")}</span>
       <p>
         Source publication: {s.publication_date ?? "not recorded"} · Access:{" "}
-        {s.access.replaceAll("_", " ").toLowerCase()}
+        {(s.access_method ?? s.access ?? "not recorded")
+          .replaceAll("_", " ")
+          .toLowerCase()}
       </p>
       {s.provenance_note && <p>{s.provenance_note}</p>}
+      {researchSupplement.citations.some((c) => c.source_id === id) &&
+        s.checked_as_of !== researchSupplement.checked_at && (
+          <p>
+            Section locator and support checked {researchSupplement.checked_at}{" "}
+            in the citation supplement.
+          </p>
+        )}
       <Link href={`/sources/#${s.id}`}>Catalogue entry {s.id}</Link>
     </div>
   );
@@ -29,6 +43,7 @@ export function EvidenceContext({ p }: { p: Prediction }) {
           <strong>{m.action.replaceAll("_", " ")}</strong>
           <p>{m.reason}</p>
         </Notice>
+        <ConditionalOutcomes p={p} />
         {m.canonical_ids.length > 0 && (
           <div className="history-links">
             <h2>Reconciled records & related versions</h2>
@@ -62,7 +77,7 @@ export function EvidenceContext({ p }: { p: Prediction }) {
   return (
     <div className="release-context">
       <Notice>
-        <strong>Editorial paraphrase · evidence v0.2.</strong>{" "}
+        <strong>Editorial paraphrase · evidence v0.3.</strong>{" "}
         {release.disclosure}
         <p>
           Source state: {r.source_verification.state.replaceAll("_", " ")}.{" "}
@@ -80,12 +95,29 @@ export function EvidenceContext({ p }: { p: Prediction }) {
           </p>
         )}
       </Notice>
-      {r.assessment.drift_range_years && (
-        <Notice>
-          <strong>LATE — hardware proxy; approximately 3–4 years.</strong>{" "}
-          {r.assessment.withheld_reason}
-        </Notice>
-      )}
+      <dl className="detail-fields confidence-fields">
+        <div>
+          <dt>Attribution confidence</dt>
+          <dd>{r.attribution_confidence}</dd>
+        </div>
+        <div>
+          <dt>Outcome confidence · deadline / review</dt>
+          <dd>
+            {r.outcome_confidence?.at_deadline} /{" "}
+            {r.outcome_confidence?.at_review}
+          </dd>
+        </div>
+        <div>
+          <dt>Timing confidence / kind</dt>
+          <dd>
+            {r.timing_confidence} · {r.timing?.kind.replaceAll("_", " ")}
+          </dd>
+        </div>
+        <div>
+          <dt>Population</dt>
+          <dd>{r.population_scope}</dd>
+        </div>
+      </dl>
     </div>
   );
 }
@@ -105,6 +137,59 @@ export function LegacyRelations({ p }: { p: Prediction }) {
             {rel.relation.replaceAll("_", " ")}
           </Link>
         </div>
+      ))}
+    </div>
+  );
+}
+
+function ConditionalOutcomes({ p }: { p: Prediction }) {
+  const c = p.reconciliation?.conditional_outcome;
+  if (!c) return null;
+  const conditional =
+    c.assessment_basis ===
+    "CONDITIONAL_ON_IMPORTED_WORDING_NOT_VERIFIED_ATTRIBUTION";
+  return (
+    <div className="panel conditional-outcomes">
+      <h2>
+        {conditional
+          ? "Attribution unresolved — outcome conditional on this wording"
+          : "Outcome dispositions on the corrected source-matched criteria"}
+      </h2>
+      <p>{c.assessed_claim}</p>
+      {c.verdict && (
+        <p>
+          <strong>Conditional verdict: {c.verdict.replaceAll("_", " ")}</strong>
+        </p>
+      )}
+      {c.at_deadline && (
+        <p>
+          At original deadline: {c.at_deadline.replaceAll("_", " ")} · By
+          review: {c.at_review?.replaceAll("_", " ")}
+        </p>
+      )}
+      <p>{c.rationale}</p>
+      {c.date_note && <p>{c.date_note}</p>}
+      {c.broader_reading && <p>{c.broader_reading}</p>}
+      {c.component_assessments.map((v, i) => (
+        <article className="interpretation-panel" key={i}>
+          <h3>{v.title ?? v.claim}</h3>
+          <p>Target: {v.deadline ?? "see linked record"}</p>
+          <p>
+            {v.verdict} · At deadline: {v.at_deadline.replaceAll("_", " ")} · By
+            review: {v.at_review.replaceAll("_", " ")}
+          </p>
+          <p>{v.qualifier}</p>
+          {v.id && <Link href={`/predictions/${v.id}/`}>{v.id} →</Link>}
+        </article>
+      ))}
+      <p className="footnote">
+        Excluded from aggregate author accuracy. Conditional wording and related
+        canonical versions are never counted twice.
+      </p>
+      {c.evidence_source_ids?.map((id) => (
+        <Link className="source-id-link" key={id} href={`/sources/#${id}`}>
+          {id}
+        </Link>
       ))}
     </div>
   );

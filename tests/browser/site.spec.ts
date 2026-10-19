@@ -12,17 +12,21 @@ test("overview distinguishes collection from scoring and links charts to records
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Ray Kurzweil",
   );
-  for (const value of ["88", "50", "34", "13"])
+  for (const value of ["88", "84", "68"])
     await expect(page.locator(".metric-grid")).toContainText(value);
   await expect(page.locator(".metric-grid")).not.toContainText("%");
   await expect(
     page.getByText("Selected reviewed subset only.", { exact: true }),
   ).toBeVisible();
-  await expect(page.locator("#state")).toContainText("unknown for 9 of the 13");
-  await page.getByRole("link", { name: /AI & software: 8 of 50/ }).click();
+  await expect(page.locator("#state")).toContainText("36.8%");
+  await expect(page.locator("#state")).toContainText("52.9%");
+  await expect(page.locator(".mode-comparison")).toContainText(
+    "Same 67 forecast versions",
+  );
+  await page.getByRole("link", { name: /AI & software: 12 of 84/ }).click();
   await expect(page).toHaveURL(/category=AI/);
   await expect(page.locator(".results-toolbar")).toContainText(
-    "8 of 50 records",
+    "12 of 84 records",
   );
   expect(errors).toEqual([]);
 });
@@ -62,7 +66,7 @@ test("search, combined filters, sort, pagination, and reload preserve URL state"
   ).toBeVisible();
   await page.getByRole("button", { name: "Show curated records" }).click();
   await expect(page.locator(".results-toolbar")).toContainText(
-    "50 of 50 records",
+    "84 of 84 records",
   );
 });
 test("exports every filtered row and copies the current view", async ({
@@ -114,7 +118,9 @@ test("detail URLs are stable and expose unchanged provenance", async ({
     "HOLD ATTRIBUTION CONFLICT",
   );
   await expect(
-    page.locator(".reconciliation-panel a[href='/predictions/K001/']"),
+    page.locator(
+      ".reconciliation-panel .related-row[href='/predictions/K001/']",
+    ),
   ).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("chess");
@@ -159,14 +165,13 @@ test("curated evidence preserves source limits, interval timing, and related ver
   );
   await page.goto("/predictions/K033/");
   await expect(page.locator(".assessment-panel")).toContainText(
-    "LATE — hardware proxy; approximately 3–4 years",
+    "LATE".toLowerCase(),
+    { ignoreCase: true },
   );
-  await expect(page.locator(".assessment-panel")).toContainText(
-    "Excluded from default statistics",
-  );
-  await expect(page.locator(".outcome-comparison")).toContainText(
-    "FULFILLED UNDER STATED HARDWARE PROXY",
-  );
+  await expect(page.locator(".timing-note")).toContainText("2013");
+  await expect(
+    page.locator(".interpretations .outcome-comparison"),
+  ).toContainText("FULFILLED");
   await page.goto("/predictions/AUD-025/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("2019");
   await page
@@ -175,8 +180,11 @@ test("curated evidence preserves source limits, interval timing, and related ver
   await expect(page.locator(".timeline")).toContainText("2029");
   await expect(page.locator(".history-links")).toContainText("AUD-025");
   await page.goto("/predictions/K003/");
+  await expect(page.locator(".assessment-panel")).toContainText(
+    "EDITORIAL ASSESSMENT COMPLETE",
+  );
   await expect(page.locator(".release-context")).toContainText(
-    "remains UNREVIEWED",
+    "Attribution confidence",
   );
   await page.goto("/sources/");
   await expect(page.locator("#P01")).toContainText(
@@ -246,6 +254,12 @@ test("desktop and mobile layouts stay in the viewport", async ({ page }) => {
     path: "work/screenshots/scorecard-desktop.png",
     fullPage: true,
   });
+  const maxRowHeight = await page
+    .locator(".scorecard-table tbody tr")
+    .evaluateAll((rows) =>
+      Math.max(...rows.map((row) => row.getBoundingClientRect().height)),
+    );
+  expect(maxRowHeight).toBeLessThan(210);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of [
     "/",
@@ -277,4 +291,115 @@ test("desktop and mobile layouts stay in the viewport", async ({ page }) => {
     path: "work/screenshots/scorecard-mobile.png",
     fullPage: true,
   });
+});
+
+test("reading controls preserve boundary dates, expose scope changes and drill down by exact cohort", async ({
+  page,
+}) => {
+  await page.goto("/predictions/?q=K036");
+  await expect(page.locator(".results-toolbar")).toContainText("1 of 84");
+  await page
+    .getByLabel("Interpretation", { exact: true })
+    .selectOption("strict");
+  await expect(page).toHaveURL(/reading=strict/);
+  await expect(page.locator(".scorecard-table tbody")).toContainText("2026");
+  await expect(page.locator(".scorecard-table tbody")).toContainText("Pending");
+  await expect(page.locator(".scorecard-table thead")).toContainText(
+    "At original deadline",
+  );
+  await expect(page.locator(".scorecard-table thead")).toContainText(
+    "By review date",
+  );
+  await page.reload();
+  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
+    "strict",
+  );
+  await page.goto("/predictions/K036/");
+  await page
+    .getByRole("button", { name: "Strict / alternative reading", exact: true })
+    .click();
+  await expect(page.locator(".interpretations")).toContainText("2026");
+  await expect(page.locator(".interpretations")).toContainText("NOT DUE");
+  await page.goto("/predictions/K004/");
+  await page
+    .getByRole("button", { name: "Broader / directional reading", exact: true })
+    .click();
+  await expect(page.locator(".interpretations")).toContainText(
+    "Changed conditions",
+  );
+  await page.goto("/predictions/K041/");
+  await page
+    .getByRole("button", { name: "Broader / directional reading", exact: true })
+    .click();
+  await expect(page.locator(".interpretations")).toContainText(
+    "Broader / directional reading",
+  );
+  await expect(page.locator(".interpretations")).toContainText(
+    "Non-scoring comparator",
+  );
+  await page.goto("/");
+  const modeRows = page.locator(".mode-comparison tbody tr");
+  await expect(modeRows).toHaveCount(3);
+  await modeRows.nth(1).getByRole("link", { name: "67", exact: true }).click();
+  await expect(page.locator(".results-toolbar")).toContainText("67 of 84");
+  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
+    "strict",
+  );
+});
+test("legacy conditional dispositions stay outside metrics and all record URLs survive", async ({
+  page,
+}) => {
+  await page.goto("/predictions/DEC-003/");
+  await expect(page.locator(".conditional-outcomes")).toContainText("outcome");
+  const raw = await (await page.request.get("/data/predictions.json")).json();
+  for (const p of raw.predictions)
+    expect((await page.request.get(`/predictions/${p.id}/`)).status()).toBe(
+      200,
+    );
+  const reconciliation = await (
+    await page.request.get(
+      "/data/releases/v0.3/legacy-reconciliation.v0.3.json",
+    )
+  ).json();
+  for (const m of reconciliation.mapping)
+    expect(
+      (await page.request.get(`/predictions/${m.legacy_id}/`)).status(),
+    ).toBe(200);
+  const metrics = await (await page.request.get("/data/metrics.json")).json();
+  expect(metrics.views.reference.eligible).toBe(68);
+  expect(metrics.views.reference.onTime).toBe(25);
+  expect(metrics.views.reference.realized).toBe(36);
+});
+
+test("researched citation additions render with source limits and preserved assessment dates", async ({
+  page,
+}) => {
+  await page.goto("/predictions/K005/");
+  await expect(page.locator(".evidence-list")).toContainText(
+    "does not establish storage technology",
+  );
+  await expect(page.locator(".evidence-list")).toContainText(
+    "USB flash-drive paragraph",
+  );
+  await expect(page.locator(".evidence-list")).toContainText("2026-10-18");
+  await expect(page.locator(".assessment-panel")).toContainText("2026-10-15");
+  await page.goto("/predictions/K002/");
+  await expect(page.locator(".evidence-list")).toContainText(
+    "three-pound MacBook Air",
+  );
+  await expect(
+    page
+      .locator(".source-provenance")
+      .filter({ hasText: "Catalogue entry SUP005" }),
+  ).toBeVisible();
+  await page.goto("/sources/");
+  await expect(
+    page.getByText("Research supplement · 2026-10-18.", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("#SUP003")).toContainText("home-local server");
+  const supplement = await (
+    await page.request.get("/data/research/citation-supplement-2026-10-18.json")
+  ).json();
+  expect(supplement.sources).toHaveLength(5);
+  expect(supplement.citations).toHaveLength(24);
 });

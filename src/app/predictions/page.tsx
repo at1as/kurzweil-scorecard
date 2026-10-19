@@ -5,7 +5,7 @@ import { Eyebrow, Notice } from "@/components/ui";
 export const metadata: Metadata = { title: "The prediction ledger" };
 export default function PredictionsPage() {
   return (
-    <div className="container page-container">
+    <div className="container page-container predictions-page">
       <div className="page-intro">
         <Eyebrow>THE FORECAST RECORD</Eyebrow>
         <h1>The prediction ledger.</h1>

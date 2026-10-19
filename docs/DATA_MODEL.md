@@ -1,6 +1,6 @@
 # Canonical prediction field guide
 
-`src/lib/model.ts` is the authoritative Zod schema and inferred TypeScript `Prediction` type. `src/lib/validation.ts` enforces cross-record and chronological integrity. The site uses supplied v0.2 editorial verdicts when a release payload is present; legacy fixture verdicts remain derived. Statistics are recomputed from eligibility flags, with no fractional weights.
+`src/lib/model.ts` is the authoritative Zod schema and inferred TypeScript `Prediction` type. `src/lib/validation.ts` enforces cross-record and chronological integrity. The site uses supplied versioned editorial verdicts when a release payload is present; legacy fixture verdicts remain derived. Statistics are recomputed from eligibility flags, with no fractional weights.
 
 | Field                                                | Meaning and rule                                                                                                                                                                                                  |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -35,17 +35,19 @@
 
 All sources, criteria, and evidence must be populated by actual research. An apparently complete schema does not prove historical truth; validation enforces consistency, while human research establishes correctness.
 
-## Evidence release v0.2
+## Current evidence release v0.3
 
-`src/lib/evidence-model.ts` validates the immutable package. Each adapted record retains the entire authoritative object in `release`, including separate deadline/review outcomes, review state, source verification, publication provenance, target precision/interpretation, eligibility, documented-by bounds, exact/interval drift, and legacy relations. Read these original fields for semantic display rather than inferring from normalized browsing fields.
+`src/lib/evidence-model.ts` validates both historical and current release objects. Every complete supplied canonical object is preserved in `Prediction.release`; the original fields are not replaced by the site's normalized browsing projection. `scripts/evidence-input.ts` checks manifests, references, identity and snapshot consistency. Previous assessments are retained exactly in `release.revision_history` and displayed through `research.history`.
 
-`ASSESSED` is an AI-assisted editorial assessment, not human verification. `SOURCE_CONFIRMED` and `ATTRIBUTION_UNRESOLVED` are unreviewed. `EDITORIAL_PARAPHRASE` never renders as a quotation. `WRONG_MISSED` maps to the display key `MISSED`; the raw value remains in `release`. Supplied outcome enums remain unchanged in details and CSV exports.
+`EDITORIAL_ASSESSMENT_COMPLETE` grants a completed outcome state; attribution confidence is independent. `release.interpretations.reference|strict|broader` supplies mode-specific criteria, deadline year, deadline outcome, review outcome, verdict, conditions and eligibility. `selectReading` creates an explicit projection without mutating the canonical release. `selectedReading` labels it; filters, exported CSV and summary metrics use that same projection. `WRONG` maps to UI key `MISSED` only at display/scoring boundaries.
 
-Original intake records receive a separate `reconciliation` object when served, with action, explanation, canonical links, source references, and explicit no-redirect/retain-original decisions. This does not mutate their imported fields or confer a score. Curated and original arrays are separate; aggregate metrics only consume curated records.
+Common-cohort comparison intersects the eligibility of every interpretation. The native counts are reference 68, strict/alternative 67, and broader 68. K036's deadline changes from reference 2025 to alternative 2026. The comparable intersection has 67. Conditional imported wording, legacy aliases, citations, tags and `non_scoring_comparators` are never extra canonical records.
 
-Publication years are attributed, not asserted to be checked original first editions. Approximate navigation intervals are retained in `release.target`; they are not numeric exact deadlines. `full_achievement_documented_by_year` never populates `firstAchievementYear`. Exact drift requires an explicit supplied exact observation; K033's interval cannot enter default aggregates.
+Legacy routes join their original field map with versioned reconciliation history. `conditional_outcome` is explicitly contingent on unresolved wording and excluded from author accuracy; component assessments retain multiple targets. Reference canonical versions remain independently browsable under stable K IDs.
 
-The current UI displays all 13 taxonomy entries even when a category is empty. Counts and filters are based on canonical versions, not 88 minus duplicates. Category outcome counts are descriptive, not an accuracy ranking.
+`release.timing` separates first event, documented-by bound, approximate editorial era and unestablished timing. Exact drift requires the supplied exact-event support; a known-by date stays a bound. K001's −3 to −1 range survives its deadline conflict, while K033's 2013 measured result gives +4 under the reference criterion. Alternative-reading projections do not reuse reference drift as their own exact date.
+
+Every release stays immutable; corrections require a versioned package and change-log entry. All 13 original taxonomy entries remain available.
 
 ## Historical v0.1 curation mechanism
 

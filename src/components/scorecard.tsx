@@ -54,6 +54,12 @@ import {
   VIEWS,
   type Filters,
 } from "@/lib/filters";
+import {
+  deadlineOutcome,
+  reviewOutcome,
+  displayOutcome,
+} from "@/lib/interpretations";
+import { READING_LABELS, READINGS } from "@/lib/evidence-model";
 import { Badge } from "./ui";
 const VIEW_LABELS = {
   all: "Curated records",
@@ -148,7 +154,7 @@ export function Scorecard() {
             <small>
               {row.original.deadline.precision === "UNCONFIRMED"
                 ? "Unconfirmed"
-                : "Confirmed"}
+                : "Supplied reading year"}
             </small>
           </span>
         ),
@@ -159,14 +165,28 @@ export function Scorecard() {
         accessorFn: (p) => verdict(p, AS_OF),
         cell: ({ row }) => (
           <div>
-            <Badge
-              verdict={verdict(row.original, AS_OF)}
-              disputed={row.original.assessment.disputed}
-            />
-            {row.original.release?.assessment.drift_range_years && (
+            {row.original.reconciliation ? (
+              <span className="badge">
+                {row.original.reconciliation.conditional_outcome?.verdict?.replaceAll(
+                  "_",
+                  " ",
+                ) ?? "Linked / component outcomes"}
+                <small className="qualifier">
+                  Conditional legacy disposition
+                </small>
+              </span>
+            ) : (
+              <Badge
+                verdict={verdict(row.original, AS_OF)}
+                disputed={row.original.assessment.disputed}
+              />
+            )}
+            {row.original.release?.assessment.verdict_qualifier && (
               <small className="qualifier">
-                Hardware proxy; approximately 3–4 years. Excluded from default
-                statistics.
+                {row.original.release.assessment.verdict_qualifier.replaceAll(
+                  "_",
+                  " ",
+                )}
               </small>
             )}
             {row.original.release?.source_verification.state.startsWith(
@@ -177,6 +197,26 @@ export function Scorecard() {
               </small>
             )}
           </div>
+        ),
+      },
+      {
+        id: "atDeadline",
+        header: "At original deadline",
+        accessorFn: (p) => deadlineOutcome(p),
+        cell: ({ row }) => (
+          <span className="outcome-cell">
+            {displayOutcome(deadlineOutcome(row.original))}
+          </span>
+        ),
+      },
+      {
+        id: "atReview",
+        header: "By review date",
+        accessorFn: (p) => reviewOutcome(p),
+        cell: ({ row }) => (
+          <span className="outcome-cell">
+            {displayOutcome(reviewOutcome(row.original))}
+          </span>
         ),
       },
       {
@@ -192,14 +232,13 @@ export function Scorecard() {
       },
       {
         id: "drift",
-        header: "Timing drift",
+        header: "Timing / known by",
         accessorFn: (p) => sortValue(p, "drift", AS_OF),
         sortUndefined: "last",
         cell: ({ row }) => (
           <span className="numeric">
-            {row.original.release?.assessment.drift_range_years
-              ? "≈ +3–4y (proxy)"
-              : driftLabel(driftYears(row.original, AS_OF))}
+            {row.original.release?.timing?.label ||
+              driftLabel(driftYears(row.original, AS_OF))}
           </span>
         ),
       },
@@ -302,6 +341,29 @@ export function Scorecard() {
     items.map((value) => ({ value, label: value }));
   return (
     <div className="scorecard">
+      <label className="inline-select reading-control">
+        Interpretation
+        <select
+          aria-label="Interpretation"
+          value={filters.reading}
+          onChange={(e) =>
+            update({ reading: e.target.value as Filters["reading"] })
+          }
+        >
+          {READINGS.map((mode) => (
+            <option key={mode} value={mode}>
+              {READING_LABELS[mode]}
+            </option>
+          ))}
+        </select>
+      </label>
+      {filters.reading !== "reference" && (
+        <p className="table-note">
+          {filters.reading === "strict"
+            ? "Alternative criteria can change the population or deadline, not just the severity of a judgment."
+            : "Broader outcomes can use a different mechanism or lower adoption threshold. Open a record to see the changed conditions."}
+        </p>
+      )}
       <div className="view-tabs" role="group" aria-label="Prediction views">
         {VIEWS.map((view) => (
           <button
@@ -396,6 +458,14 @@ export function Scorecard() {
           {select("cohort", "Statistical populations", [
             { value: "eligible", label: "Due & eligible selected subset" },
             { value: "canonical", label: "Canonical only" },
+            { value: "common", label: "Common 67-record comparison cohort" },
+            { value: "new", label: "New in v0.3" },
+            { value: "undated", label: "No usable deadline" },
+            { value: "on-time", label: "Eligible and fulfilled on time" },
+            {
+              value: "realized",
+              label: "Eligible and fully realized by review",
+            },
             { value: "drift", label: "Eligible with exact timing drift" },
           ])}
         </div>

@@ -1,5 +1,19 @@
 # Dataset and site history
 
+## Citation supplement and interface fixes — 2026-10-18
+
+Fixed the missing space below the prediction-ledger notice and inset native dropdown chevrons consistently. Added a versioned citation supplement resolving all 15 previously blank outcome-reference locators, checking one additional Pew section, and adding five primary sources/eight corroborating evidence links. Source-specific findings explain what each citation does and does not support. Source catalogue now contains 103 entries.
+
+Original v0.3 files and every earlier release remain unchanged. The complete imported release object remains available under each record's `release` field. New primary references and check history are appended to the site's evidence projection. Outcome cutoff remains 2026-10-15; citation checks are dated 2026-10-18. Scoring is unchanged.
+
+## Evidence v0.3 — snapshot 2026-10-15
+
+Replaced K001–K050 by stable ID and added K051–K084. Preserved all v0.2 previous assessments exactly, the original 88-row intake, prior reconciliation notes, and downloadable v0.1/v0.2 releases. The pre-integration checkpoint is `6f1108a`.
+
+The active reference cohort has 68 mature forecasts: 25 on-time and 36 fully realized by review. All due outcomes are assessed. Added reference, strict/alternative and broader reading controls, separate deadline/review columns, confidence metadata, conditional legacy/component outcomes, common-cohort comparisons, and timing series with exact/known-by/editorial distinctions. Source catalogue grows to 98 used references. Raw supplied files are unchanged.
+
+K036's alternative deadline makes the native strict cohort 67; mode comparisons use the equal 67-record intersection. K001 now has a correct outcome and bounded early timing. K033 now uses the supplied measured 2013 milestone. These update live judgments while retaining prior decisions in history. See `V03_INTEGRATION_REVIEW.md` for remaining research gaps.
+
 ## Evidence v0.2 — snapshot 2026-10-14
 
 Integrated the supplied immutable `2026-10-14-evidence-v0.2` release. No editorial judgments or source dates were changed during integration. All 50 authoritative records and 88 reconciliation decisions are retained. Sources are joined by ID, and original routes stay available without redirects.

@@ -18,7 +18,7 @@ const definitions: { v: Verdict; text: string; treatment: string }[] = [
     v: "LATE",
     text: "The full original claim was realized after its original deadline. Its historical at-deadline failure remains unchanged.",
     treatment:
-      "Zero on-time hits. K033 is a qualified hardware-proxy case and is excluded from the default aggregate.",
+      "Zero on-time hits; one full-realization hit in the same eligible cohort. K033 now uses the supplied 2013 measured-performance milestone.",
   },
   {
     v: "PARTIAL",
@@ -128,11 +128,13 @@ export default function Methodology() {
               precise endpoints to vague imported date ranges.
             </p>
             <p>
-              This release has no exact drift observations. K033 is LATE —
-              hardware proxy; approximately 3–4 years, depending on the
-              benchmark. It is excluded from default metrics. A “documented by
-              2008” bound does not establish the first achievement year. Chess
-              has a confirmed 1997 outcome but an unresolved original deadline.
+              Timing is separated into exact events, documented-by bounds,
+              bounded ranges, and approximate editorial era bounds. Chess is a
+              1997 success under either cited deadline; its drift remains a
+              range of 1–3 years early. K033 is assessed as late under the
+              reference hardware criterion, with measured performance documented
+              in 2013. A documented-by year never establishes the first
+              invention date.
             </p>
             <div className="worked-example">
               <span className="micro-label">
@@ -200,25 +202,24 @@ export default function Methodology() {
                 flag.
               </strong>{" "}
               Only assessed, due records with an explicit eligibility flag enter
-              the default cohort. K033 is explicitly excluded. Future
-              deadlines—including forecasts achieved early—are excluded from
-              both rates. Partial outcomes receive no fractional credit. Missing
-              data is not a zero. A zero-sized denominator produces “Not yet
-              available.”
+              the default cohort. Future deadlines—including forecasts achieved
+              early—are excluded from both rates. Partial outcomes receive no
+              fractional credit. Missing data is not a zero. A zero-sized
+              denominator produces “Not yet available.”
             </p>
             <p>
-              Full realization by review is unknown for {stats.currentUnknown}{" "}
-              members of the {stats.eligible}-record eligible cohort, so the
-              full-realization rate is withheld. The known deadline counts are{" "}
-              {stats.eligibleBreakdown.CORRECT} correct,{" "}
-              {stats.eligibleBreakdown.PARTIAL} partial, and{" "}
-              {stats.eligibleBreakdown.MISSED} wrong/missed. No category
-              accuracy ranking is defensible from these small selected groups.
+              Every mature reference forecast has both outcomes assessed:{" "}
+              {stats.onTime} fully fulfilled by its deadline and{" "}
+              {stats.realized} fully realized by the review date, within the
+              same {stats.eligible}-record subset. Late achievements retain the
+              original deadline miss. Partials remain a separate bucket.
+              Historical achievement remains established even if a product is
+              later discontinued.
             </p>
             <p>
               Verdict distributions cover editorially assessed forecast
-              versions, including pending and unscorable records; they therefore
-              use a different, explicitly labeled population from deadline-based
+              versions, including future and undated records; they therefore use
+              a different, explicitly labeled population from deadline-based
               accuracy. Drift uses editorially assessed full realizations with
               established years. Clicking a chart or rate opens its underlying
               records.
@@ -290,14 +291,13 @@ export default function Methodology() {
               </li>
             </ol>
             <p>
-              This release uses ASSESSED, SOURCE_CONFIRMED, and
-              ATTRIBUTION_UNRESOLVED. TEXT_CONFIRMED_IN_LISTED_SOURCE confirms
-              attribution only; SOURCE_CONFIRMED remains UNREVIEWED. PENDING
-              based on a secondary report remains visibly provisional. Merely
-              failing to locate evidence is not grounds for a false or
-              unscorable verdict. Reviews are historical snapshots; advancing
-              the snapshot date requires updating outcomes for deadlines that
-              have newly closed.
+              The current state is EDITORIAL_ASSESSMENT_COMPLETE. Attribution
+              confidence, outcome confidence, and timing confidence are
+              separate. Original-book collation is still incomplete; that
+              uncertainty does not erase a completed outcome judgment.
+              Unresolved imported wording receives a conditional outcome,
+              explicitly excluded from author-accuracy aggregates. Snapshot
+              dates belong to research releases rather than rebuilds.
             </p>
           </section>
           <section id="coverage">
@@ -316,14 +316,17 @@ export default function Methodology() {
               even once individual records are verified.
             </p>
             <p>
-              Evidence v0.2 adds 50 curated forecast/version records with a
-              disposition for all 88 original leads. It is not “88 minus
-              duplicates.” Some leads were split, some quarantined, and related
-              versions added. A 2029 version never repairs an unlocated 2019
-              version. The original 147-item 2009 corpus is a bounded next audit
-              population. Immutable v0.1 and v0.2 releases retain prior
-              decisions; corrections belong in a subsequent version and dated
-              change log.
+              Evidence v0.3 contains 84 source-matched forecast versions,
+              including 34 additions, alongside all 88 original lead
+              dispositions. The reference reading has 68 mature records; strict
+              / alternative has 67 because K036 allows a 2026 deadline rather
+              than the reference 2025. Cross-reading comparison uses the common
+              67-record cohort. Broader readings expose changed conditions and
+              never silently replace the reference result. Stronger-than-source
+              comparators are excluded. Immutable v0.1, v0.2 and v0.3 files
+              retain the complete record history. Original editions, the full
+              147-item 2009 corpus, and remaining interviews still need
+              systematic coverage.
             </p>
             <Link className="button button-primary" href="/sources/">
               Explore source coverage <ArrowRight size={16} />

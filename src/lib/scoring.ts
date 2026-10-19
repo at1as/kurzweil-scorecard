@@ -1,3 +1,4 @@
+import { readingOf } from "./interpretations";
 import { type Prediction, type Verdict, VERDICTS } from "./model";
 
 /** A deadline closes after its last calendar day, not on January 1 of its year. */
@@ -19,7 +20,9 @@ export function deadlineYear(p: Prediction) {
 }
 export function isVerified(p: Prediction, asOf: string) {
   return (
-    ["VERIFIED", "ASSESSED"].includes(p.assessment.state) &&
+    ["VERIFIED", "ASSESSED", "EDITORIAL_ASSESSMENT_COMPLETE"].includes(
+      p.assessment.state,
+    ) &&
     p.assessment.lastReviewedAt !== null &&
     p.assessment.lastReviewedAt <= asOf
   );
@@ -29,9 +32,11 @@ export function fullyRealized(p: Prediction) {
 }
 export function verdict(p: Prediction, asOf: string): Verdict {
   if (p.release)
-    return p.release.assessment.verdict === "WRONG_MISSED"
+    return ["WRONG", "WRONG_MISSED"].includes(
+      readingOf(p)?.verdict ?? p.release.assessment.verdict,
+    )
       ? "MISSED"
-      : p.release.assessment.verdict;
+      : ((readingOf(p)?.verdict ?? p.release.assessment.verdict) as Verdict);
   if (p.assessment.state === "EXCLUDED" || p.duplicateOf) return "EXCLUDED";
   if (!isVerified(p, asOf)) return "UNREVIEWED";
   if (!p.assessment.scorable || !deadlineEnd(p)) return "UNSCORABLE";
@@ -61,7 +66,8 @@ export function eligibleRecords(records: Prediction[], asOf: string) {
   return canonicalRecords(
     records.filter((p) =>
       p.release
-        ? p.release.assessment.eligible_for_deadline_metrics &&
+        ? (readingOf(p)?.eligible_for_deadline_metrics ??
+            p.release.assessment.eligible_for_deadline_metrics) &&
           isVerified(p, asOf) &&
           isDue(p, asOf)
         : isVerified(p, asOf) && p.assessment.scorable && isDue(p, asOf),
@@ -69,6 +75,12 @@ export function eligibleRecords(records: Prediction[], asOf: string) {
   );
 }
 export function driftYears(p: Prediction, asOf: string): number | null {
+  if (p.release?.timing)
+    return (p.selectedReading ?? "reference") === "reference" &&
+      p.release.timing.kind === "EXACT_EVENT" &&
+      eligibleRecords([p], asOf).length
+      ? p.release.timing.drift_years
+      : null;
   if (p.release)
     return isVerified(p, asOf) &&
       p.release.assessment.eligible_for_deadline_metrics
@@ -131,9 +143,11 @@ export function summarize(records: Prediction[], asOf: string) {
     scored: scored.length,
     eligible: eligible.length,
     eligibleIds: eligible.map((p) => p.id),
+    onTimeIds: onTime.map((p) => p.id),
+    realizedIds: realized.map((p) => p.id),
     onTime: onTime.length,
     realized: realized.length,
-    onTimeRateLabel: `Strict on-time rate within this selected reviewed subset (n=${eligible.length})`,
+    onTimeRateLabel: `Full on-time rate under ${records[0]?.selectedReading ?? "reference"} reading within this selected reviewed subset (n=${eligible.length})`,
     onTimeRate: eligible.length ? onTime.length / eligible.length : null,
     currentUnknown,
     eligibleBreakdown,

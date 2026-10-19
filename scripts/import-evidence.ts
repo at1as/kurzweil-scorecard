@@ -1,123 +1,84 @@
 import fs from "node:fs";
-import path from "node:path";
-import { createHash } from "node:crypto";
-import {
-  evidenceReleaseSchema,
-  sourceSchema,
-  reconciliationSchema,
-  coverageSchema,
-} from "../src/lib/evidence-model";
+import { applyCitationSupplement } from "../src/lib/research-supplement";
+import { isDeepStrictEqual } from "node:util";
 import { adaptEvidence } from "../src/lib/evidence";
 import { validateDataset } from "../src/lib/validation";
 import { summarize } from "../src/lib/scoring";
+import { commonCohort, selectReading } from "../src/lib/interpretations";
+import { READINGS } from "../src/lib/evidence-model";
+import {
+  EVIDENCE_DIR,
+  evidenceFile,
+  loadEvidence,
+  sha,
+} from "./evidence-input";
 import type { Prediction } from "../src/lib/model";
-
 export function importEvidence(
   intake: Prediction[],
   categories: string[],
   asOf: string,
   intakeHash: string,
 ) {
-  const dir = "kurzweil_verification_v0_2";
-  const read = (name: string) =>
-    JSON.parse(fs.readFileSync(path.join(dir, name), "utf8"));
-  const sha = (bytes: Buffer) =>
-    createHash("sha256").update(bytes).digest("hex");
-  const manifest = read("MANIFEST.json");
-  for (const file of manifest.files) {
-    const bytes = fs.readFileSync(path.join(dir, file.name));
-    if (bytes.length !== file.bytes || sha(bytes) !== file.sha256)
-      throw new Error(`Immutable v0.2 release altered: ${file.name}`);
-  }
-  const release = evidenceReleaseSchema.parse(
-    read("predictions.canonical.v0.2.json"),
-  );
-  const sourceFile = read("sources.v0.2.json"),
-    mappingFile = read("legacy-reconciliation.v0.2.json"),
-    coverageFile = read("source-coverage.v0.2.json");
-  const sources = sourceSchema.array().parse(sourceFile.sources);
-  const mappings = reconciliationSchema.array().parse(mappingFile.mapping);
-  const coverage = coverageSchema.array().parse(coverageFile.coverage);
-  if (
-    [
-      release.as_of,
-      sourceFile.as_of,
-      mappingFile.as_of,
-      coverageFile.as_of,
-    ].some((date) => date !== asOf)
-  )
-    throw new Error("Release/snapshot mismatch");
-  if (
-    release.legacy_input_sha256 !== intakeHash ||
-    sha(
-      fs.readFileSync(path.join(dir, "kurzweil_prediction_intake_v0_1.csv")),
-    ) !== intakeHash
-  )
-    throw new Error("Original intake hash mismatch");
-  const ids = new Set(release.records.map((r) => r.id)),
-    sourceIds = new Set(sources.map((s) => s.id));
-  if (
-    ids.size !== release.records.length ||
-    new Set(release.records.map((r) => r.slug)).size !== ids.size ||
-    sourceIds.size !== sources.length
-  )
-    throw new Error("Duplicate release IDs/slugs");
+  const { release, sources, mappings, supplement } = loadEvidence();
+  if (release.as_of !== asOf) throw new Error("Snapshot mismatch");
   if (
     mappings.length !== intake.length ||
     new Set(mappings.map((m) => m.legacy_id)).size !== intake.length
   )
-    throw new Error("Incomplete original-ID reconciliation");
+    throw new Error("Incomplete intake mapping");
   for (const m of mappings) {
     const original = intake.find((p) => p.id === m.legacy_id);
     if (
       !original ||
       m.raw_import_sha256 !== intakeHash ||
-      original.importedClaim !== m.original_prediction ||
-      original.deadline.originalText !== m.original_target_text
+      m.original_prediction !== original.importedClaim ||
+      m.original_target_text !== original.deadline.originalText
     )
-      throw new Error(`Original history mismatch: ${m.legacy_id}`);
+      throw new Error(`${m.legacy_id}: altered original intake`);
+  }
+  const previous = JSON.parse(
+    fs.readFileSync(
+      "kurzweil_verification_v0_2/predictions.canonical.v0.2.json",
+      "utf8",
+    ),
+  ).records;
+  for (const p of previous) {
+    const r = release.records.find((r) => r.id === p.id);
     if (
-      m.canonical_ids.some((id) => !ids.has(id)) ||
-      m.source_ids.some((id) => !sourceIds.has(id))
-    )
-      throw new Error(`Broken reconciliation: ${m.legacy_id}`);
-  }
-  for (const c of coverage)
-    if (c.source_ids.some((id) => !sourceIds.has(id)))
-      throw new Error(`Unknown coverage source: ${c.id}`);
-  for (const r of release.records) {
-    for (const ref of [...r.prediction_sources, ...r.evidence])
-      if (!sourceIds.has(ref.source_id))
-        throw new Error(`${r.id}: broken source reference`);
-    for (const rel of r.legacy_relations)
-      if (
-        !mappings.some(
-          (m) =>
-            m.legacy_id === rel.legacy_id && m.canonical_ids.includes(r.id),
-        )
+      !r?.revision_history?.some((h) =>
+        isDeepStrictEqual(h.previous_assessment, p.assessment),
       )
-        throw new Error(`${r.id}: broken original relation`);
+    )
+      throw new Error(`${p.id}: missing v0.2 assessment history`);
   }
-  const file = `${dir}/predictions.canonical.v0.2.json`,
-    hash = sha(fs.readFileSync(file));
-  const reviewed = validateDataset(
-    release.records.map((r) => adaptEvidence(r, sources, file, hash)),
+  const records = validateDataset(
+    release.records.map((r) =>
+      applyCitationSupplement(
+        adaptEvidence(r, sources, evidenceFile, sha(evidenceFile)),
+        supplement,
+      ),
+    ),
     categories,
     asOf,
   );
   fs.writeFileSync(
     "data/generated/reviewed.json",
-    JSON.stringify(reviewed, null, 2) + "\n",
+    JSON.stringify(records, null, 2) + "\n",
   );
   fs.writeFileSync(
     "public/data/predictions.json",
     JSON.stringify(
       {
         asOf,
-        release: release.release_id,
-        scope: release.scope,
-        reviewDisclosure: release.review_disclosure,
-        predictions: reviewed,
+        release: "0.3",
+        researchSupplement: {
+          id: supplement.id,
+          checkedAt: supplement.checked_at,
+          outcomeCutoff: supplement.outcome_cutoff,
+        },
+        scope:
+          "Selected source-matched forecast versions; not lifetime accuracy.",
+        predictions: records,
       },
       null,
       2,
@@ -126,23 +87,43 @@ export function importEvidence(
   fs.writeFileSync(
     "public/data/metrics.json",
     JSON.stringify(
-      { asOf, scope: release.scope, ...summarize(reviewed, asOf) },
+      {
+        asOf,
+        scope:
+          "Selected distinct forecast versions; conditional legacy outcomes and comparators excluded.",
+        views: Object.fromEntries(
+          READINGS.map((mode) => [
+            mode,
+            summarize(
+              records.map((p) => selectReading(p, mode)),
+              asOf,
+            ),
+          ]),
+        ),
+        commonCohort: Object.fromEntries(
+          READINGS.map((mode) => [
+            mode,
+            summarize(
+              commonCohort(records).map((p) => selectReading(p, mode)),
+              asOf,
+            ),
+          ]),
+        ),
+      },
       null,
       2,
     ) + "\n",
   );
-  // Copies are downloads, never edited sources. Manifest hashes remain valid.
-  fs.cpSync(dir, "public/data/releases/v0.2", { recursive: true });
-  fs.mkdirSync("public/data/releases/v0.1", { recursive: true });
+  fs.mkdirSync("public/data/research", { recursive: true });
   fs.copyFileSync(
-    "data/releases/v0.1/predictions.json",
-    "public/data/releases/v0.1/predictions.json",
+    "data/research/citation-supplement-2026-10-18.json",
+    "public/data/research/citation-supplement-2026-10-18.json",
   );
-  fs.copyFileSync(
-    "data/releases/v0.1/config.json",
-    "public/data/releases/v0.1/config.json",
-  );
+  fs.cpSync(EVIDENCE_DIR, "public/data/releases/v0.3", { recursive: true });
+  fs.cpSync("data/releases/v0.2", "public/data/releases/v0.2/site-snapshot", {
+    recursive: true,
+  });
   console.log(
-    `Evidence: ${reviewed.length} curated records; ${mappings.length} original routes retained; ${summarize(reviewed, asOf).eligible} due and eligible.`,
+    `Evidence v0.3: ${records.length} canonical versions; ${mappings.length} original routes retained; ${summarize(records, asOf).eligible} reference-eligible.`,
   );
 }

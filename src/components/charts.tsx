@@ -102,42 +102,52 @@ export function DriftChart({
   records: Prediction[];
   asOf: string;
 }) {
-  const stats = summarize(records, asOf);
-  if (!stats.drifts.length)
-    return (
-      <EmptyChart title="When did the future arrive?" compact>
-        No exact drift observations are available in this release. “Documented
-        by” dates are evidence bounds, not first-achievement years. K033 has a
-        qualified hardware-proxy interval of approximately 3–4 years, excluded
-        from default statistics.
-      </EmptyChart>
-    );
-  const max = Math.max(...stats.drifts.map((d) => Math.abs(d.years)), 1);
+  const dated = records.filter(
+    (p) => p.release?.timing && p.release.timing.kind !== "UNESTABLISHED",
+  );
+  const series = (kinds: string[], label: string) => (
+    <div>
+      <h4>{label}</h4>
+      {dated
+        .filter((p) => kinds.includes(p.release!.timing!.kind))
+        .map((p) => (
+          <Link
+            className="timing-row"
+            href={`/predictions/${p.id}/`}
+            key={p.id}
+          >
+            <span className="mono">{p.id}</span>
+            <span>{p.release!.timing!.label}</span>
+          </Link>
+        ))}
+    </div>
+  );
   return (
-    <div className="drift-chart">
+    <div className="timing-series">
       <p className="chart-caption">
-        {stats.drifts.length} verified, canonical full realizations ·
-        calendar-year difference
+        {dated.length} timing observations. Known-by years are evidence bounds;
+        editorial era bounds are approximate market judgments.
       </p>
-      <div className="drift-axis">
-        <span>Early</span>
-        <span>On time</span>
-        <span>Late</span>
-      </div>
-      {stats.drifts.map((d) => (
-        <Link href={`/predictions/${d.id}/`} key={d.id} className="drift-row">
-          <span>{d.id}</span>
-          <span className="drift-track">
-            <i
-              style={{
-                left: d.years >= 0 ? "50%" : `${50 + (d.years / max) * 45}%`,
-                width: `${Math.max((Math.abs(d.years) / max) * 45, 1)}%`,
-              }}
-            />
-          </span>
-          <strong>{driftLabel(d.years)}</strong>
-        </Link>
-      ))}
+      {series(["EXACT_EVENT"], "Dated events & bounded drift")}
+      <details>
+        <summary>
+          Known-by observations (
+          {
+            dated.filter((p) => p.release!.timing!.kind === "DOCUMENTED_BY")
+              .length
+          }
+          )
+        </summary>
+        {series(
+          ["DOCUMENTED_BY"],
+          "Documented by this year; first event unknown",
+        )}
+      </details>
+      {series(["EDITORIAL_ERA_BOUND"], "Approximate editorial era bounds")}
+      <p className="footnote">
+        Still-unfulfilled records show overdue status on their detail pages. An
+        unfinished forecast has no completed delay.
+      </p>
     </div>
   );
 }

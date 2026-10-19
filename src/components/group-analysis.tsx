@@ -243,9 +243,9 @@ export function GroupAnalysis({
       </div>
       <p className="footnote">
         Snapshot {asOf}. Eligibility follows the supplied editorial flags.
-        Future, unreviewed, unscorable, and qualified hardware-proxy assessments
-        are excluded from the due subset. Partial outcomes receive no fractional
-        credit. Unknown current outcomes are not failures.
+        Future and undated assessments are excluded from the due subset. Partial
+        outcomes receive no fractional credit. Unknown current outcomes are not
+        failures.
       </p>
     </div>
   );

@@ -14,6 +14,7 @@ export const VERDICTS = [
 export type Verdict = (typeof VERDICTS)[number];
 export const REVIEW_STATES = [
   "UNREVIEWED",
+  "EDITORIAL_ASSESSMENT_COMPLETE",
   "ASSESSED",
   "SOURCE_CONFIRMED",
   "ATTRIBUTION_UNRESOLVED",
@@ -23,6 +24,8 @@ export const REVIEW_STATES = [
   "EXCLUDED",
 ] as const;
 export const CLAIM_TYPES = [
+  "RESEARCH_MILESTONE",
+  "TREND",
   "UNKNOWN",
   "CAPABILITY",
   "ADOPTION",
@@ -53,6 +56,7 @@ const outcome = z.enum([
 ]);
 export const predictionSchema = z
   .object({
+    selectedReading: z.enum(["reference", "strict", "broader"]).optional(),
     release: evidenceRecordSchema.optional(),
     reconciliation: reconciliationSchema.optional(),
     id: z.string().regex(/^[A-Z0-9][A-Z0-9-]*$/),
@@ -103,6 +107,7 @@ export const predictionSchema = z
     }),
     evidence: z.array(
       z.object({
+        sourceId: z.string().optional(),
         id: z.string(),
         title: z.string().min(1),
         url: webUrl,
@@ -169,6 +174,8 @@ export const LABELS: Record<Verdict, string> = {
   EXCLUDED: "Excluded",
 };
 export const TYPE_LABELS: Record<Prediction["claimType"], string> = {
+  RESEARCH_MILESTONE: "Research milestone",
+  TREND: "Trend",
   UNKNOWN: "Not classified",
   CAPABILITY: "Capability",
   ADOPTION: "Adoption",

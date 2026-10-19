@@ -2,15 +2,33 @@ import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import { createHash } from "node:crypto";
 import { parse } from "csv-parse/sync";
-import {
-  predictions,
-  originalIntake,
-  reconciliation,
-  allRecords,
-  categories,
-  evidenceSources,
-  AS_OF,
-} from "../src/lib/data";
+import type { Prediction } from "../src/lib/model";
+import oldSite from "../data/releases/v0.2/predictions.json";
+import original from "../data/generated/predictions.json";
+import oldMapping from "../kurzweil_verification_v0_2/legacy-reconciliation.v0.2.json";
+import oldSources from "../kurzweil_verification_v0_2/sources.v0.2.json";
+import spec from "../data/generated/specification.json";
+const predictions = oldSite.predictions as Prediction[],
+  reconciliation = oldMapping.mapping,
+  evidenceSources = oldSources.sources,
+  categories = spec.categories,
+  AS_OF = "2026-10-14";
+const originalIntake = (original as Prediction[]).map((p) => ({
+  ...p,
+  reconciliation: reconciliation.find(
+    (m) => m.legacy_id === p.id,
+  ) as Prediction["reconciliation"],
+  research: {
+    ...p.research,
+    history: [
+      {
+        date: AS_OF,
+        note: reconciliation.find((m) => m.legacy_id === p.id)!.reason,
+      },
+    ],
+  },
+}));
+const allRecords = [...predictions, ...originalIntake];
 import {
   summarize,
   eligibleRecords,

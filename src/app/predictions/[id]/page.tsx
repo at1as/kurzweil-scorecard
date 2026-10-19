@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InterpretationPanels } from "@/components/interpretation-panels";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowUpRight, Check, Minus, FileText } from "lucide-react";
@@ -73,7 +74,9 @@ export default async function PredictionPage({
         },
         {
           name: "Editorial assessment supplied",
-          done: p.release.assessment.review_state === "ASSESSED",
+          done: ["ASSESSED", "EDITORIAL_ASSESSMENT_COMPLETE"].includes(
+            p.release.assessment.review_state,
+          ),
         },
         { name: "Eligible for default deadline statistics", done: eligible },
       ]
@@ -121,7 +124,11 @@ export default async function PredictionPage({
         </Eyebrow>
         <h1>{claim(p)}</h1>
         <div className="detail-meta">
-          <Badge verdict={status} disputed={p.assessment.disputed} />
+          {p.reconciliation ? (
+            <span className="badge">Legacy lead · see outcome disposition</span>
+          ) : (
+            <Badge verdict={status} disputed={p.assessment.disputed} />
+          )}
           <span>Research snapshot · {AS_OF_LABEL}</span>
         </div>
       </div>
@@ -135,6 +142,7 @@ export default async function PredictionPage({
       )}
       <div className="detail-grid">
         <div className="detail-main">
+          <InterpretationPanels p={p} />
           <section className="detail-section">
             <SectionHeading
               index="01"
@@ -261,6 +269,15 @@ export default async function PredictionPage({
                 </small>
               </div>
             </div>
+            {p.release?.timing && (
+              <p className="timing-note">
+                <strong>{p.release.timing.kind.replaceAll("_", " ")}:</strong>{" "}
+                {p.release.timing.label ||
+                  (p.assessment.atReview !== "FULL" && eligible
+                    ? `Overdue; not fully realized as of ${AS_OF}`
+                    : "No first-achievement date established.")}
+              </p>
+            )}
             {p.release?.target.interpretation && (
               <p className="footnote">{p.release.target.interpretation}</p>
             )}
@@ -312,7 +329,12 @@ export default async function PredictionPage({
                     <small>Source checked as of {e.accessedAt}</small>
                     {p.release && (
                       <SourceProvenance
-                        id={p.release.evidence[p.evidence.indexOf(e)].source_id}
+                        id={
+                          e.sourceId ??
+                          p.release.evidence[p.evidence.indexOf(e)]
+                            ?.source_id ??
+                          ""
+                        }
                       />
                     )}
                   </article>
@@ -430,24 +452,22 @@ export default async function PredictionPage({
         </div>
         <aside className="assessment-panel">
           <Eyebrow>ASSESSMENT</Eyebrow>
-          <Badge verdict={status} disputed={p.assessment.disputed} />
+          {p.reconciliation ? (
+            <span className="badge">Legacy lead · see outcome disposition</span>
+          ) : (
+            <Badge verdict={status} disputed={p.assessment.disputed} />
+          )}
           <p>
             {p.assessment.rationale ??
               "The original source and outcome have not been verified. No accuracy judgment has been assigned."}
           </p>
-          {p.release?.assessment.drift_range_years && (
-            <p className="qualifier">
-              LATE — hardware proxy; approximately 3–4 years. Excluded from
-              default statistics.
-            </p>
-          )}
           <dl>
             <div>
               <dt>Review state</dt>
               <dd>{p.assessment.state.replaceAll("_", " ")}</dd>
             </div>
             <div>
-              <dt>Confidence</dt>
+              <dt>Outcome confidence</dt>
               <dd>{p.assessment.confidence ?? "Not assessed"}</dd>
             </div>
             <div>

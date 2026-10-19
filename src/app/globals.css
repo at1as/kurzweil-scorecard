@@ -1253,7 +1253,7 @@ summary {
   border-collapse: collapse;
   width: 100%;
   font-size: 11px;
-  min-width: 1060px;
+  min-width: 1260px;
   table-layout: fixed;
 }
 .scorecard-table thead {
@@ -1270,26 +1270,32 @@ summary {
   line-height: 1.4;
 }
 .scorecard-table th:first-child {
-  width: 33%;
+  width: 25%;
   padding-left: 17px;
 }
 .scorecard-table th:nth-child(2) {
-  width: 15%;
+  width: 12%;
 }
 .scorecard-table th:nth-child(3) {
-  width: 10%;
+  width: 7%;
 }
 .scorecard-table th:nth-child(4) {
-  width: 11%;
+  width: 7%;
 }
 .scorecard-table th:nth-child(5) {
-  width: 14%;
+  width: 11%;
 }
 .scorecard-table th:nth-child(6) {
   width: 8%;
 }
 .scorecard-table th:nth-child(7) {
-  width: 9%;
+  width: 8%;
+}
+.scorecard-table th:nth-child(8) {
+  width: 6%;
+}
+.scorecard-table th:nth-child(9) {
+  width: 16%;
 }
 .scorecard-table th button {
   display: flex;
@@ -2471,7 +2477,7 @@ summary {
     font-size: 9px;
   }
   .scorecard-table {
-    min-width: 1040px;
+    min-width: 1260px;
   }
   .pagination {
     gap: 12px;
@@ -2851,4 +2857,99 @@ summary {
 .coverage-heading h3,
 .coverage-state {
   overflow-wrap: anywhere;
+}
+
+.reading-control {
+  margin-bottom: 1rem;
+}
+.interpretation-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1.2rem 0;
+}
+.interpretation-tabs button {
+  white-space: normal;
+  text-align: left;
+}
+.interpretation-panel {
+  margin: 1rem 0;
+}
+.interpretation-panel p {
+  margin: 1rem 0;
+}
+.conditional-outcomes {
+  margin: 1.5rem 0;
+}
+.conditional-outcomes h2 {
+  font-size: 1.7rem;
+}
+.mode-comparison {
+  margin: 1.5rem 0;
+}
+.mode-comparison p {
+  margin: 0.8rem 0;
+}
+.timing-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #d4dacf;
+  font-size: 0.85rem;
+}
+.timing-row span {
+  overflow-wrap: anywhere;
+}
+.timing-series details {
+  margin: 1rem 0;
+}
+.outcome-cell {
+  text-transform: capitalize;
+}
+.confidence-fields {
+  margin-top: 1.5rem;
+}
+.reading-control select {
+  max-width: 100%;
+}
+.reading-control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.reading-control select {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.timing-series h4 {
+  margin: 1rem 0 0.5rem;
+}
+
+/* Keep the ledger notice clear of the interpretation control. */
+.predictions-page > .notice {
+  margin-bottom: 24px;
+}
+
+/* Native select indicators ignore padding inconsistently across browsers. */
+.filter-label select,
+.inline-select select,
+.pagination select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m3 4.5 3 3 3-3' fill='none' stroke='%23596651' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 12px;
+}
+@media (forced-colors: active) {
+  .filter-label select,
+  .inline-select select,
+  .pagination select {
+    appearance: auto;
+    background-image: none;
+  }
+}
+
+.page-container > .notice + .notice {
+  margin-top: 16px;
 }

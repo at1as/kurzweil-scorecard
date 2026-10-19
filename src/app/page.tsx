@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ModeComparison } from "@/components/mode-comparison";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -44,7 +45,7 @@ export default function Overview() {
         <div className="hero-copy">
           <Eyebrow>
             <span className="live-dot" />A living research project{" "}
-            <span className="eyebrow-divider">/</span> Edition 02
+            <span className="eyebrow-divider">/</span> Edition 03
           </Eyebrow>
           <h1>
             Ray Kurzweil
@@ -168,7 +169,7 @@ export default function Overview() {
           <Link className="metric" href={scorecardUrl({ view: "verified" })}>
             <span>Editorial assessments</span>
             <strong>{stats.verified}</strong>
-            <p>Includes future and unscorable claims</p>
+            <p>Deadline and review outcomes recorded</p>
           </Link>
           <Link className="metric" href={scorecardUrl({ cohort: "eligible" })}>
             <span>Due forecasts assessed</span>
@@ -199,24 +200,57 @@ export default function Overview() {
           )}
         </div>
         <p className="footnote">
-          Outcome counts above cover {stats.verified} editorial assessments,
-          including future and unscorable records. The due-and-eligible subset
-          contains {stats.eligibleBreakdown.CORRECT} correct,{" "}
-          {stats.eligibleBreakdown.PARTIAL} partial, and{" "}
-          {stats.eligibleBreakdown.MISSED} wrong/missed assessments. Partials
-          receive no fractional credit. K033 is a qualified hardware-proxy
-          result, excluded from default statistics.
+          The status counts above cover all {stats.collected} source-matched
+          versions. The mature reference cohort contains{" "}
+          {stats.eligibleBreakdown.CORRECT} correct,{" "}
+          {stats.eligibleBreakdown.LATE} late, {stats.eligibleBreakdown.PARTIAL}{" "}
+          partial, and {stats.eligibleBreakdown.MISSED} wrong assessments. Two
+          undated records are outside deadline-based rates.
         </p>
-        <p className="footnote population-note">
-          <Link href={scorecardUrl({ cohort: "eligible" })}>
-            Inspect all {stats.eligible} eligible assessments
-          </Link>
-          <span>{stats.unreviewed} curated records remain unreviewed</span>
-        </p>
+        <div className="coverage-metrics">
+          <div>
+            <Link href={scorecardUrl({ cohort: "on-time" })}>
+              <strong>{(stats.onTimeRate! * 100).toFixed(1)}%</strong>
+              <span>
+                Reference on-time rate · {stats.onTime} / {stats.eligible}
+              </span>
+            </Link>
+          </div>
+          <div>
+            <Link href={scorecardUrl({ cohort: "realized" })}>
+              <strong>{(stats.realizationRate! * 100).toFixed(1)}%</strong>
+              <span>
+                Full realization by review · {stats.realized} / {stats.eligible}
+              </span>
+            </Link>
+          </div>
+          <div>
+            <Link href={scorecardUrl({ cohort: "new" })}>
+              <strong>
+                {predictions.filter((p) => p.release?.is_new_in_v03).length}
+              </strong>
+              <span>New forecast versions in v0.3</span>
+            </Link>
+          </div>
+          <div>
+            <Link href={scorecardUrl({ view: "future" })}>
+              <strong>
+                {
+                  predictions.filter(
+                    (p) => p.release?.assessment.at_deadline === "NOT_DUE",
+                  ).length
+                }
+              </strong>
+              <span>Future targets · current outcomes assessed</span>
+            </Link>
+          </div>
+        </div>
         <p className="footnote">
-          Full realization by review: unknown for {stats.currentUnknown} of the{" "}
-          {stats.eligible} eligible forecasts; percentage withheld. Unknown
-          outcomes are not permanent failures.
+          Rates describe this selected reference subset (n={stats.eligible}).
+          Partials receive no fractional credit.{" "}
+          <Link href={scorecardUrl({ cohort: "undated" })}>
+            Inspect the two undated outcomes.
+          </Link>
         </p>
       </section>
       <section className="section">
@@ -284,13 +318,12 @@ export default function Overview() {
           <article className="panel">
             <div className="panel-heading">
               <h3>Timing drift</h3>
-              <span className="micro-label">
-                n = {stats.drifts.length} EXACT OBSERVATIONS
-              </span>
+              <span className="micro-label">DATES, BOUNDS & RANGES</span>
             </div>
             <DriftChart records={predictions} asOf={AS_OF} />
           </article>
         </div>
+        <ModeComparison records={predictions} asOf={AS_OF} />
         <div className="panel analytics-panel">
           <GroupAnalysis
             records={predictions}
@@ -334,10 +367,12 @@ export default function Overview() {
                 </span>
                 <div>
                   <Badge verdict={verdict(p, AS_OF)} />
-                  {p.release?.assessment.drift_range_years && (
+                  {p.release?.assessment.verdict_qualifier && (
                     <small className="qualifier">
-                      Hardware proxy; approximately 3–4 years. Excluded from
-                      default statistics.
+                      {p.release.assessment.verdict_qualifier.replaceAll(
+                        "_",
+                        " ",
+                      )}
                     </small>
                   )}
                 </div>

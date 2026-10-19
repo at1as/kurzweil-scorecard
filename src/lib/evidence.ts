@@ -1,4 +1,5 @@
 import type { EvidenceRecord, EvidenceSource } from "./evidence-model";
+import { readingOf } from "./interpretations";
 import type { Prediction } from "./model";
 
 /** Lossless release payload alongside the site's common browsing fields. No new judgments. */
@@ -23,11 +24,14 @@ export function adaptEvidence(
     canonical: true,
     scoringKey: r.id,
     category: r.primary_category,
-    tags: [...new Set([...r.tags, r.subcategory])],
-    claimType:
-      r.claim_type === "SOCIAL_OR_POPULATION_OUTCOME"
-        ? "SOCIAL_INSTITUTIONAL"
-        : r.claim_type,
+    tags: [...new Set([...r.tags, r.subcategory].filter(Boolean))],
+    claimType: [
+      "SOCIAL_OR_POPULATION_OUTCOME",
+      "SOCIAL_OUTCOME",
+      "SOCIAL_INSTITUTIONAL",
+    ].includes(r.claim_type)
+      ? "SOCIAL_INSTITUTIONAL"
+      : (r.claim_type as Prediction["claimType"]),
     importedClaim: r.prediction_paraphrase,
     originalWording: null,
     wordingKind: "EDITORIAL_PARAPHRASE",
@@ -62,6 +66,7 @@ export function adaptEvidence(
     evidence: r.evidence.map((ref, i) => {
       const s = source(ref.source_id);
       return {
+        sourceId: s.id,
         id: `${s.id}-${i}`,
         title: s.title,
         url: s.url,
@@ -79,14 +84,18 @@ export function adaptEvidence(
       atDeadline:
         a.at_deadline === "FULFILLED"
           ? "FULL"
-          : a.at_deadline === "NOT_ASSESSED"
+          : ["UNDATED", "NOT_ASSESSED"].includes(a.at_deadline)
             ? "UNREVIEWED"
-            : a.at_deadline,
+            : a.at_deadline === "PARTLY_FULFILLED"
+              ? "PARTIAL"
+              : (a.at_deadline as Prediction["assessment"]["atDeadline"]),
       atReview: a.at_review.startsWith("FULFILLED")
         ? "FULL"
         : a.at_review === "NOT_FULFILLED"
           ? "NOT_FULFILLED"
-          : "UNREVIEWED",
+          : a.at_review === "PARTLY_FULFILLED"
+            ? "PARTIAL"
+            : "UNREVIEWED",
       firstAchievementYear: a.first_full_achievement_year,
       firstAchievementDate: null,
       lastReviewedAt: a.as_of,
@@ -104,9 +113,13 @@ export function adaptEvidence(
       notes: r.limitations,
       unresolvedQuestions: r.open_questions,
       history: [
+        ...(r.revision_history ?? []).map((h) => ({
+          date: String(h.previous_assessment.as_of),
+          note: `Evidence v${h.from_version}: ${h.previous_assessment.verdict}. ${h.previous_assessment.rationale} Change: ${h.change_reason}`,
+        })),
         {
           date: a.as_of,
-          note: `Evidence v0.2: ${a.review_state}; supplied verdict ${a.verdict}. ${a.rationale}`,
+          note: `Evidence v${r.interpretations ? "0.3" : "0.2"}: ${a.review_state}; supplied verdict ${a.verdict}. ${a.rationale}`,
         },
       ],
     },
@@ -126,6 +139,50 @@ export function validateEvidenceRecord(p: Prediction, asOf: string) {
   const require = (condition: unknown, message: string) => {
     if (!condition) throw new Error(`${p.id}: ${message}`);
   };
+  if (r.interpretations) {
+    require(r.id === p.id &&
+      r.primary_category === p.category, "release identity/category mismatch");
+    require(a.as_of === p.assessment.lastReviewedAt &&
+      a.as_of <= asOf, "release review date mismatch");
+    require(a.review_state === p.assessment.state, "review state mismatch");
+    require(p.wordingKind === "EDITORIAL_PARAPHRASE" &&
+      p.originalWording === null, "release descriptions are not quotations");
+    require(p.assessment.firstAchievementYear ===
+      r.timing
+        ?.first_full_achievement_year, "evidence bound cannot become first achievement year");
+    require(r.timing?.documented_by_year ===
+      a.full_achievement_documented_by_year, "timing bound mismatch");
+    for (const [mode, v] of Object.entries(r.interpretations)) {
+      require(!v.eligible_for_deadline_metrics ||
+        (v.deadline_year !== null &&
+          `${v.deadline_year}-12-31` < asOf &&
+          !["NOT_DUE", "UNDATED"].includes(
+            v.at_deadline,
+          )), `${mode}: eligible deadline is not due`);
+      require(v.verdict !== "LATE" ||
+        (v.at_review === "FULFILLED" &&
+          v.at_deadline !== "FULFILLED"), `${mode}: late outcome mismatch`);
+      require(v.verdict !== "PENDING" ||
+        v.at_deadline === "NOT_DUE", `${mode}: pending outcome mismatch`);
+      if (mode === "reference")
+        for (const key of [
+          "verdict",
+          "at_deadline",
+          "at_review",
+          "eligible_for_deadline_metrics",
+        ] as const)
+          require(v[key] === a[key], "reference/assessment mismatch");
+    }
+    const v = readingOf(p)!;
+    require(p.deadline.year === v.deadline_year, "reading deadline mismatch");
+    require(r.timing?.drift_years === null ||
+      (r.timing?.first_full_achievement_year !== null &&
+        r.target.deadline_year !== null &&
+        r.timing!.drift_years ===
+          r.timing!.first_full_achievement_year! -
+            r.target.deadline_year!), "exact drift needs supported years");
+    return;
+  }
   require(r.id === p.id &&
     r.primary_category === p.category, "release identity/category mismatch");
   require(a.as_of <= asOf &&

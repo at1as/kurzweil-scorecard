@@ -1,3 +1,10 @@
+import {
+  selectReading,
+  commonCohort,
+  deadlineOutcome,
+  reviewOutcome,
+} from "./interpretations";
+import { type Reading, READINGS } from "./evidence-model";
 import { claim, type Prediction } from "./model";
 import {
   canonicalRecords,
@@ -23,10 +30,13 @@ export const SORTS = [
   "made",
   "target",
   "verdict",
+  "atDeadline",
+  "atReview",
   "actual",
   "drift",
 ] as const;
 export type Filters = {
+  reading: Reading;
   q: string;
   category: string;
   tag: string;
@@ -45,6 +55,7 @@ export type Filters = {
   size: number;
 };
 export const defaultFilters: Filters = {
+  reading: "reference",
   q: "",
   category: "",
   tag: "",
@@ -78,6 +89,8 @@ export function parseFilters(params: URLSearchParams): Filters {
     "cohort",
   ] as const)
     f[key] = (params.get(key) ?? "").slice(0, 1000);
+  const reading = params.get("reading");
+  if (READINGS.includes(reading as Reading)) f.reading = reading as Reading;
   const view = params.get("view");
   if (VIEWS.includes(view as View)) f.view = view as View;
   const sort = params.get("sort");
@@ -146,6 +159,8 @@ export function filterRecords(
   filters: Filters,
   asOf: string,
 ) {
+  records = records.map((p) => selectReading(p, filters.reading));
+  const common = new Set(commonCohort(records).map((p) => p.id));
   const eligible = new Set(eligibleRecords(records, asOf).map((p) => p.id));
   const canonical = new Set(canonicalRecords(records).map((p) => p.id));
   const words = filters.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -172,6 +187,19 @@ export function filterRecords(
     if (filters.verdict && v !== filters.verdict) return false;
     if (filters.type && p.claimType !== filters.type) return false;
     if (filters.horizon && horizonGroup(p) !== filters.horizon) return false;
+    if (filters.cohort === "common" && !common.has(p.id)) return false;
+    if (
+      filters.cohort === "on-time" &&
+      (!eligible.has(p.id) || p.assessment.atDeadline !== "FULL")
+    )
+      return false;
+    if (
+      filters.cohort === "realized" &&
+      (!eligible.has(p.id) || p.assessment.atReview !== "FULL")
+    )
+      return false;
+    if (filters.cohort === "new" && !p.release?.is_new_in_v03) return false;
+    if (filters.cohort === "undated" && p.deadline.year !== null) return false;
     if (filters.cohort === "eligible" && !eligible.has(p.id)) return false;
     if (filters.cohort === "canonical" && !canonical.has(p.id)) return false;
     if (
@@ -216,6 +244,10 @@ export function sortValue(
       );
     case "verdict":
       return verdict(p, asOf);
+    case "atDeadline":
+      return deadlineOutcome(p);
+    case "atReview":
+      return reviewOutcome(p);
     case "actual":
       return p.assessment.firstAchievementYear ?? undefined;
     case "drift":
@@ -246,6 +278,16 @@ export function exportCsv(records: Prediction[], asOf: string) {
     "Provenance file",
     "Provenance row",
     "Snapshot date",
+    "Reading evidence source IDs",
+    "Reading",
+    "Criterion",
+    "Changed conditions",
+    "Attribution confidence",
+    "Outcome confidence at deadline",
+    "Outcome confidence by review",
+    "Timing confidence",
+    "Timing kind",
+    "Timing label",
     "Deadline metrics eligible",
     "Verdict qualifier",
     "Documented by year (not first year)",
@@ -276,8 +318,8 @@ export function exportCsv(records: Prediction[], asOf: string) {
       verdict(p, asOf),
       p.assessment.state,
       p.canonical,
-      p.release?.assessment.at_deadline ?? p.assessment.atDeadline,
-      p.release?.assessment.at_review ?? p.assessment.atReview,
+      deadlineOutcome(p),
+      reviewOutcome(p),
       p.assessment.firstAchievementYear,
       driftYears(p, asOf),
       p.assessment.lastReviewedAt,
@@ -289,10 +331,26 @@ export function exportCsv(records: Prediction[], asOf: string) {
       p.provenance.inputFile,
       p.provenance.row,
       asOf,
+      p.release?.interpretations?.[
+        p.selectedReading ?? "reference"
+      ].evidence_source_ids.join("; "),
+      p.selectedReading ?? "reference",
+      p.successCriteria,
+      p.release?.interpretations?.[
+        p.selectedReading ?? "reference"
+      ].relaxed_or_changed_conditions.join("; "),
+      p.release?.attribution_confidence,
+      p.release?.outcome_confidence?.at_deadline,
+      p.release?.outcome_confidence?.at_review,
+      p.release?.timing_confidence,
+      p.release?.timing?.kind,
+      p.release?.timing?.label,
       eligibleRecords([p], asOf).length > 0,
-      p.release?.assessment.drift_range_years
-        ? "Hardware proxy; approximately 3–4 years; excluded from default statistics"
-        : "",
+      p.release?.timing?.label
+        ? p.release.timing.label
+        : p.release?.assessment.drift_range_years
+          ? "Hardware proxy; approximately 3–4 years; excluded from default statistics"
+          : "",
       p.release?.assessment.full_achievement_documented_by_year,
       p.release?.assessment.drift_range_years?.join("–"),
       p.assessment.exclusionReason,
