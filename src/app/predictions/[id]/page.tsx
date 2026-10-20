@@ -127,12 +127,22 @@ export default async function PredictionPage({
           {p.reconciliation ? (
             <span className="badge">Legacy lead · see outcome disposition</span>
           ) : (
-            <Badge verdict={status} disputed={p.assessment.disputed} />
+            <>
+              <span className="micro-label">Reference judgment</span>
+              <Badge verdict={status} disputed={p.assessment.disputed} />
+            </>
           )}
           <span>Research snapshot · {AS_OF_LABEL}</span>
         </div>
       </div>
-      <EvidenceContext p={p} />
+      {p.release ? (
+        <details className="editorial-disclosure detail-research-context">
+          <summary>Source confidence & research status</summary>
+          <EvidenceContext p={p} />
+        </details>
+      ) : (
+        <EvidenceContext p={p} />
+      )}
       {status === "UNREVIEWED" && !p.release && !p.reconciliation && (
         <Notice>
           <strong>This is a research lead.</strong> The imported statement,
@@ -223,7 +233,7 @@ export default async function PredictionPage({
             </dl>
           </section>
           <section className="detail-section">
-            <SectionHeading index="02" title="Dates are part of the claim." />
+            <SectionHeading index="02" title="Timeline" />
             <div className="timeline">
               <div>
                 <span className="timeline-dot" />
@@ -366,7 +376,7 @@ export default async function PredictionPage({
             )}
           </section>
           <section className="detail-section">
-            <SectionHeading index="04" title="Research notes & provenance." />
+            <SectionHeading index="04" title="Research notes & history" />
             <p>{p.research.notes}</p>
             <LegacyRelations p={p} />
             {p.research.unresolvedQuestions.length > 0 && (
@@ -451,7 +461,7 @@ export default async function PredictionPage({
           </section>
         </div>
         <aside className="assessment-panel">
-          <Eyebrow>ASSESSMENT</Eyebrow>
+          <Eyebrow>REFERENCE JUDGMENT</Eyebrow>
           {p.reconciliation ? (
             <span className="badge">Legacy lead · see outcome disposition</span>
           ) : (

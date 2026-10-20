@@ -14,13 +14,13 @@ export function ModeComparison({
   asOf: string;
 }) {
   const common = commonCohort(records);
+  const due = summarize(records, asOf).eligible;
   return (
     <div className="panel mode-comparison">
       <h3>How the reading changes the result</h3>
       <p>
-        Same {common.length} forecast versions in every reading. K036 is
-        excluded here because the deadline interpretation changes cohort
-        eligibility.
+        Same {common.length} predictions in every reading. One brain-modeling
+        forecast is left out because its alternative deadline has not passed.
       </p>
       <div className="table-scroll">
         <table className="analysis-table">
@@ -31,9 +31,9 @@ export function ModeComparison({
           <thead>
             <tr>
               <th scope="col">Reading</th>
-              <th scope="col">Common cohort</th>
+              <th scope="col">Predictions</th>
               <th scope="col">On time</th>
-              <th scope="col">Fully realized by review</th>
+              <th scope="col">Fully realized</th>
             </tr>
           </thead>
           <tbody>
@@ -87,10 +87,9 @@ export function ModeComparison({
         </table>
       </div>
       <p className="footnote">
-        Strict / alternative can change a population or deadline; broader can
-        change mechanism or adoption thresholds. The native reference and
-        broader cohorts each contain 68 records; the alternative contains 67.
-        These are selected-subset rates, not lifetime accuracy.
+        The main comparison has {due} due predictions. This comparison uses the{" "}
+        {common.length} eligible in all three readings. Broader success may mean
+        meeting different conditions; open a record to see what changed.
       </p>
     </div>
   );

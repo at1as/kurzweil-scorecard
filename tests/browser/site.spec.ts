@@ -12,22 +12,25 @@ test("overview distinguishes collection from scoring and links charts to records
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Ray Kurzweil",
   );
-  for (const value of ["88", "84", "68"])
-    await expect(page.locator(".metric-grid")).toContainText(value);
-  await expect(page.locator(".metric-grid")).not.toContainText("%");
-  await expect(
-    page.getByText("Selected reviewed subset only.", { exact: true }),
-  ).toBeVisible();
-  await expect(page.locator("#state")).toContainText("36.8%");
-  await expect(page.locator("#state")).toContainText("52.9%");
-  await expect(page.locator(".mode-comparison")).toContainText(
-    "Same 67 forecast versions",
+  await expect(page.locator(".story-deck")).toContainText("84");
+  await expect(page.locator("#state")).toContainText("68");
+  await expect(page.locator(".outcome-summary")).toContainText("25");
+  await expect(page.locator(".outcome-summary")).toContainText("11");
+  await expect(page.locator(".scope-caption")).toContainText(
+    "not a lifetime accuracy score",
   );
-  await page.getByRole("link", { name: /AI & software: 12 of 84/ }).click();
+  await expect(page.locator(".category-rows > li")).toHaveCount(8);
+  await page
+    .locator(".category-name")
+    .filter({ hasText: "AI & software" })
+    .click();
   await expect(page).toHaveURL(/category=AI/);
   await expect(page.locator(".results-toolbar")).toContainText(
-    "12 of 84 records",
+    "9 of 84 records",
   );
+  await expect(page.locator(".scorecard-table thead th")).toHaveCount(4);
+  await page.getByRole("button", { name: "Show research columns" }).click();
+  await expect(page.locator(".scorecard-table thead th")).toHaveCount(9);
   expect(errors).toEqual([]);
 });
 test("search, combined filters, sort, pagination, and reload preserve URL state", async ({
@@ -132,6 +135,12 @@ test("category comparisons retain zero categories and show outcome counts withou
   page,
 }) => {
   await page.goto("/categories/");
+  await expect(page.locator(".category-rows > li")).toHaveCount(13);
+  await page
+    .getByText("More breakdowns: decade, forecast horizon & claim type", {
+      exact: true,
+    })
+    .click();
   await expect(page.locator(".analysis-table tbody tr")).toHaveCount(13);
   await expect(
     page
@@ -143,6 +152,7 @@ test("category comparisons retain zero categories and show outcome counts withou
     "Current outcome unknown",
   );
   await expect(page.locator(".analysis-table")).not.toContainText("%");
+  await expect(page.locator(".analysis-table thead")).toContainText("Late");
   await page.getByRole("button", { name: "Verdicts", exact: true }).click();
   await expect(page.locator(".analysis-table")).toContainText("Pending");
   await page.getByLabel("Group by").selectOption("horizon");
@@ -248,6 +258,14 @@ test("desktop and mobile layouts stay in the viewport", async ({ page }) => {
     path: "work/screenshots/overview-desktop.png",
     fullPage: true,
   });
+  await page
+    .locator("#by-field")
+    .screenshot({ path: "work/screenshots/publication-category-chart.png" });
+  await page.goto("/categories/");
+  await page.screenshot({
+    path: "work/screenshots/categories-desktop.png",
+    fullPage: true,
+  });
   await page.goto("/predictions/");
   await page.getByRole("searchbox").waitFor();
   await page.screenshot({
@@ -304,6 +322,7 @@ test("reading controls preserve boundary dates, expose scope changes and drill d
   await expect(page).toHaveURL(/reading=strict/);
   await expect(page.locator(".scorecard-table tbody")).toContainText("2026");
   await expect(page.locator(".scorecard-table tbody")).toContainText("Pending");
+  await page.getByRole("button", { name: "Show research columns" }).click();
   await expect(page.locator(".scorecard-table thead")).toContainText(
     "At original deadline",
   );
@@ -338,6 +357,9 @@ test("reading controls preserve boundary dates, expose scope changes and drill d
     "Non-scoring comparator",
   );
   await page.goto("/");
+  await page
+    .getByText("How much do the judgments change the score?", { exact: true })
+    .click();
   const modeRows = page.locator(".mode-comparison tbody tr");
   await expect(modeRows).toHaveCount(3);
   await modeRows.nth(1).getByRole("link", { name: "67", exact: true }).click();
@@ -402,4 +424,40 @@ test("researched citation additions render with source limits and preserved asse
   ).json();
   expect(supplement.sources).toHaveLength(5);
   expect(supplement.citations).toHaveLength(24);
+});
+
+test("category interpretations keep the same-cohort option and selected reading on drill-down", async ({
+  page,
+}) => {
+  await page.goto("/categories/");
+  const chart = page.locator(".domain-explorer");
+  await expect(chart.locator("a.forecast-dot")).toHaveCount(68);
+  await page
+    .getByLabel("Interpretation", { exact: true })
+    .selectOption("strict");
+  await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
+  await page
+    .getByText("Compare interpretations on the same predictions", {
+      exact: true,
+    })
+    .click();
+  await page.getByLabel("Use the same 67 predictions").check();
+  await page
+    .getByLabel("Interpretation", { exact: true })
+    .selectOption("broader");
+  await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
+  await expect(chart.locator("a.forecast-dot.dot-correct")).toHaveCount(37);
+  await page.reload();
+  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
+    "broader",
+  );
+  await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
+  await chart.getByRole("link", { name: /K004:/ }).click();
+  await expect(page).toHaveURL(/K004\/.+reading=broader/);
+  await expect(
+    page.locator(".interpretations button[aria-pressed=true]"),
+  ).toContainText("Broader");
+  await expect(page.locator(".interpretations")).toContainText(
+    "Changed conditions",
+  );
 });

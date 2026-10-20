@@ -120,8 +120,8 @@ export function GroupAnalysis({
         </div>
       </div>
       <p className="analysis-note">
-        Selected subset only; group sizes are too small for a defensible
-        accuracy ranking. Counts are shown instead of category rates.{" "}
+        Counts describe the selected collection. Read each result alongside its
+        sample size.{" "}
         {group === "horizon"
           ? "Horizon requires confirmed publication and deadline years; unresolved years remain open."
           : "Publication years are attributed; approximate target labels are for navigation only."}
@@ -145,7 +145,8 @@ export function GroupAnalysis({
               ) : mode === "outcomes" ? (
                 <>
                   <th scope="col">Eligible n</th>
-                  <th scope="col">Correct</th>
+                  <th scope="col">On time</th>
+                  <th scope="col">Late</th>
                   <th scope="col">Partial</th>
                   <th scope="col">Wrong / missed</th>
                   <th scope="col">Current outcome unknown</th>
@@ -194,19 +195,21 @@ export function GroupAnalysis({
                     <td>
                       <Link href={link(g.key, true)}>{g.stats.eligible}</Link>
                     </td>
-                    {(["CORRECT", "PARTIAL", "MISSED"] as const).map((v) => (
-                      <td key={v}>
-                        <Link
-                          href={scorecardUrl({
-                            [group]: g.key,
-                            cohort: "eligible",
-                            verdict: v,
-                          })}
-                        >
-                          {g.stats.eligibleBreakdown[v]}
-                        </Link>
-                      </td>
-                    ))}
+                    {(["CORRECT", "LATE", "PARTIAL", "MISSED"] as const).map(
+                      (v) => (
+                        <td key={v}>
+                          <Link
+                            href={scorecardUrl({
+                              [group]: g.key,
+                              cohort: "eligible",
+                              verdict: v,
+                            })}
+                          >
+                            {g.stats.eligibleBreakdown[v]}
+                          </Link>
+                        </td>
+                      ),
+                    )}
                     <td>{g.stats.currentUnknown}</td>
                   </>
                 ) : (

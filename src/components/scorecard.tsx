@@ -83,6 +83,7 @@ export function Scorecard() {
   );
   const population = filters.view === "intake" ? originalIntake : predictions;
   const [more, setMore] = useState(false);
+  const [researchColumns, setResearchColumns] = useState(false);
   const [copyStatus, setCopyStatus] = useState("");
   function update(values: Partial<Filters>, resetPage = true) {
     const current = parseFilters(new URLSearchParams(window.location.search));
@@ -264,7 +265,17 @@ export function Scorecard() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    state: { sorting, pagination },
+    state: {
+      sorting,
+      pagination,
+      columnVisibility: {
+        made: researchColumns,
+        atDeadline: researchColumns,
+        atReview: researchColumns,
+        actual: researchColumns,
+        drift: researchColumns,
+      },
+    },
     enableSortingRemoval: false,
     onSortingChange: (updater) => {
       const next = typeof updater === "function" ? updater(sorting) : updater;
@@ -341,22 +352,31 @@ export function Scorecard() {
     items.map((value) => ({ value, label: value }));
   return (
     <div className="scorecard">
-      <label className="inline-select reading-control">
-        Interpretation
-        <select
-          aria-label="Interpretation"
-          value={filters.reading}
-          onChange={(e) =>
-            update({ reading: e.target.value as Filters["reading"] })
-          }
+      <div className="ledger-controls">
+        <label className="inline-select reading-control">
+          Interpretation
+          <select
+            aria-label="Interpretation"
+            value={filters.reading}
+            onChange={(e) =>
+              update({ reading: e.target.value as Filters["reading"] })
+            }
+          >
+            {READINGS.map((mode) => (
+              <option key={mode} value={mode}>
+                {READING_LABELS[mode]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          className="text-button"
+          aria-pressed={researchColumns}
+          onClick={() => setResearchColumns(!researchColumns)}
         >
-          {READINGS.map((mode) => (
-            <option key={mode} value={mode}>
-              {READING_LABELS[mode]}
-            </option>
-          ))}
-        </select>
-      </label>
+          {researchColumns ? "Hide research columns" : "Show research columns"}
+        </button>
+      </div>
       {filters.reading !== "reference" && (
         <p className="table-note">
           {filters.reading === "strict"
@@ -525,7 +545,9 @@ export function Scorecard() {
         </p>
       )}
       <div className="table-scroll scorecard-table-wrap">
-        <table className="scorecard-table">
+        <table
+          className={`scorecard-table ${researchColumns ? "research-table" : "concise-table"}`}
+        >
           <caption className="sr-only">
             Prediction scorecard. Click a prediction to inspect its evidence.
             Sorting buttons are in column headings.

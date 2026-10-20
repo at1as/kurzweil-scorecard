@@ -18,8 +18,8 @@ export default function Sources() {
   return (
     <div className="container page-container">
       <div className="page-intro">
-        <Eyebrow>THE CORPUS, IN THE OPEN</Eyebrow>
-        <h1>A collection, not the complete picture.</h1>
+        <Eyebrow>THE RESEARCH</Eyebrow>
+        <h1>Sources & record history.</h1>
         <p>Source links, what was examined, and what remains to extract.</p>
       </div>
       <Notice>
@@ -57,7 +57,7 @@ export default function Sources() {
         </div>
       </div>
       <section className="section">
-        <SectionHeading index="01" title="What has actually been examined.">
+        <SectionHeading index="01" title="Research coverage.">
           Selected passages and versions, not complete book extraction. The
           original 147-item 2009 corpus is the next bounded audit population.
         </SectionHeading>
@@ -91,7 +91,7 @@ export default function Sources() {
         </div>
       </section>
       <section className="section">
-        <SectionHeading index="02" title="The source catalogue.">
+        <SectionHeading index="02" title="Source links.">
           Forecast attribution and outcome evidence are labelled separately.
           Locators on detail pages use printed page numbers, not PDF viewer
           indices.

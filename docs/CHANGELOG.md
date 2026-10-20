@@ -1,5 +1,9 @@
 # Dataset and site history
 
+## 2026-10-19 — Publication pass
+
+Rebuilt the homepage around the category findings and concrete judgment examples. Added one-square-per-prediction charts with sample sizes, alternative readings and evidence links. Simplified the default ledger to four columns; all nine research columns remain available. Moved research details into disclosures and shortened methodology. Corrected the default-reading description and the missing Late column in detailed group outcomes. Raw evidence, assessments and scoring are unchanged. See `PUBLICATION_REVIEW.md` for editorial reasoning and remaining publication limits.
+
 ## Citation supplement and interface fixes — 2026-10-18
 
 Fixed the missing space below the prediction-ledger notice and inset native dropdown chevrons consistently. Added a versioned citation supplement resolving all 15 previously blank outcome-reference locators, checking one additional Pew section, and adding five primary sources/eight corroborating evidence links. Source-specific findings explain what each citation does and does not support. Source catalogue now contains 103 entries.

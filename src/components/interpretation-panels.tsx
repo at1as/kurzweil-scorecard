@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Prediction, Verdict } from "@/lib/model";
 import { READINGS, READING_LABELS, type Reading } from "@/lib/evidence-model";
@@ -7,18 +7,33 @@ import { Badge, External } from "./ui";
 import { evidenceSources } from "@/lib/data";
 export function InterpretationPanels({ p }: { p: Prediction }) {
   const [mode, setMode] = useState<Reading>("reference");
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get("reading");
+    if (READINGS.includes(value as Reading)) setMode(value as Reading);
+  }, []);
+  function changeReading(next: Reading) {
+    setMode(next);
+    const url = new URL(window.location.href);
+    if (next === "reference") url.searchParams.delete("reading");
+    else url.searchParams.set("reading", next);
+    window.history.replaceState(null, "", url);
+  }
   const r = p.release,
     v = r?.interpretations?.[mode];
   if (!v) return null;
   return (
     <section className="detail-section interpretations">
-      <h2>Interpretations & outcomes</h2>
+      <h2>Our reading of the claim</h2>
       <div
         className="segmented interpretation-tabs"
         aria-label="Interpretation reading"
       >
         {READINGS.map((m) => (
-          <button key={m} aria-pressed={m === mode} onClick={() => setMode(m)}>
+          <button
+            key={m}
+            aria-pressed={m === mode}
+            onClick={() => changeReading(m)}
+          >
             {READING_LABELS[m]}
           </button>
         ))}
@@ -48,16 +63,19 @@ export function InterpretationPanels({ p }: { p: Prediction }) {
           </div>
         </div>
         <p>{v.rationale}</p>
-        {v.at_deadline_rationale && (
-          <p>
-            <strong>At deadline:</strong> {v.at_deadline_rationale}
-          </p>
-        )}
-        {v.at_review_rationale && (
-          <p>
-            <strong>By review:</strong> {v.at_review_rationale}
-          </p>
-        )}
+        <details className="editorial-disclosure">
+          <summary>Deadline and follow-up notes</summary>
+          {v.at_deadline_rationale && (
+            <p>
+              <strong>At deadline:</strong> {v.at_deadline_rationale}
+            </p>
+          )}
+          {v.at_review_rationale && (
+            <p>
+              <strong>By review:</strong> {v.at_review_rationale}
+            </p>
+          )}
+        </details>
         {v.relaxed_or_changed_conditions.length > 0 && (
           <div className="notice">
             <div>

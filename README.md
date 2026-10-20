@@ -66,11 +66,11 @@ The research snapshot is 2026-10-15 regardless of build time. All 13 original ca
 
 ## Pages and interactions
 
-- `/`: separate population counts, outcomes, coverage, timing limitations, and linked comparisons.
-- `/predictions/`: curated records by default; Original intake view preserves the original research inventory. Search, combined filters, sorting, pagination, CSV export, and shareable URLs work in the browser.
+- `/`: a narrative introduction, due-outcome summary, category graphic and three concrete judgment examples. Each square links to its forecast. Smaller samples and research mechanics live one level deeper.
+- `/predictions/`: curated records by default; Original intake view preserves the original research inventory. The default table shows four columns; “Show research columns” restores all nine. Search, combined filters, sorting, pagination, CSV export, and shareable URLs work in the browser.
 - `/predictions/K001/` through `/predictions/K084/`: supplied assessments, criteria, attribution, source provenance, separate deadline/review outcomes, limitations, and legacy relations.
 - Original `/predictions/AUD-…/`, `/predictions/DEC-…/`, and `/predictions/EXE-…/` routes: unchanged original content plus reconciliation history and related-version links.
-- `/categories/`: counts by all 13 categories, target/publication decades, confirmed horizon, and claim type. No accuracy ranking.
+- `/categories/`: outcomes across all 13 fields, with selectable interpretations and a common-population option. Reading and population choices survive reloads in the URL. Empty and future-only fields remain visible. Decade, horizon, claim type and taxonomy details are expandable.
 - `/sources/`: 103 live source links (98 imported plus five supplemental), 5 incremental source-coverage entries, provenance limits, original reports, and versioned downloads.
 - `/methodology/`: eligibility, uncertainty, editorial review states, date rules, and population limits.
 

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s · Kurzweil Scorecard",
   },
   description:
-    "An evidence-based audit of technological forecasting. Explore the research intake, original deadlines, evidence, and transparent scoring methodology.",
+    "Where was Ray Kurzweil right? Compare 84 predictions by field, see what arrived on time or late, and inspect the evidence behind each judgment.",
   robots: { index: true, follow: true },
 };
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
           <div>
             <Link href="/" className="footer-brand">
               The Kurzweil Scorecard
-              <span>Source-backed assessments. Transparent criteria.</span>
+              <span>Predictions, judgments, and the evidence.</span>
             </Link>
             <p>
               An independent project. Not affiliated with Ray Kurzweil.
@@ -45,7 +45,8 @@ export default function RootLayout({
             </a>
           </div>
           <div className="footer-bottom">
-            Good forecasts deserve careful scrutiny. So do the scorecards.
+            AI-assisted research · Selected forecasts · All assessments and
+            source history available
           </div>
         </footer>
       </body>
