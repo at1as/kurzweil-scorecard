@@ -15,7 +15,7 @@ import { OutcomeLegend } from "./category-chart";
 import { EvidenceLink } from "./evidence-panel";
 
 export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
-  const { rows, reading, common, update } = useStoryComparison();
+  const { rows, reading, update } = useStoryComparison();
   const groups = targetYearResults(rows);
   const total = groups.reduce((sum, g) => sum + g.records.length, 0);
   const largest = [...groups]
@@ -80,7 +80,7 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
           <select
             aria-label="Target-year interpretation"
             value={reading}
-            onChange={(e) => update(e.target.value as Reading, common)}
+            onChange={(e) => update(e.target.value as Reading)}
           >
             {READINGS.map((r) => (
               <option key={r} value={r}>
@@ -92,10 +92,8 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
       </div>
       <OutcomeLegend />
       <p className="chart-instruction">
-        Select a year to see its predictions.{" "}
-        {common
-          ? `Same ${total} predictions in every reading.`
-          : `${total} predictions with deadlines passed.`}
+        Select a year to see its predictions. {total} predictions with deadlines
+        passed.
       </p>
       <div
         className="time-plot"

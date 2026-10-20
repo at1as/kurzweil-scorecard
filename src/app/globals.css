@@ -3531,30 +3531,6 @@ button.category-name:hover {
   gap: 48px;
   padding-bottom: 40px;
 }
-.comparison-setting-help {
-  margin: 20px 0 0;
-  max-width: 700px;
-}
-.comparison-setting-help > div {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  gap: 12px;
-  margin-top: 10px;
-}
-.comparison-setting-help dt {
-  font-weight: 600;
-}
-.comparison-setting-help dd {
-  color: var(--muted);
-}
-.comparison-setting > .comparison-setting-detail {
-  font-size: 12px;
-}
-.comparison-setting-detail a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .scope-section {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
@@ -3589,20 +3565,6 @@ button.category-name:hover {
 }
 .editorial-intro h1 {
   max-width: none;
-}
-.domain-explorer .editorial-disclosure {
-  margin-top: 24px;
-}
-.comparison-check {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 18px;
-}
-.comparison-check input {
-  accent-color: var(--green);
-  width: 17px;
-  height: 17px;
 }
 .category-context {
   margin: 36px 0;

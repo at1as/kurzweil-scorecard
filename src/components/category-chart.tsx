@@ -36,11 +36,9 @@ export function OutcomeLegend() {
 export function CategoryChart({
   rows,
   reading = "reference",
-  common = false,
 }: {
   rows: CategoryResult[];
   reading?: Reading;
-  common?: boolean;
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [preview, setPreview] = useState<{
@@ -100,7 +98,7 @@ export function CategoryChart({
     });
   }, [preview]);
   // A different reading must not leave a preview showing the previous judgment.
-  useEffect(() => setPreview(null), [reading, common]);
+  useEffect(() => setPreview(null), [reading]);
 
   return (
     <div className="category-chart">
@@ -265,9 +263,7 @@ export function CategoryChart({
                       href={scorecardUrl({
                         category: row.name,
                         reading,
-                        ...(row.due
-                          ? { cohort: common ? "common" : "eligible" }
-                          : {}),
+                        ...(row.due ? { cohort: "eligible" } : {}),
                       })}
                     >
                       Open in the prediction ledger <ArrowUpRight size={14} />

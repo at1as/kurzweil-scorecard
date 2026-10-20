@@ -93,7 +93,7 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   expect(data.predictions.length).toBe(84);
   await page.goto(`${base}/categories/?reading=strict&cohort=common`);
   await expect(page).toHaveURL(
-    new RegExp(`${base}/\\?reading=strict&cohort=common#by-field$`),
+    new RegExp(`${base}/\\?reading=strict#by-field$`),
   );
   await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
     "strict",

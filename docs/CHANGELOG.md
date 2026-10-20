@@ -1,5 +1,9 @@
 # Dataset and site history
 
+## 2026-10-20 — Simplify Story population controls
+
+Removed “Keep the same 67 predictions” and its explanatory block: it only excluded K036 from the reference and broader readings. The Story field and year charts now always show each reading's eligible forecasts (68 reference/broader, 67 strict at this snapshot). Old Story/category links discard the retired cohort parameter while preserving the interpretation and evidence. Research data, historical assessments and the methodology's fixed-population comparison remain unchanged.
+
 ## 2026-10-19 — Public-readiness follow-up
 
 Reviewed the pushed time-chart checkpoint, reachable history, research-document metadata, dependencies and GitHub repository contents. Refreshed `PUBLIC_READINESS.md` to reflect the resolved license, email and repository name. Corrected the README screenshot extension to match its JPEG content. No data, assessments, application behavior or visibility settings changed.

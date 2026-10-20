@@ -45,12 +45,6 @@ export default function Overview() {
   const views = Object.fromEntries(
     READINGS.map((r) => [r, categoryResults(predictions, names, AS_OF, r)]),
   ) as Record<Reading, CategoryResult[]>;
-  const commonViews = Object.fromEntries(
-    READINGS.map((r) => [
-      r,
-      categoryResults(predictions, names, AS_OF, r, true),
-    ]),
-  ) as Record<Reading, CategoryResult[]>;
   const outcomeNotes = {
     CORRECT: {
       description: "Arrived by the deadline.",
@@ -158,7 +152,7 @@ export default function Overview() {
           undated. <Link href="/methodology/">Scope & sources</Link>
         </p>
       </section>
-      <StoryComparisonProvider views={views} commonViews={commonViews}>
+      <StoryComparisonProvider views={views}>
         <section id="by-field" className="story-section">
           <div className="story-section-heading">
             <Eyebrow>THE DATA</Eyebrow>

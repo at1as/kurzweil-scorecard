@@ -464,10 +464,14 @@ test("researched citation additions render with source limits and preserved asse
   expect(supplement.citations).toHaveLength(24);
 });
 
-test("category interpretations keep the same-cohort option and selected reading on drill-down", async ({
+test("category interpretations use their eligible records and preserve reading on drill-down", async ({
   page,
 }) => {
-  await page.goto("/categories/");
+  await page.goto("/?cohort=common#by-field");
+  await expect(page).toHaveURL(/\/#by-field$/);
+  await expect(
+    page.getByText("Which predictions are counted?", { exact: true }),
+  ).toHaveCount(0);
   const chart = page.locator(".domain-explorer");
   await expect(chart.locator("a.forecast-dot")).toHaveCount(68);
   await page
@@ -475,25 +479,15 @@ test("category interpretations keep the same-cohort option and selected reading 
     .selectOption("strict");
   await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
   await page
-    .getByText("Which predictions are counted?", {
-      exact: true,
-    })
-    .click();
-  await page.getByLabel("Keep the same 67 predictions").check();
-  await page
     .getByLabel("Interpretation", { exact: true })
     .selectOption("broader");
-  await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
-  await expect(chart.locator("a.forecast-dot.dot-correct")).toHaveCount(37);
-  await page.getByLabel("Keep the same 67 predictions").uncheck();
   await expect(chart.locator("a.forecast-dot")).toHaveCount(68);
-  await page.getByLabel("Keep the same 67 predictions").check();
-  await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
+  await expect(chart.locator("a.forecast-dot.dot-correct")).toHaveCount(37);
   await page.reload();
   await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
     "broader",
   );
-  await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
+  await expect(chart.locator("a.forecast-dot")).toHaveCount(68);
   await chart.getByRole("link", { name: /K004:/ }).click();
   await expect(page).toHaveURL(/evidence=K004&evidenceReading=broader/);
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -580,11 +574,11 @@ test("field rows expand with keyboard access and previews reveal claims without 
   ).toHaveCount(0);
 });
 
-test("old category links preserve interpretation and cohort on the homepage", async ({
+test("old category links preserve interpretation and discard the retired cohort setting", async ({
   page,
 }) => {
   await page.goto("/categories/?reading=strict&cohort=common");
-  await expect(page).toHaveURL(/\/\?reading=strict&cohort=common#by-field$/);
+  await expect(page).toHaveURL(/\/\?reading=strict#by-field$/);
   await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
     "strict",
   );
@@ -839,12 +833,11 @@ test("target-year columns share the comparison population and keep evidence in p
   await expect(page.getByLabel("Target-year interpretation")).toHaveValue(
     "broader",
   );
-  await page
-    .getByText("Which predictions are counted?", { exact: true })
-    .click();
-  await page.getByLabel("Keep the same 67 predictions").check();
-  await expect(chart.locator(".time-year")).toHaveCount(5);
-  await expect(chart).toContainText("Same 67 predictions in every reading");
+  await expect(chart.locator(".time-year")).toHaveCount(6);
+  await expect(chart).toContainText("68 predictions with deadlines passed");
+  await expect(
+    chart.getByRole("button", { name: /^2025: 1 predictions;/ }),
+  ).toBeVisible();
 });
 
 test("target-year visualization is readable and accessible on desktop and mobile", async ({

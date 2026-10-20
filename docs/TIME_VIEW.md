@@ -17,9 +17,9 @@ These are reference-reading counts at the 2026-10-15 cutoff. This table is an ex
 
 Stacked columns show composition and sample size together. Counts are the default so a single prediction does not look equivalent to a group of 38. The percentage view makes composition easier to compare; every column retains its sample size. The x-axis contains target-year groups with equal spacing, explicitly labeled as such. It is not a continuous time series and has no interpolating line.
 
-Selecting a column opens that year's records below the chart, grouped by judgment. Their links use the evidence panel, keeping the chart and selected year in place. A close control restores focus to the year button. The count/percentage choice and selected year are local presentation state; the reading and common-cohort choice persist in the existing URL parameters.
+Selecting a column opens that year's records below the chart, grouped by judgment. Their links use the evidence panel, keeping the chart and selected year in place. A close control restores focus to the year button. The count/percentage choice and selected year are local presentation state; the reading persists in the existing URL parameter. Each reading uses its eligible forecasts; the former common-cohort toggle was removed because it only excluded K036.
 
-Field and year comparisons share `StoryComparisonProvider`. `targetYearResults` regroups the field chart's exact eligible records, so the chart cannot quietly introduce a second denominator. Future and undated forecasts remain outside it. K036's 2025 column disappears in the strict reading and common cohort. Both interpretation controls update the same state.
+Field and year comparisons share `StoryComparisonProvider`. `targetYearResults` regroups the field chart's exact eligible records, so the chart cannot quietly introduce a second denominator. Future and undated forecasts remain outside it. K036's 2025 column disappears in the strict reading, where its deadline is 2026 and has not passed at the research cutoff. Both interpretation controls update the same state.
 
 ## Why there is no drift regression or extrapolation
 
@@ -33,4 +33,4 @@ A later timing view could display explicit event dates, completion intervals and
 
 ## Validation
 
-Unit checks compare every plotted ID against the eligible population in all three readings and both cohort settings, protect the 2009/2019 counts, and verify deadline-boundary exclusions. Browser checks cover both axes, shared controls, URL reloads, evidence focus restoration, expanded records, mobile layout and automated accessibility.
+Unit checks compare every plotted ID against the eligible population in all three readings (and the retained research helper's common cohort), protect the 2009/2019 counts, and verify deadline-boundary exclusions. Browser checks cover both axes, shared controls, URL reloads, evidence focus restoration, expanded records, mobile layout and automated accessibility.

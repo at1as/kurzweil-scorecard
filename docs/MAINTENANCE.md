@@ -17,7 +17,7 @@ The active release is v0.3 with a **2026-10-15** outcome cutoff. The 2026-10-18 
 
 Under the reference reading, 68 forecasts enter the mature cohort: 25 on time, 11 late, 16 partial and 16 missed. Fourteen are future targets and two are undated. Fully realized means on time plus late; partials earn no fractional credit. These are results for this selected collection, not Kurzweil's lifetime accuracy.
 
-Strict, reference and broader interpretations can change criteria and eligibility. K036 is the reason the strict native cohort has 67 records while reference has 68. “Keep the same 67 predictions” compares the intersection of eligible records across all three readings. Do not silently change denominators or replace original deadlines with later forecast versions.
+Strict, reference and broader interpretations can change criteria and eligibility. K036 is the reason the strict native cohort has 67 records while reference has 68. The Story uses each reading's eligible population without a cohort toggle; old Story `cohort` parameters are discarded. The methodology comparison retains the fixed 67-record intersection. Do not silently change denominators or replace original deadlines with later forecast versions.
 
 ## Where to work
 
@@ -40,7 +40,7 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 
 The filename table is a map, not a replacement for reading the relevant code. [DATA_MODEL.md](DATA_MODEL.md) describes the intake model; the evidence schema and [V03_INTEGRATION_REVIEW.md](V03_INTEGRATION_REVIEW.md) cover the later release.
 
-The field and target-year charts share interpretation/cohort state through `src/components/story-comparison-context.tsx`. The time view in `src/components/target-year-chart.tsx` regroups the same eligible records via `targetYearResults` in `src/lib/publication.ts`. See [TIME_VIEW.md](TIME_VIEW.md) for the chart choice and why no drift regression or extrapolation is shown.
+The field and target-year charts share interpretation state through `src/components/story-comparison-context.tsx`. The time view in `src/components/target-year-chart.tsx` regroups the same eligible records via `targetYearResults` in `src/lib/publication.ts`. See [TIME_VIEW.md](TIME_VIEW.md) for the chart choice and why no drift regression or extrapolation is shown.
 
 ## Preserve the research trail
 
@@ -56,7 +56,7 @@ All original IDs keep their routes. A reconciliation can describe a split, relat
 - `evidence=<ID>&evidenceReading=<mode>` identifies the open panel. The panel's interpretation is independent of the underlying `reading` filter.
 - Stable record URLs remain useful for sharing, modified clicks, and the explicit “Full record & history” link. Summaries load on demand as static JSON; the original detail pages remain complete.
 - Field rows group by judgment and sort by target year within each group. Every curated record appears once, with future and undated records outside scored totals.
-- `/categories/` remains a compatibility redirect into the Story comparison, retaining interpretation/cohort choices.
+- `/categories/` remains a compatibility redirect into the Story comparison, retaining interpretation choices and dropping the retired Story cohort setting.
 - Native paths must use `sitePath` so the same features work at `/` locally and `/sites/kurzweil/` publicly.
 
 ## Checks and known limits
