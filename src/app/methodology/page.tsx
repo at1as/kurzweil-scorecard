@@ -7,7 +7,11 @@ import { scorecardUrl } from "@/lib/filters";
 import { Badge, Eyebrow } from "@/components/ui";
 import { ModeComparison } from "@/components/mode-comparison";
 import type { Verdict } from "@/lib/model";
-export const metadata: Metadata = pageMetadata("/methodology/", "Methodology");
+export const metadata: Metadata = pageMetadata(
+  "/methodology/",
+  "Methodology",
+  "How this scorecard judges Kurzweil’s predictions: original deadlines, later outcomes, interpretation choices, scoring rules and coverage limits.",
+);
 const definitions: { v: Verdict; text: string }[] = [
   {
     v: "CORRECT",

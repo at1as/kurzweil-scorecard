@@ -142,3 +142,17 @@ homepage and Methodology page views with the correct URLs/referrers. Calculator 
 amounts and their SHA-256 hashes were absent from all intercepted requests. No test
 hits were sent to the property. This validates emitted requests, not the GA reporting
 backend or a live deployment.
+
+## Search metadata and the parent sitemap
+
+`src/lib/site-meta.ts` supplies canonical URLs, descriptions and social metadata in
+the initial static HTML. Record descriptions include their ID and claim; supporting
+pages describe their own content. Search/filter/evidence query states share the base
+page canonical and are not separate sitemap entries.
+
+The hosting repo discovers canonical directory-index HTML under this export on every
+Jekyll build. Its `_data/static_sitemaps.json` excludes `/categories/` (a compatibility
+redirect with the Story canonical), 404 and `_not-found`. All public curated and intake
+record pages remain distinct. Evidence JSON, research downloads and Next payloads are
+not sitemap pages. The host's `make check-seo` runs in deployment CI and verifies these
+rules against the actual copied metadata. Keep that registration when changing slugs.

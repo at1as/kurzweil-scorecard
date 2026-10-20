@@ -8,6 +8,7 @@ import { Eyebrow } from "@/components/ui";
 export const metadata: Metadata = pageMetadata(
   "/predictions/",
   "The prediction ledger",
+  `Search ${predictions.length} selected Ray Kurzweil forecasts by field, deadline and outcome. Read assessments, source links and earlier versions of each record.`,
 );
 export default function PredictionsPage() {
   return (

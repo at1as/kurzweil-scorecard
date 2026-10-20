@@ -14,7 +14,11 @@ import {
   researchSupplement,
 } from "@/lib/data";
 import { Eyebrow, External, Notice, SectionHeading } from "@/components/ui";
-export const metadata: Metadata = pageMetadata("/sources/", "Sources");
+export const metadata: Metadata = pageMetadata(
+  "/sources/",
+  "Sources",
+  "Sources and downloadable records behind the Kurzweil scorecard: original leads, versioned evidence packages, coverage gaps and assessment history.",
+);
 export default function Sources() {
   const legacy = coverage.filter((s) => s.id.startsWith("LEGACY"));
   return (

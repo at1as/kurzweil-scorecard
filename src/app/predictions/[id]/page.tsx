@@ -40,6 +40,9 @@ export async function generateMetadata({
   return pageMetadata(
     `/predictions/${id}/`,
     p ? `${id}: ${claim(p)}` : "Prediction not found",
+    p
+      ? `Evidence and assessment for Ray Kurzweil forecast ${id}: ${claim(p)}`
+      : undefined,
   );
 }
 export default async function PredictionPage({
