@@ -61,7 +61,8 @@ export function validateBundle(
       !page.test(file) &&
       !asset.test(file) &&
       !summary.test(file) &&
-      file !== "icon.svg"
+      file !== "icon.svg" &&
+      file !== "share-card.png"
     ) {
       throw Error(`Unexpected export file: ${file}`);
     }
@@ -87,6 +88,7 @@ export function validateBundle(
   }
   for (const required of [
     "index.html",
+    "share-card.png",
     "predictions/index.html",
     "methodology/index.html",
     "sources/index.html",

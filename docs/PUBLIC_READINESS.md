@@ -28,7 +28,7 @@ This is a pattern scan plus targeted manual review, including historical blobs a
 
 A refreshed `npm audit` completed successfully and reported **zero known vulnerabilities** across production and development dependencies. The first request timed out; the successful retry supplies this result. Advisory status is time-dependent. Every resolved dependency URL in the lockfile uses the public npm registry.
 
-A targeted frontend review found no `dangerouslySetInnerHTML`, `eval`, cookie access, local/session storage, or added analytics service. Evidence summaries load from the site's own static files. Preview servers bind to loopback. This remains a static application without an API-key or backend-account requirement.
+The October 19 frontend review found no `dangerouslySetInnerHTML`, `eval`, cookie access, local/session storage, or added analytics service. Evidence summaries load from the site's own static files. Preview servers bind to loopback. This remains a static application without an API-key or backend-account requirement.
 
 `npm run check` passed at the time-chart commit: data integrity, TypeScript and 76 unit tests. The preceding implementation verification also passed the production build, all 20 main browser tests, the prefixed static export and its three browser tests. No application code changed during this follow-up review.
 
@@ -49,3 +49,5 @@ The screenshot was visually checked and remains accurate for the field compariso
 **Contribution checks.** Local checks and browser tests are documented, but there is no GitHub Actions CI workflow. CI would be useful before relying on outside contributions; its absence does not prevent readers from running or inspecting this project.
 
 Changing repository visibility and publishing the website are separate actions. Neither was performed by this review.
+
+On October 20, 2026, the public export added the existing GA tag, restricted to the production host and subpath. Enhanced Measurement remains enabled by request; see STATIC_EXPORT.md for collection limits. Research downloads remain unchanged.

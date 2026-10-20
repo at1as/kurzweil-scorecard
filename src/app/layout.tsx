@@ -1,3 +1,4 @@
+import { PageViews } from "@/components/page-views";
 import { AUTHOR_HOME, AUTHOR_BLOG, sitePath } from "@/lib/site-path";
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
@@ -23,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <PageViews />
         <EvidenceProvider>
           <a href="#main" className="skip-link">
             Skip to content

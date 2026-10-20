@@ -96,3 +96,49 @@ Jekyll 4.2.2 was used for the initial compatibility check. Keep directory-index/
 - If the raw public downloads change after export, the copy check asks for a new build. Source edits also require rebuilding; the copy command does not compile them.
 - For a rollback, check out the desired source revision, regenerate its export, review it, then copy through the same guarded path. Git history in the hosting repository offers a second rollback point after publication.
 - Root development remains `npm run dev`; a production root preview is `npm run build` then `npm run preview`. Never use `next start` with this export configuration.
+
+## Google Analytics
+
+The public layout includes `src/components/page-views.tsx`, using the existing
+`G-Q5N6H3PVG2` tag. It is part of each build; the hosting repository does not inject
+or rewrite analytics. Re-export normally to retain it. Only a subpath export opened
+on `https://www.jasonwillems.com/sites/kurzweil/` initializes the tag. Local previews,
+private routes and alternate hosts do not load Google scripts or send analytics.
+
+The config sends the initial page view. The shared stream's Enhanced Measurement
+remains enabled by Jason's choice (October 20, 2026), and handles history navigation;
+we send no additional manual page-view or calculator events. Enhanced Measurement can
+also record clicks, searches, forms and scrolls according to the stream settings.
+Query-only history changes can therefore count as views; this is not a path-only counter.
+Do not add a second SPA page-view effect without revisiting those settings.
+
+The tag uses Google’s native page URL and referrer handling so navigation is attributed
+to the correct page. Enhanced Measurement may include URL query parameters and search
+terms. Our component never reads calculator values, input fields or application state. Advertising
+consent is denied and Google signals, ad personalization and enhanced conversions are
+disabled for these apps. Calculator values must stay in tab memory, outside URLs,
+browser storage, dataLayer, event parameters, page titles and custom dimensions.
+
+Export browser tests serve the real build under the production origin using intercepted
+requests, check initialization/navigation, and block collection so tests do not pollute
+the live property. Live GA reports can only be confirmed after the hosting branch deploys.
+
+## Social share card
+
+`src/app/share-card.png/route.tsx` renders a 1200 × 630 PNG at build time using Next's
+ImageResponse. It uses the same field summaries, default interpretation and fixed
+research cutoff as the Story. No external image/font service is needed. Edit copy and
+artwork here, then export again; never patch the generated image in the host checkout.
+`src/lib/site-meta.ts` supplies absolute Open Graph and X/Twitter image URLs on all
+public pages. The public build ID versions the image URL for crawler caches.
+
+### October 20, 2026 verification
+
+TypeScript, 78 unit tests and all six export browser tests passed. The finished
+copies were also verified through the real hosting repo's Jekyll build, matching every
+manifest hash. A separate check loaded the current Google tag with production-origin
+requests mapped to local export files and all collection intercepted. Both apps emitted
+homepage and Methodology page views with the correct URLs/referrers. Calculator test
+amounts and their SHA-256 hashes were absent from all intercepted requests. No test
+hits were sent to the property. This validates emitted requests, not the GA reporting
+backend or a live deployment.

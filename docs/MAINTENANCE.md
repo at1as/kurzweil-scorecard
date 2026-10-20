@@ -29,6 +29,7 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 | Ledger and URL filters                      | `src/components/scorecard.tsx`                                            |
 | Evidence drawer, focus and browser history  | `src/components/evidence-panel.tsx`                                       |
 | Summary data projected into the drawer      | `src/lib/evidence-summary.ts`                                             |
+| Production analytics and share card         | `src/components/page-views.tsx`, `src/app/share-card.png/route.tsx`          |
 | Static summary endpoint                     | `src/app/evidence/[id]/summary.json/route.ts`                             |
 | Full records and historical assessments     | `src/app/predictions/[id]/page.tsx`                                       |
 | Navigation and author CTAs                  | `src/components/navigation.tsx`, `src/app/layout.tsx`                     |

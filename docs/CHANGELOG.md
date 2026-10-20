@@ -1,5 +1,11 @@
 # Dataset and site history
 
+## 2026-10-20 — Analytics and social previews
+
+- Public exports include the existing GA tag on the production host. Enhanced Measurement handles navigation; local previews remain untracked.
+- A generated 1200 × 630 social card compares selected fields using the Story's default judgments and fixed review date. Open Graph and X/Twitter metadata point to the versioned image.
+- Re-export both apps from their source repositories; the host copy requires no analytics injection.
+
 ## 2026-10-20 — Prepare the first personal-site copy
 
 Renamed the collapsed comparison to “Compare by prediction type or decade.” Documented the source-of-truth workflow: commit changes here, build and verify the export, copy only the generated site into a dedicated hosting branch, and record the source revision in its commit message. The rejected colored-bar experiment was fully removed before this checkpoint.

@@ -156,3 +156,31 @@ test("export header and footer stay accessible on desktop and mobile", async ({
     .scrollIntoViewIfNeeded();
   await page.screenshot({ path: "work/screenshots/export-home-mobile.png" });
 });
+
+test("social cards are in crawler HTML and the exported PNG is 1200 by 630", async ({
+  request,
+}) => {
+  for (const path of [
+    "/",
+    "/predictions/",
+    "/predictions/K002/",
+    "/methodology/",
+  ]) {
+    const response = await request.get(`${base}${path}`, {
+      headers: { "User-Agent": "Twitterbot/1.0" },
+    });
+    const html = await response.text();
+    expect(html).toContain('name="twitter:card" content="summary_large_image"');
+    expect(html).toContain(
+      `property="og:image" content="${deployment.origin}${base}/share-card.png?v=`,
+    );
+    expect(html).toContain(
+      `name="twitter:image" content="${deployment.origin}${base}/share-card.png?v=`,
+    );
+  }
+  const response = await request.get(`${base}/share-card.png`);
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toContain("image/png");
+  const png = await response.body();
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1200, 630]);
+});
