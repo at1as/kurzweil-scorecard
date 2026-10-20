@@ -35,11 +35,11 @@ export default function Methodology() {
     <div className="container page-container publication-page">
       <div className="page-intro editorial-intro">
         <Eyebrow>HOW WE JUDGE</Eyebrow>
-        <h1>A prediction, a deadline, a judgment.</h1>
+        <h1>How we judge a prediction.</h1>
         <p>
-          We ask whether the substance of a forecast happened, at the scale it
-          described, by the date it gave. The judgment is ours; the sources are
-          there for you to check.
+          We compare each forecast with what happened, using its deadline and
+          stated scale. Each record explains our interpretation and links to the
+          evidence.
         </p>
       </div>
       <div className="methodology-layout">
@@ -53,22 +53,31 @@ export default function Methodology() {
         </nav>
         <div className="prose">
           <section id="interpretation">
-            <h2>A reasonable reading, made explicit.</h2>
+            <h2>What counts as success?</h2>
             <p>
-              The default is our stated reasonable reading of the claim. We
-              preserve meaningful requirements: cost, capability, adoption,
-              geography, mechanism and deadline. We do not add a universal
-              requirement when the source describes a trend.
+              We read each claim in context, retaining its cost, capability,
+              adoption, geography, mechanism and deadline requirements. A
+              forecast of a trend does not require universal adoption.
             </p>
             <p>
-              For example,{" "}
-              <Link href="/predictions/K009/">wireless peripherals</Link> count
-              as a hit even though charging and monitor cables remain. But a
-              robot vacuum market does not establish{" "}
+              <Link href="/predictions/K009/">Wireless keyboards and mice</Link>{" "}
+              were practical and in ordinary use by 2009. He was right about the
+              technology, but less accurate about consumer preference: wired
+              devices remained in use. Our default judgment credits the move
+              toward wireless; the stricter reading also tests how far cables
+              disappeared. The household robot forecast set a higher bar:{" "}
               <Link href="/predictions/K080/">
-                near-universal household robots
-              </Link>{" "}
-              performing a broad range of chores.
+                robots in nearly every household
+              </Link>
+              , performing a broad range of chores.
+            </p>
+            <p>
+              Consumer preference, cost and regulation can limit adoption even
+              when a technology works. We weigh those factors case by case and
+              explain the judgment. A working option may satisfy a capability
+              forecast; a forecast of widespread use also needs adoption
+              evidence. When the wording leaves room for disagreement, we retain
+              alternative readings and identify what changes the result.
             </p>
             <p>
               Each record separates the attributed forecast from its testable
@@ -100,9 +109,8 @@ export default function Methodology() {
               ))}
             </div>
             <p>
-              A verdict summarizes the trajectory. Each detail page also shows
-              what had happened at the original deadline and what had happened
-              by the review date.
+              Each record shows the outcome at the original deadline and at the
+              review date.
             </p>
             <details className="editorial-disclosure">
               <summary>Unreviewed, unscorable and excluded records</summary>
@@ -170,8 +178,8 @@ export default function Methodology() {
             <p>
               Both use the same predictions. Partial receives no fractional
               points; missing evidence does not automatically mean failure. The
-              homepage and category charts use this due group. The full ledger
-              also includes future and undated records.
+              homepage comparison uses this group. The full ledger also includes
+              future and undated records.
             </p>
             <p>
               Identical repetitions count once. Materially different deadlines
@@ -213,9 +221,8 @@ export default function Methodology() {
             <h2>The limits of this collection.</h2>
             <p>
               This is a selected, expanding collection, not a complete audit or
-              a random sample of Kurzweil’s predictions. Category differences
-              are a pattern to investigate. A one-record category cannot
-              establish a general strength or weakness.
+              a random sample of Kurzweil’s predictions. A one-record category
+              cannot establish a general strength or weakness.
             </p>
             <p>
               The research and editorial judgments are AI-assisted and have not

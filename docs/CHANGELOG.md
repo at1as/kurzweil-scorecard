@@ -1,5 +1,17 @@
 # Dataset and site history
 
+## 2026-10-19 — Reading order and explanations
+
+Sorted expanded field predictions by target year within each judgment. Removed periods from section headings, replaced numbered explanation labels with a shaded “Judgments & sources” section, and explained the comparison setting in terms of what happens when it is on or off. The wireless example now distinguishes a correct technology forecast from a less accurate expectation of consumer preference. Assessments and record history are unchanged.
+
+## 2026-10-19 — Copy and comparison polish
+
+Tightened homepage, methodology and research descriptions. Clarified how preference and regulation affect interpretation while retaining adoption requirements. Added percentages beside field counts, corrected accordion chevrons to right/down, inset row totals and removed narrow heading limits. Recorded an evidence side-panel recommendation in `PUBLICATION_REVIEW.md`; navigation is unchanged. Imported evidence, verdicts and history are preserved.
+
+## 2026-10-19 — Homepage consolidation
+
+Checkpoint before refinement: `ac2c4bc`. Expanded the outcome summaries with plain descriptions and examples. Moved all 13 fields, interpretation controls, category definitions and additional breakdowns into the homepage. Field rows expand into linked prediction tables, including future and undated entries outside the score. Prediction squares now have immediate hover/focus previews. The former Categories URL retains its query parameters and leads to the homepage comparison; the separate navigation item is removed. Evidence, eligibility and assessment history are unchanged.
+
 ## 2026-10-19 — Publication pass
 
 Rebuilt the homepage around the category findings and concrete judgment examples. Added one-square-per-prediction charts with sample sizes, alternative readings and evidence links. Simplified the default ledger to four columns; all nine research columns remain available. Moved research details into disclosures and shortened methodology. Corrected the default-reading description and the missing Late column in detailed group outcomes. Raw evidence, assessments and scoring are unchanged. See `PUBLICATION_REVIEW.md` for editorial reasoning and remaining publication limits.

@@ -13,8 +13,12 @@ import {
   categoryResults,
   OUTCOME_LABELS,
   OUTCOME_ORDER,
+  OUTCOME_MARKS,
+  type CategoryResult,
 } from "@/lib/publication";
-import { CategoryChart } from "@/components/category-chart";
+import { CategoryExplorer } from "@/components/category-explorer";
+import { GroupAnalysis } from "@/components/group-analysis";
+import { READINGS, type Reading } from "@/lib/evidence-model";
 import { ModeComparison } from "@/components/mode-comparison";
 import { Eyebrow, Badge } from "@/components/ui";
 
@@ -31,6 +35,34 @@ export default function Overview() {
     categories.map((c) => c.name),
     AS_OF,
   );
+  const names = categories.map((c) => c.name);
+  const views = Object.fromEntries(
+    READINGS.map((r) => [r, categoryResults(predictions, names, AS_OF, r)]),
+  ) as Record<Reading, CategoryResult[]>;
+  const commonViews = Object.fromEntries(
+    READINGS.map((r) => [
+      r,
+      categoryResults(predictions, names, AS_OF, r, true),
+    ]),
+  ) as Record<Reading, CategoryResult[]>;
+  const outcomeNotes = {
+    CORRECT: {
+      description: "Arrived by the deadline.",
+      example: "Wireless peripherals",
+    },
+    LATE: {
+      description: "Came true, behind schedule.",
+      example: "Brain-scale supercomputing",
+    },
+    PARTIAL: {
+      description: "Partly fulfilled by review.",
+      example: "Robots in every home",
+    },
+    MISSED: {
+      description: "Still unfulfilled at review.",
+      example: "Life expectancy over 100",
+    },
+  };
   const get = (name: string) => domains.find((d) => d.name === name)!;
   const hardware = get("Computing hardware"),
     medicine = get("Biology & medicine"),
@@ -40,19 +72,19 @@ export default function Overview() {
     {
       id: "K009",
       title: "Wireless peripherals",
-      note: "Bluetooth keyboards and mice count. The survival of charging cables doesn’t undo the shift.",
+      note: "Wireless keyboards and mice were in ordinary use by 2009. He was right about the technology, but less accurate about consumer preference: wired devices remained in use.",
       target: "2009",
     },
     {
       id: "K033",
       title: "Brain-scale supercomputing",
-      note: "The chosen numerical benchmark was reached in 2013, four years after the deadline. Matching a compute benchmark is not reproducing a brain.",
+      note: "Tianhe-2 exceeded the 20-petaflop benchmark in 2013, four years after the deadline. This measures computing performance, not a simulation of the human brain.",
       target: "2009",
     },
     {
       id: "K080",
       title: "Robots in every home",
-      note: "Robot vacuums became a real market. That falls short of near-universal household robots handling a broad range of chores.",
+      note: "Robot vacuums handle a specific chore. The forecast called for robots in nearly every household, doing a broad range of chores.",
       target: "2019",
     },
   ];
@@ -62,14 +94,14 @@ export default function Overview() {
         <Eyebrow>THE KURZWEIL SCORECARD · {AS_OF_LABEL}</Eyebrow>
         <h1>Where was Ray Kurzweil right?</h1>
         <p className="story-deck">
-          Wireless networks. Wearable computers. Cars that drive themselves.
-          Kurzweil put dates on them. We checked {stats.collected} predictions
+          Kurzweil put deadlines on wireless networks, wearable computers and
+          self-driving cars. We checked {stats.collected} of his forecasts
           against what happened.
         </p>
         <p className="story-thesis">
-          The results vary by field. Networks and medical tools fare better in
-          this collection than robotics and transport. Computing has plenty of
-          hits, often late.
+          Networks and medical tools fare better in this collection than
+          robotics and transport. Of {hardware.due} computing forecasts,{" "}
+          {hardware.realized} came true, {hardware.onTime} by the deadline.
         </p>
         <div className="story-links">
           <a className="text-link" href="#by-field">
@@ -86,9 +118,12 @@ export default function Overview() {
         aria-labelledby="snapshot-title"
       >
         <div className="snapshot-title">
-          <h2 id="snapshot-title">
-            Of {stats.eligible} predictions with deadlines passed
-          </h2>
+          <div>
+            <h2 id="snapshot-title">How the predictions turned out</h2>
+            <p>
+              {stats.eligible} predictions with deadlines passed · Our judgment
+            </p>
+          </div>
           <Link href="/methodology/">How we judge them ↗</Link>
         </div>
         <div className="outcome-summary">
@@ -98,8 +133,16 @@ export default function Overview() {
               className={`summary-outcome summary-${v.toLowerCase()}`}
               href={scorecardUrl({ cohort: "eligible", verdict: v })}
             >
-              <strong>{stats.eligibleBreakdown[v]}</strong>
-              <span>{OUTCOME_LABELS[v]}</span>
+              <div className="summary-count">
+                <strong>{stats.eligibleBreakdown[v]}</strong>
+                <span aria-hidden="true">{OUTCOME_MARKS[v]}</span>
+              </div>
+              <h3>
+                {OUTCOME_LABELS[v]}
+                <ArrowUpRight size={17} aria-hidden="true" />
+              </h3>
+              <p>{outcomeNotes[v].description}</p>
+              <small>e.g. {outcomeNotes[v].example}</small>
             </Link>
           ))}
         </div>
@@ -111,106 +154,114 @@ export default function Overview() {
       </section>
       <section id="by-field" className="story-section">
         <div className="story-section-heading">
-          <Eyebrow>01 / THE PATTERN</Eyebrow>
-          <h2>How the fields compare.</h2>
+          <Eyebrow>THE DATA</Eyebrow>
+          <h2>How the fields compare</h2>
           <p>
-            {networks.realized} of {networks.due} network forecasts and{" "}
-            {medicine.realized} of {medicine.due} medical forecasts were fully
-            realized by the review date. Robotics and transport:{" "}
-            {robotics.realized} of {robotics.due}. These are small groups, but
-            the contrast is worth examining.
+            In our default reading, {networks.realized} of {networks.due}{" "}
+            network forecasts and {medicine.realized} of {medicine.due} medical
+            forecasts were fully realized by the review date. Robotics and
+            transport: {robotics.realized} of {robotics.due}. These are small
+            groups drawn from an incomplete collection.
           </p>
         </div>
-        <CategoryChart rows={domains.filter((d) => d.due >= 4)} />
-        <div className="chart-followup">
-          <p>
-            Computing is the largest group: {hardware.realized} of{" "}
-            {hardware.due} came true, {hardware.onTime} on time. A field can
-            have both substantial successes and substantial misses.
-          </p>
-          <Link className="text-link" href="/categories/">
-            All {categories.length} fields & alternative readings{" "}
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-        <p className="chart-footnote">
-          Shown above: fields with at least four due predictions. Smaller
-          samples and fields without past deadlines are on the category page.
-        </p>
-      </section>
-      <section className="story-section">
-        <div className="story-section-heading">
-          <Eyebrow>02 / THE JUDGMENT</Eyebrow>
-          <h2>What counts as a hit?</h2>
-          <p>
-            We use a reasonable reading of each claim, keeping its deadline and
-            scale. A technology existing, becoming common, and taking over are
-            three different predictions.
-          </p>
-        </div>
-        <div className="editorial-examples">
-          {examples.map((example) => {
-            const p = predictions.find((p) => p.id === example.id)!;
-            return (
-              <article key={p.id}>
-                <div className="example-meta">
-                  <Badge verdict={verdict(p, AS_OF)} />
-                  <span>Target: {example.target}</span>
-                </div>
-                <h3>
-                  <Link href={`/predictions/${p.id}/`}>
-                    {example.title}
-                    <ArrowUpRight size={17} />
-                  </Link>
-                </h3>
-                <p>{example.note}</p>
-                <Link className="text-link" href={`/predictions/${p.id}/`}>
-                  Read the evidence <ArrowRight size={14} />
-                </Link>
-              </article>
-            );
-          })}
-        </div>
-        <details className="editorial-disclosure reading-sensitivity">
-          <summary>How much do the judgments change the score?</summary>
-          <ModeComparison records={predictions} asOf={AS_OF} />
+        <CategoryExplorer views={views} commonViews={commonViews} />
+        <details className="editorial-disclosure">
+          <summary>
+            More breakdowns: decade, forecast horizon & claim type
+          </summary>
+          <GroupAnalysis records={predictions} asOf={AS_OF} />
+        </details>
+        <details className="editorial-disclosure">
+          <summary>How the {categories.length} categories are defined</summary>
+          <div className="taxonomy-definitions">
+            {categories.map((c) => (
+              <div key={c.name}>
+                <h3>{c.name}</h3>
+                <p>{c.rule}</p>
+              </div>
+            ))}
+          </div>
         </details>
       </section>
-      <section className="story-section scope-section">
-        <div>
-          <Eyebrow>03 / THE EVIDENCE</Eyebrow>
-          <h2>Check our work.</h2>
-          <p>
-            Every record links the forecast, our interpretation, and the outcome
-            evidence. You can disagree with a judgment without losing the
-            underlying facts.
-          </p>
-          <Link className="button button-primary" href="/predictions/">
-            Explore the predictions <ArrowRight size={17} />
-          </Link>
+      <div className="explanation-area" id="about-the-judgments">
+        <div className="explanation-divider">
+          <span>Judgments & sources</span>
+          <a href="#by-field">Back to the data ↑</a>
         </div>
-        <div className="scope-notes">
-          <h3>What this collection can tell us</h3>
-          <p>
-            It compares {stats.collected} distinct forecast versions. Repeated
-            claims count once; materially different deadlines or thresholds stay
-            separate. {stats.eligible} are due, {future} are future, and{" "}
-            {undated} lack a usable deadline.
-          </p>
-          <p>
-            The selection is incomplete and uneven across fields. Most book
-            claims were checked through reprints or retrospectives; original
-            editions still need checking. The research and judgments are
-            AI-assisted and have not had independent human review.
-          </p>
-          <p>
-            Outcomes are assessed through {AS_OF_LABEL}. The{" "}
-            <Link href="/sources/">sources and downloads</Link> include all{" "}
-            {originalIntake.length} original intake records and earlier
-            assessments.
-          </p>
-        </div>
-      </section>
+        <section className="story-section">
+          <div className="story-section-heading">
+            <h2>What counts as a hit?</h2>
+            <p>
+              We judge each claim against its deadline and intended scale. A
+              working product can satisfy a capability forecast; a prediction of
+              widespread use also needs evidence of adoption.
+            </p>
+            <p>
+              Consumer preference and regulation can limit use even when a
+              technology works. We judge those cases individually and show
+              alternative readings where the result is ambiguous.
+            </p>
+          </div>
+          <div className="editorial-examples">
+            {examples.map((example) => {
+              const p = predictions.find((p) => p.id === example.id)!;
+              return (
+                <article key={p.id}>
+                  <div className="example-meta">
+                    <Badge verdict={verdict(p, AS_OF)} />
+                    <span>Target: {example.target}</span>
+                  </div>
+                  <h3>
+                    <Link href={`/predictions/${p.id}/`}>{example.title}</Link>
+                  </h3>
+                  <p>{example.note}</p>
+                  <Link className="text-link" href={`/predictions/${p.id}/`}>
+                    Read the evidence <ArrowRight size={14} />
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+          <details className="editorial-disclosure reading-sensitivity">
+            <summary>How much do the judgments change the score?</summary>
+            <ModeComparison records={predictions} asOf={AS_OF} />
+          </details>
+        </section>
+        <section className="story-section scope-section">
+          <div>
+            <h2>Check our work</h2>
+            <p>
+              Each record includes the forecast, our judgment, source links and
+              earlier assessments. Open one to check the reasoning or compare
+              alternative readings.
+            </p>
+            <Link className="button button-primary" href="/predictions/">
+              Explore the predictions <ArrowRight size={17} />
+            </Link>
+          </div>
+          <div className="scope-notes">
+            <h3>What this collection can tell us</h3>
+            <p>
+              It compares {stats.collected} distinct forecast versions. Repeated
+              claims count once; materially different deadlines or thresholds
+              stay separate. {stats.eligible} are due, {future} are future, and{" "}
+              {undated} lack a usable deadline.
+            </p>
+            <p>
+              The selection is incomplete and uneven across fields. Most book
+              claims were checked through reprints or retrospectives; original
+              editions still need checking. The research and judgments are
+              AI-assisted and have not had independent human review.
+            </p>
+            <p>
+              Outcomes are assessed through {AS_OF_LABEL}. The{" "}
+              <Link href="/sources/">sources and downloads</Link> include all{" "}
+              {originalIntake.length} original intake records and earlier
+              assessments.
+            </p>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

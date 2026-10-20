@@ -18,7 +18,7 @@ export default function PredictionsPage() {
       </div>
       <p className="ledger-note">
         A selected collection of {predictions.length} forecast versions. Default
-        verdicts use our stated reasonable reading.{" "}
+        verdicts reflect our interpretation of each claim.{" "}
         <Link href="/methodology/">Scoring rules & limitations</Link>
       </p>
       <Suspense

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { CategoryChart } from "./category-chart";
 import type { CategoryResult } from "@/lib/publication";
 import { PUBLIC_READINGS } from "@/lib/publication";
@@ -65,24 +66,38 @@ export function CategoryExplorer({
         </label>
       </div>
       <CategoryChart rows={rows} reading={reading} common={common} />
-      <details className="editorial-disclosure">
-        <summary>Compare interpretations on the same predictions</summary>
-        <p>
-          The stricter reading gives one brain-modeling forecast until the end
-          of 2026; our reading uses 2025. Exclude it to compare the same{" "}
-          {commonCount} predictions in every reading.
-        </p>
+      <details className="editorial-disclosure comparison-setting">
+        <summary>Which predictions are counted?</summary>
         <label className="comparison-check">
           <input
             type="checkbox"
             checked={common}
+            aria-describedby="comparison-setting-help"
             onChange={(e) => update(reading, e.target.checked)}
-          />{" "}
-          Use the same {commonCount} predictions
+          />
+          Keep the same {commonCount} predictions
         </label>
-        <p>
-          Alternative readings can change a deadline, population, mechanism or
-          adoption threshold. Each record spells out the differences.
+        <dl id="comparison-setting-help" className="comparison-setting-help">
+          <div>
+            <dt>On</dt>
+            <dd>
+              Switch interpretations to compare different judgments of the same{" "}
+              {commonCount} predictions.
+            </dd>
+          </div>
+          <div>
+            <dt>Off</dt>
+            <dd>
+              Each interpretation counts the predictions whose deadlines have
+              passed. The number of predictions can change.
+            </dd>
+          </div>
+        </dl>
+        <p className="comparison-setting-detail">
+          The difference is{" "}
+          <Link href="/predictions/K036/">one brain-modeling forecast</Link>:
+          our reading gives it a 2025 deadline; the stricter reading allows
+          until the end of 2026, so it is not yet due in this snapshot.
         </p>
       </details>
     </section>

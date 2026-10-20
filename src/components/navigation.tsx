@@ -7,7 +7,6 @@ export function Navigation() {
   const items = [
     ["/", "The story"],
     ["/predictions/", "Predictions"],
-    ["/categories/", "Categories"],
     ["/methodology/", "Methodology"],
     ["/sources/", "Sources"],
   ];

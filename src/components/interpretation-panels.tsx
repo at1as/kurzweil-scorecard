@@ -49,8 +49,8 @@ export function InterpretationPanels({ p }: { p: Prediction }) {
         <p>
           <strong>Deadline:</strong> {v.deadline_year ?? "Undated"} ·{" "}
           {v.eligible_for_deadline_metrics
-            ? "Included in this reading’s mature cohort"
-            : "Outside this reading’s mature cohort"}
+            ? "Included in this comparison"
+            : "Not counted in this comparison"}
         </p>
         <div className="outcome-comparison">
           <div>
@@ -97,7 +97,7 @@ export function InterpretationPanels({ p }: { p: Prediction }) {
         {v.verdict === "CORRECT" && v.at_deadline === "NOT_DUE" && (
           <p>
             <strong>EARLY</strong> · Outside deadline-based rates until its
-            target cohort matures.
+            deadline passes.
           </p>
         )}
         <p>

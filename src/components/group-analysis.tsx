@@ -80,14 +80,10 @@ export function GroupAnalysis({
     >
       <div className="analysis-controls">
         <div>
-          <h3>
-            {compact
-              ? "A closer look at the reviewed subset"
-              : "Compare the collection"}
-          </h3>
+          <h3>{compact ? "Reviewed predictions" : "Compare the collection"}</h3>
           <p>
-            {records.length} curated records · {summary.eligible} due and
-            eligible assessments
+            {records.length} predictions · {summary.eligible} with deadlines
+            passed
           </p>
         </div>
         <label className="inline-select">

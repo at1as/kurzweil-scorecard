@@ -29,6 +29,14 @@ describe("publication charts", () => {
         expect(rows.reduce((s, r) => s + r.realized, 0)).toBe(
           summarize(source, AS_OF).realized,
         );
+        const allVisible = rows.flatMap((row) => [
+          ...row.records,
+          ...row.otherRecords,
+        ]);
+        expect(new Set(allVisible.map((p) => p.id)).size).toBe(
+          predictions.length,
+        );
+        expect(allVisible).toHaveLength(predictions.length);
         for (const row of rows) {
           expect(row.records).toHaveLength(row.due);
           expect(
@@ -47,6 +55,37 @@ describe("publication charts", () => {
         }
       }
     expect(JSON.stringify(predictions)).toBe(before);
+  });
+  it("orders the computing forecasts by target year within each judgment", () => {
+    const row = categoryResults(predictions, names, AS_OF).find(
+      (r) => r.name === "Computing hardware",
+    )!;
+    expect(
+      row.records
+        .filter((p) => p.verdict === "CORRECT")
+        .map((p) => [p.id, p.target]),
+    ).toEqual([
+      ["K002", "2009"],
+      ["K005", "2009"],
+      ["K046", "2009"],
+      ["K052", "2009"],
+      ["K050", "2019"],
+    ]);
+    for (const reading of READINGS) {
+      for (const category of categoryResults(
+        predictions,
+        names,
+        AS_OF,
+        reading,
+      )) {
+        for (const outcome of OUTCOME_ORDER) {
+          const years = category.records
+            .filter((p) => p.verdict === outcome)
+            .map((p) => Number(p.target));
+          expect(years).toEqual([...years].sort((a, b) => a - b));
+        }
+      }
+    }
   });
   it("keeps small, future-only and empty fields visible without a false zero score", () => {
     const rows = categoryResults(predictions, names, AS_OF);

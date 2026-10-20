@@ -52,14 +52,14 @@ export default function Sources() {
           <span>linked source entries</span>
         </div>
         <div>
-          <strong>Open</strong>
-          <span>corpus completeness</span>
+          <strong>Incomplete</strong>
+          <span>research coverage</span>
         </div>
       </div>
       <section className="section">
         <SectionHeading index="01" title="Research coverage.">
-          Selected passages and versions, not complete book extraction. The
-          original 147-item 2009 corpus is the next bounded audit population.
+          The collection covers selected passages. A useful next step is to
+          review all 147 forecasts for 2009.
         </SectionHeading>
         <div className="source-coverage-list">
           {evidenceCoverage.map((s, i) => (
@@ -147,13 +147,11 @@ export default function Sources() {
       </section>
       <section className="section dataset-section">
         <div>
-          <Eyebrow>REPRODUCIBLE BY DESIGN</Eyebrow>
-          <h2>Follow the data.</h2>
+          <Eyebrow>DATA & HISTORY</Eyebrow>
+          <h2>Download the data.</h2>
           <p>
-            Immutable releases preserve original dates, prior assessments,
-            unresolved cases, and source limitations. The current download
-            contains the site’s joined records; original release files remain
-            unchanged.
+            Download the current records or an earlier release. Each release
+            retains its original dates, assessments and source notes.
           </p>
           <div className="hero-actions">
             <a

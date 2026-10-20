@@ -19,10 +19,32 @@ test("overview distinguishes collection from scoring and links charts to records
   await expect(page.locator(".scope-caption")).toContainText(
     "not a lifetime accuracy score",
   );
-  await expect(page.locator(".category-rows > li")).toHaveCount(8);
+  await expect(page.locator(".category-rows > li")).toHaveCount(13);
+  const hardware = page.locator(".category-result").filter({
+    has: page.getByRole("button", {
+      name: "Computing hardware predictions",
+      exact: true,
+    }),
+  });
+  await expect(hardware.locator(".category-realized")).toContainText("62.5%");
+  await expect(hardware.locator(".category-ratio small")).toContainText(
+    "31.3%",
+  );
+  await expect(
+    page.locator(".category-result.no-due .category-rate"),
+  ).toHaveCount(0);
   await page
     .locator(".category-name")
     .filter({ hasText: "AI & software" })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "AI & software predictions" }),
+  ).toHaveAttribute("aria-expanded", "true");
+  const expanded = page.locator(".category-expanded:visible");
+  await expect(expanded.locator("tbody tr")).toHaveCount(12);
+  await expect(expanded.locator(".outside-comparison")).toHaveCount(3);
+  await expanded
+    .getByRole("link", { name: "Open in the prediction ledger" })
     .click();
   await expect(page).toHaveURL(/category=AI/);
   await expect(page.locator(".results-toolbar")).toContainText(
@@ -141,23 +163,33 @@ test("category comparisons retain zero categories and show outcome counts withou
       exact: true,
     })
     .click();
-  await expect(page.locator(".analysis-table tbody tr")).toHaveCount(13);
+  await expect(page.locator("#by-field .analysis-table tbody tr")).toHaveCount(
+    13,
+  );
   await expect(
     page
-      .locator(".analysis-table tbody tr")
+      .locator("#by-field .analysis-table tbody tr")
       .filter({ hasText: "Manufacturing & materials" }),
   ).toContainText("0");
   await page.getByRole("button", { name: "Due outcomes", exact: true }).click();
-  await expect(page.locator(".analysis-table")).toContainText(
+  await expect(page.locator("#by-field .analysis-table")).toContainText(
     "Current outcome unknown",
   );
-  await expect(page.locator(".analysis-table")).not.toContainText("%");
-  await expect(page.locator(".analysis-table thead")).toContainText("Late");
+  await expect(page.locator("#by-field .analysis-table")).not.toContainText(
+    "%",
+  );
+  await expect(page.locator("#by-field .analysis-table thead")).toContainText(
+    "Late",
+  );
   await page.getByRole("button", { name: "Verdicts", exact: true }).click();
-  await expect(page.locator(".analysis-table")).toContainText("Pending");
+  await expect(page.locator("#by-field .analysis-table")).toContainText(
+    "Pending",
+  );
   await page.getByLabel("Group by").selectOption("horizon");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
-  await expect(page.locator(".analysis-table")).toContainText("Unresolved");
+  await expect(page.locator("#by-field .analysis-table")).toContainText(
+    "Unresolved",
+  );
 });
 test("curated evidence preserves source limits, interval timing, and related versions", async ({
   page,
@@ -227,6 +259,7 @@ test("all primary pages and representative details pass automated accessibility 
     "/predictions/K033/",
   ]) {
     await page.goto(route);
+    if (route === "/categories/") await expect(page).toHaveURL(/\/#by-field$/);
     await page.getByRole("heading", { level: 1 }).waitFor();
     await page.evaluate(() => document.fonts.ready);
     const results = await new AxeBuilder({ page })
@@ -261,7 +294,11 @@ test("desktop and mobile layouts stay in the viewport", async ({ page }) => {
   await page
     .locator("#by-field")
     .screenshot({ path: "work/screenshots/publication-category-chart.png" });
+  await page
+    .locator(".explanation-area")
+    .screenshot({ path: "work/screenshots/judgments-and-sources.png" });
   await page.goto("/categories/");
+  await expect(page).toHaveURL(/\/#by-field$/);
   await page.screenshot({
     path: "work/screenshots/categories-desktop.png",
     fullPage: true,
@@ -289,6 +326,7 @@ test("desktop and mobile layouts stay in the viewport", async ({ page }) => {
     "/predictions/K033/",
   ]) {
     await page.goto(route);
+    if (route === "/categories/") await expect(page).toHaveURL(/\/#by-field$/);
     await page.getByRole("heading", { level: 1 }).waitFor();
     await page.evaluate(() => document.fonts.ready);
     expect(
@@ -437,16 +475,20 @@ test("category interpretations keep the same-cohort option and selected reading 
     .selectOption("strict");
   await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
   await page
-    .getByText("Compare interpretations on the same predictions", {
+    .getByText("Which predictions are counted?", {
       exact: true,
     })
     .click();
-  await page.getByLabel("Use the same 67 predictions").check();
+  await page.getByLabel("Keep the same 67 predictions").check();
   await page
     .getByLabel("Interpretation", { exact: true })
     .selectOption("broader");
   await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
   await expect(chart.locator("a.forecast-dot.dot-correct")).toHaveCount(37);
+  await page.getByLabel("Keep the same 67 predictions").uncheck();
+  await expect(chart.locator("a.forecast-dot")).toHaveCount(68);
+  await page.getByLabel("Keep the same 67 predictions").check();
+  await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
   await page.reload();
   await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
     "broader",
@@ -460,4 +502,102 @@ test("category interpretations keep the same-cohort option and selected reading 
   await expect(page.locator(".interpretations")).toContainText(
     "Changed conditions",
   );
+});
+
+test("field rows expand with keyboard access and previews reveal claims without navigating", async ({
+  page,
+}) => {
+  await page.goto("/#by-field");
+  const hardware = page.getByRole("button", {
+    name: "Computing hardware predictions",
+    exact: true,
+  });
+  await hardware.press("Enter");
+  await expect(hardware).toHaveAttribute("aria-expanded", "true");
+  const panel = page.locator(".category-expanded:visible");
+  await expect(panel.locator("tbody tr")).toHaveCount(17);
+  await expect(panel.locator(".outside-comparison")).toHaveCount(1);
+  await panel.getByRole("button", { name: "Collapse field" }).click();
+  await expect(hardware).toBeFocused();
+  await expect(hardware).toHaveAttribute("aria-expanded", "false");
+
+  for (const id of ["K009", "K033", "K080", "K004"]) {
+    const tile = page.locator(`a.forecast-dot[href='/predictions/${id}/']`);
+    await tile.hover();
+    const tooltip = page.getByRole("tooltip");
+    await expect(tooltip).toBeVisible();
+    const heading = await tooltip.locator("strong").innerText();
+    expect(heading.length).toBeGreaterThan(10);
+    await expect(tile).toHaveAttribute(
+      "aria-label",
+      new RegExp(heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+    );
+    await tooltip.hover();
+    await expect(tooltip).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(tooltip).not.toBeVisible();
+  }
+  await hardware.press("Tab");
+  await expect(page.getByRole("tooltip")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("tooltip")).not.toBeVisible();
+
+  await page
+    .getByRole("button", { name: "Networks & communications predictions" })
+    .click();
+  await expect(page.locator(".category-expanded:visible tbody tr")).toHaveCount(
+    4,
+  );
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+    .analyze();
+  expect(results.violations).toEqual([]);
+  await page
+    .locator("#by-field")
+    .screenshot({ path: "work/screenshots/fields-expanded.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole("button", { name: "Networks & communications predictions" }),
+  ).toHaveAttribute("aria-expanded", "true");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page
+    .locator(".category-result.is-expanded")
+    .screenshot({ path: "work/screenshots/field-mobile-expanded.png" });
+  await page
+    .getByRole("button", { name: "Energy & environment predictions" })
+    .click();
+  await expect(page.locator(".category-expanded:visible tbody tr")).toHaveCount(
+    2,
+  );
+  await expect(
+    page.locator(".category-expanded:visible .outside-comparison"),
+  ).toHaveCount(2);
+  await expect(
+    page.locator(".category-result.is-expanded a.forecast-dot"),
+  ).toHaveCount(0);
+});
+
+test("old category links preserve interpretation and cohort on the homepage", async ({
+  page,
+}) => {
+  await page.goto("/categories/?reading=strict&cohort=common");
+  await expect(page).toHaveURL(/\/\?reading=strict&cohort=common#by-field$/);
+  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
+    "strict",
+  );
+  await expect(page.locator("a.forecast-dot")).toHaveCount(67);
+  await page
+    .getByRole("button", {
+      name: "Neuroscience & human augmentation predictions",
+    })
+    .click();
+  const excluded = page
+    .locator(".category-expanded:visible tr")
+    .filter({ hasText: "K036" });
+  await expect(excluded).toContainText("2026");
+  await expect(excluded).toContainText("Not counted");
 });
