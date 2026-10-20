@@ -1,8 +1,16 @@
-# Public repository review — 2026-10-19
+# Public repository review — 2026-10-20
 
 No publication blocker was found in the reviewed repository content. The repository remains **private**; this review does not change visibility or deploy the website. The MIT License is present and recognized by GitHub, the repository name is corrected, and the maintainer has approved retaining the existing commit email.
 
-## Reviewed checkpoint
+## 2026-10-20 follow-up before the first hosting copy
+
+Rescanned the source repository at `e4c188f`, plus the pending disclosure-label and copy-workflow documentation edits. The scan covered 11 reachable commits, 291 unique historical blobs and 187 publishable working files, including XML and properties inside the Office downloads. No credential, local-path, private contact, phone/SSN or other sensitive-pattern matches were found in file contents. The only findings were commit-metadata emails, and all commit identities match the history previously approved by the maintainer. Office checks again found no hidden sheets, comments, macros or embedded-object payloads.
+
+GitHub still reports this source repository as private. The separate `at1as.github.io` repository is public. Only the generated Kurzweil site and its Sites-directory link are intended for the hosting branch; unrelated local work in that checkout is outside the export and must not be staged. The source remains authoritative, with periodic verified copies rather than a submodule. See [STATIC_EXPORT.md](STATIC_EXPORT.md) for that workflow.
+
+Data integrity, TypeScript and all 78 unit tests passed. The previous full browser run passed 22 tests, and the simplified breakdown was checked at desktop, 390px and 320px widths. Export and hosting builds must be verified after the final source commit, before pushing the hosting branch. This follow-up is a privacy/content review; the dependency-advisory result below is explicitly dated to the earlier review.
+
+## Earlier reviewed checkpoint — 2026-10-19
 
 The time-chart checkpoint is `dd0ea53` in `at1as/kurzweil-scorecard`. At review time, local HEAD and GitHub's only advertised branch, `main`, matched that commit; there were no advertised tags. The scan covered all eight locally reachable commits, 264 unique historical file blobs, and all 185 tracked files at that checkpoint. The documentation and screenshot filename corrections accompanying this review were checked separately.
 

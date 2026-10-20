@@ -185,7 +185,7 @@ export default function Overview() {
           id="more-breakdowns"
           className="editorial-disclosure story-breakdowns"
         >
-          <summary>More breakdowns: prediction type & decade</summary>
+          <summary>Compare by prediction type or decade</summary>
           <GroupAnalysis records={predictions} asOf={AS_OF} />
         </details>
       </StoryComparisonProvider>

@@ -44,14 +44,18 @@ The suite starts a server on port 4101 and checks every manifest file by hash, h
 
 Next.js `basePath` is baked into the build. `next/link` and Next router navigation add it automatically. Native anchors, `fetch`, redirects and History API URLs use `src/lib/site-path.ts`. Do not prefix Next links a second time. Author links are defined in that helper too. Canonical and social URLs use `src/lib/site-meta.ts` and always point to the configured public location, including in local previews.
 
-## Copy later
+## Copy into the hosting checkout
 
-The preparation work on 2026-10-19 did **not** modify `at1as.github.io` or publish anything. When ready to update that checkout:
+This repository is the source of truth. The personal-site repository receives a generated copy under `sites/kurzweil/`; it is not currently a submodule. Make application and research changes here, commit them, then rebuild and copy the export. Do not edit the generated copy in the hosting repository.
+
+Create or switch to a dedicated branch in the hosting checkout before copying:
 
 ```sh
 npm run export:copy               # inspect destination; write nothing
 npm run export:copy -- --write    # explicitly copy the reviewed bundle
 ```
+
+After copying, review and commit only `sites/kurzweil/` and any intentional Sites-directory entry changes. Record the source commit SHA in the hosting commit message, then push that hosting branch for review. Merging into `master` is the separate publication step. Do not include unrelated untracked files or local work.
 
 The second command writes only the configured `sites/kurzweil` directory. It does not edit the parent site's configuration, index, posts, navigation, or other projects. It performs no Git operations.
 

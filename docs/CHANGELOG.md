@@ -1,5 +1,9 @@
 # Dataset and site history
 
+## 2026-10-20 — Prepare the first personal-site copy
+
+Renamed the collapsed comparison to “Compare by prediction type or decade.” Documented the source-of-truth workflow: commit changes here, build and verify the export, copy only the generated site into a dedicated hosting branch, and record the source revision in its commit message. The rejected colored-bar experiment was fully removed before this checkpoint.
+
 ## 2026-10-20 — Simplify optional collection breakdowns
 
 Checkpoint before this change: `f3a4f53`. Moved “More breakdowns” after the target-year chart and made prediction type its default grouping. A single table shows due forecasts and the four outcomes; future and undated counts sit beneath group names. Removed the redundant view modes, empty unreviewed/unknown columns and unresolved forecast-horizon option. Field, target-decade and publication-decade groupings remain available.
