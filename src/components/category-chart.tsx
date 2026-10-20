@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { EvidenceLink } from "./evidence-panel";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
@@ -14,9 +15,6 @@ import {
 } from "@/lib/publication";
 
 type Outcome = (typeof OUTCOME_ORDER)[number];
-function recordUrl(id: string, reading: Reading) {
-  return `/predictions/${id}/${reading === "reference" ? "" : `?reading=${reading}`}`;
-}
 export function OutcomeLegend() {
   return (
     <div className="outcome-legend" aria-label="Outcome key">
@@ -161,10 +159,11 @@ export function CategoryChart({
                   {row.records.map((p) => {
                     const v = p.verdict as Outcome;
                     return (
-                      <Link
+                      <EvidenceLink
                         key={p.id}
                         className={`forecast-dot dot-${v.toLowerCase()}`}
-                        href={recordUrl(p.id, reading)}
+                        predictionId={p.id}
+                        reading={reading}
                         aria-label={`${p.id}: ${p.claim} — ${OUTCOME_LABELS[v]}`}
                         aria-describedby={
                           preview?.record.id === p.id ? tooltipId : undefined
@@ -173,9 +172,10 @@ export function CategoryChart({
                         onMouseLeave={hideSoon}
                         onFocus={(e) => show(p, e.currentTarget)}
                         onBlur={() => setPreview(null)}
+                        onClick={() => setPreview(null)}
                       >
                         <span aria-hidden="true">{OUTCOME_MARKS[v]}</span>
-                      </Link>
+                      </EvidenceLink>
                     );
                   })}
                   {!row.due && (
@@ -232,11 +232,10 @@ export function CategoryChart({
                           }
                         >
                           <td>
-                            <Link href={recordUrl(p.id, reading)}>
+                            <EvidenceLink predictionId={p.id} reading={reading}>
                               <span className="field-record-id">{p.id}</span>
                               {p.claim}
-                              <ArrowUpRight size={13} aria-hidden="true" />
-                            </Link>
+                            </EvidenceLink>
                           </td>
                           <td>{p.target}</td>
                           <td>

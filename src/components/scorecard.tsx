@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { EvidenceLink } from "./evidence-panel";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   flexRender,
@@ -106,8 +106,9 @@ export function Scorecard() {
         header: "Prediction",
         accessorFn: (p) => sortValue(p, "prediction", AS_OF),
         cell: ({ row }) => (
-          <Link
-            href={`/predictions/${row.original.id}/`}
+          <EvidenceLink
+            predictionId={row.original.id}
+            reading={row.original.selectedReading ?? "reference"}
             className="prediction-cell"
           >
             <span className="row-id">{row.original.id}</span>
@@ -115,7 +116,7 @@ export function Scorecard() {
             <span className="row-source">
               {cleanSource(row.original.sources[0].title)}
             </span>
-          </Link>
+          </EvidenceLink>
         ),
       },
       {

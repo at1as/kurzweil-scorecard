@@ -50,3 +50,11 @@ Within each field, scored predictions now sort by judgment and then target year,
 The population setting now says “Keep the same 67 predictions,” with separate On and Off explanations. The specific brain-modeling forecast is linked below as the reason the counts can differ. The wireless example distinguishes the technology from consumer preference on both the homepage and methodology page. The existing default and stricter assessments remain unchanged.
 
 Checks: 68 unit tests and 14 browser tests passed; the production export builds all 180 routes. Browser coverage verifies both states of the comparison setting. Desktop and mobile screenshots were reviewed. Raw data, imported packages, verdicts and record history are unchanged.
+
+## Evidence panel implementation
+
+The recommended side panel is now the default detail interaction from the Story and ledger. It presents the selected assessment, criterion, target, deadline/review outcomes and named outcome sources. Source notes and original wording/attribution expand inside the panel. Full research history stays available through an explicit full-record link. Normal modified clicks still follow the stable record URL.
+
+The underlying page remains mounted. Close, Escape, backdrop click and browser Back restore the originating row, keyboard focus and scroll position, including URLs with a section anchor. Forward reopens the panel. Reading changes inside it do not change the underlying comparison. A native modal dialog makes background content inert; an explicit Tab loop keeps keyboard focus inside. On mobile it fills the viewport. Failed loads offer retry and a full-record fallback.
+
+Each record summary is generated during static export and fetched only when needed. No application server or new dependency is introduced. The 172 existing record pages and all original data remain intact. Tests cover summary fidelity across all readings, deadline exclusions, Story/ledger return behavior, browser history, focus containment, clipboard links, mobile accessibility and loading failures.

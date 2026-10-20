@@ -495,13 +495,12 @@ test("category interpretations keep the same-cohort option and selected reading 
   );
   await expect(chart.locator("a.forecast-dot")).toHaveCount(67);
   await chart.getByRole("link", { name: /K004:/ }).click();
-  await expect(page).toHaveURL(/K004\/.+reading=broader/);
-  await expect(
-    page.locator(".interpretations button[aria-pressed=true]"),
-  ).toContainText("Broader");
-  await expect(page.locator(".interpretations")).toContainText(
-    "Changed conditions",
+  await expect(page).toHaveURL(/evidence=K004&evidenceReading=broader/);
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByLabel("Evidence interpretation")).toHaveValue(
+    "broader",
   );
+  await expect(page.getByRole("dialog")).toContainText("Changed conditions");
 });
 
 test("field rows expand with keyboard access and previews reveal claims without navigating", async ({
@@ -600,4 +599,189 @@ test("old category links preserve interpretation and cohort on the homepage", as
     .filter({ hasText: "K036" });
   await expect(excluded).toContainText("2026");
   await expect(excluded).toContainText("Not counted");
+});
+
+test("story evidence stays in place and restores focus, expansion, scroll, and history", async ({
+  page,
+  context,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/#by-field");
+  const hardware = page.getByRole("button", {
+    name: "Computing hardware predictions",
+    exact: true,
+  });
+  await hardware.click();
+  const trigger = page
+    .locator(".category-expanded:visible")
+    .getByRole("link", { name: /K002/ });
+  await trigger.scrollIntoViewIfNeeded();
+  const scroll = await page.evaluate(() => window.scrollY);
+  const originalUrl = page.url();
+  await trigger.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("heading", { level: 2 })).toHaveText(
+    "Portable computers become markedly lighter and thinner.",
+  );
+  await expect(dialog).toContainText("The 2008 MacBook Air");
+  await expect(
+    dialog.getByRole("link", { name: /Apple introduces MacBook Air/ }),
+  ).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe("/");
+  await expect(
+    dialog.getByRole("button", { name: "Close evidence" }),
+  ).toBeFocused();
+  // Native modal focus containment keeps the underlying page out of the tab order.
+  await page.keyboard.press("Shift+Tab");
+  expect(
+    await dialog.evaluate((el) => el.contains(document.activeElement)),
+  ).toBe(true);
+  await page.keyboard.press("Tab");
+  await expect(
+    dialog.getByRole("button", { name: "Close evidence" }),
+  ).toBeFocused();
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await dialog.getByRole("button", { name: "Copy record link" }).click();
+  await expect(dialog.getByRole("status")).toHaveText("Link copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    "http://127.0.0.1:4100/predictions/K002/",
+  );
+  const accessibility = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+    .analyze();
+  expect(accessibility.violations).toEqual([]);
+  await page.screenshot({
+    path: "work/screenshots/evidence-panel-desktop.png",
+  });
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL(originalUrl);
+  await expect(hardware).toHaveAttribute("aria-expanded", "true");
+  await expect(trigger).toBeFocused();
+  expect(
+    Math.abs((await page.evaluate(() => window.scrollY)) - scroll),
+  ).toBeLessThan(3);
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.goBack();
+  await expect(dialog).not.toBeVisible();
+  await page.goForward();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Close evidence" }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.mouse.click(20, 500);
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test("ledger evidence retains filters, ordering, pagination, and the table interpretation", async ({
+  page,
+}) => {
+  await page.goto(
+    "/predictions/?category=Computing+hardware&sort=target&order=desc&size=15&page=2&reading=strict",
+  );
+  await expect(page.locator(".scorecard-table tbody tr")).toHaveCount(2);
+  const originalUrl = page.url();
+  const first = page.locator(".prediction-cell").first();
+  const label = await first.innerText();
+  await first.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(page.getByLabel("Evidence interpretation")).toHaveValue(
+    "strict",
+  );
+  await page.getByLabel("Evidence interpretation").selectOption("broader");
+  await expect(page).toHaveURL(/evidenceReading=broader/);
+  await dialog.getByRole("button", { name: "Close evidence" }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL(originalUrl);
+  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
+    "strict",
+  );
+  expect(await first.innerText()).toBe(label);
+  await expect(first).toBeFocused();
+  await expect(page.locator(".scorecard-table tbody tr")).toHaveCount(2);
+});
+
+test("mobile evidence supports direct panel links, source disclosures, and recovery from load failure", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/?evidence=K009&evidenceReading=strict");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(page.getByLabel("Evidence interpretation")).toHaveValue(
+    "strict",
+  );
+  const bounds = await dialog.boundingBox();
+  expect(bounds?.width).toBe(390);
+  expect(bounds?.height).toBe(844);
+  await dialog
+    .getByText("The original claim & source", { exact: true })
+    .click();
+  await expect(dialog.locator(".evidence-attribution")).toContainText(
+    "printed p. 20",
+  );
+  await dialog
+    .locator(".evidence-drawer-content")
+    .evaluate((el) => (el.scrollTop = 0));
+  await page.screenshot({ path: "work/screenshots/evidence-panel-mobile.png" });
+  const accessibility = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+    .analyze();
+  expect(accessibility.violations).toEqual([]);
+  await dialog.getByRole("button", { name: "Close evidence" }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL("http://127.0.0.1:4100/");
+  await page.route("**/evidence/K033/summary.json", (route) => route.abort());
+  await page
+    .locator(".editorial-examples article")
+    .filter({ hasText: "Brain-scale supercomputing" })
+    .getByRole("link", { name: "Read the evidence" })
+    .click();
+  await expect(dialog.getByRole("heading", { level: 2 })).toHaveText(
+    "Evidence couldn’t load",
+  );
+  await expect(
+    dialog.getByRole("link", { name: /Full record & history/ }),
+  ).toHaveAttribute("href", "/predictions/K033/");
+  await page.unroute("**/evidence/K033/summary.json");
+  await dialog.getByRole("button", { name: "Try again" }).click();
+  await expect(dialog.getByRole("heading", { level: 2 })).toContainText(
+    "Supercomputers reach",
+  );
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+});
+
+test("original intake opens reviewed versions in the same panel without losing the original row", async ({
+  page,
+}) => {
+  await page.goto("/predictions/?view=intake&q=AUD-001");
+  const trigger = page.locator(".prediction-cell").first();
+  await trigger.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.locator(".evidence-legacy")).toContainText(
+    "Original intake · not scored",
+  );
+  const reviewed = dialog.locator(".evidence-legacy").getByRole("link").first();
+  const id = await reviewed.innerText();
+  await reviewed.click();
+  await expect(dialog.locator(".evidence-kicker")).toContainText(id);
+  await expect(dialog.locator(".evidence-legacy")).toHaveCount(0);
+  await expect(
+    dialog.getByRole("button", { name: "Close evidence" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL(
+    "http://127.0.0.1:4100/predictions/?view=intake&q=AUD-001",
+  );
+  await expect(trigger).toBeFocused();
 });

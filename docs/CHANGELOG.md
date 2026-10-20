@@ -1,5 +1,9 @@
 # Dataset and site history
 
+## 2026-10-19 — Evidence without leaving the page
+
+Story squares, expanded prediction rows, judgment examples and ledger records now open an evidence side panel. Closing it restores the same expanded field or filtered table, scroll position and keyboard focus. Browser Back/Forward and direct panel links work; full record URLs and history remain available. The panel carries over the chosen interpretation and separates its controls from the underlying comparison. Static summaries load per record, with recovery for failed loads. All imported data and judgments are unchanged.
+
 ## 2026-10-19 — Reading order and explanations
 
 Sorted expanded field predictions by target year within each judgment. Removed periods from section headings, replaced numbered explanation labels with a shaded “Judgments & sources” section, and explained the comparison setting in terms of what happens when it is on or off. The wireless example now distinguishes a correct technology forecast from a less accurate expectation of consumer preference. Assessments and record history are unchanged.

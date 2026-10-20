@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EvidenceLink } from "@/components/evidence-panel";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import {
   AS_OF,
@@ -212,12 +213,14 @@ export default function Overview() {
                     <span>Target: {example.target}</span>
                   </div>
                   <h3>
-                    <Link href={`/predictions/${p.id}/`}>{example.title}</Link>
+                    <EvidenceLink predictionId={p.id}>
+                      {example.title}
+                    </EvidenceLink>
                   </h3>
                   <p>{example.note}</p>
-                  <Link className="text-link" href={`/predictions/${p.id}/`}>
+                  <EvidenceLink className="text-link" predictionId={p.id}>
                     Read the evidence <ArrowRight size={14} />
-                  </Link>
+                  </EvidenceLink>
                 </article>
               );
             })}

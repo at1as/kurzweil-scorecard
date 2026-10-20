@@ -3,6 +3,7 @@ import Link from "next/link";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/newsreader";
 import "./globals.css";
+import { EvidenceProvider } from "@/components/evidence-panel";
 import { Navigation } from "@/components/navigation";
 import { AS_OF_LABEL, datasetVersion } from "@/lib/data";
 export const metadata: Metadata = {
@@ -20,35 +21,37 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <a href="#main" className="skip-link">
-          Skip to content
-        </a>
-        <Navigation />
-        <main id="main">{children}</main>
-        <footer className="site-footer">
-          <div>
-            <Link href="/" className="footer-brand">
-              The Kurzweil Scorecard
-              <span>Predictions, judgments, and the evidence.</span>
-            </Link>
-            <p>
-              An independent project. Not affiliated with Ray Kurzweil.
-              <br />
-              Research snapshot: {AS_OF_LABEL} · Dataset v{datasetVersion}
-            </p>
-          </div>
-          <div className="footer-links">
-            <Link href="/methodology/">Methodology</Link>
-            <Link href="/sources/">Source coverage</Link>
-            <a href="/data/predictions.json" download>
-              Canonical JSON ↗
-            </a>
-          </div>
-          <div className="footer-bottom">
-            AI-assisted research · Selected forecasts · All assessments and
-            source history available
-          </div>
-        </footer>
+        <EvidenceProvider>
+          <a href="#main" className="skip-link">
+            Skip to content
+          </a>
+          <Navigation />
+          <main id="main">{children}</main>
+          <footer className="site-footer">
+            <div>
+              <Link href="/" className="footer-brand">
+                The Kurzweil Scorecard
+                <span>Predictions, judgments, and the evidence.</span>
+              </Link>
+              <p>
+                An independent project. Not affiliated with Ray Kurzweil.
+                <br />
+                Research snapshot: {AS_OF_LABEL} · Dataset v{datasetVersion}
+              </p>
+            </div>
+            <div className="footer-links">
+              <Link href="/methodology/">Methodology</Link>
+              <Link href="/sources/">Source coverage</Link>
+              <a href="/data/predictions.json" download>
+                Canonical JSON ↗
+              </a>
+            </div>
+            <div className="footer-bottom">
+              AI-assisted research · Selected forecasts · All assessments and
+              source history available
+            </div>
+          </footer>
+        </EvidenceProvider>
       </body>
     </html>
   );

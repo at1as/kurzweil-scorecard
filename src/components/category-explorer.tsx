@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { EvidenceLink } from "./evidence-panel";
 import { CategoryChart } from "./category-chart";
 import type { CategoryResult } from "@/lib/publication";
 import { PUBLIC_READINGS } from "@/lib/publication";
@@ -95,8 +95,10 @@ export function CategoryExplorer({
         </dl>
         <p className="comparison-setting-detail">
           The difference is{" "}
-          <Link href="/predictions/K036/">one brain-modeling forecast</Link>:
-          our reading gives it a 2025 deadline; the stricter reading allows
+          <EvidenceLink predictionId="K036" reading={reading}>
+            one brain-modeling forecast
+          </EvidenceLink>
+          : our reading gives it a 2025 deadline; the stricter reading allows
           until the end of 2026, so it is not yet due in this snapshot.
         </p>
       </details>

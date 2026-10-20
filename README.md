@@ -66,13 +66,15 @@ The research snapshot is 2026-10-15 regardless of build time. All 13 original ca
 
 ## Pages and interactions
 
-- `/`: a narrative introduction, outcome summaries and all 13 fields in one expandable comparison. Squares preview the claim on hover/focus and link to evidence. Field rows open into prediction tables; future and undated records stay outside the score. Interpretation and common-population choices survive reloads. Further breakdowns and category definitions are collapsed below the chart.
-- `/predictions/`: curated records by default; Original intake view preserves the original research inventory. The default table shows four columns; “Show research columns” restores all nine. Search, combined filters, sorting, pagination, CSV export, and shareable URLs work in the browser.
+- `/`: a narrative introduction, outcome summaries and all 13 fields in one expandable comparison. Squares preview the claim on hover/focus and open evidence in a side panel. Field rows open into prediction tables; future and undated records stay outside the score. Interpretation and common-population choices survive reloads. Further breakdowns and category definitions are collapsed below the chart.
+- `/predictions/`: curated records by default; Original intake view preserves the original research inventory. The default table shows four columns; “Show research columns” restores all nine. Prediction links open the same evidence panel while filters, sorting and pagination stay in place. Search, combined filters, CSV export, and shareable URLs work in the browser.
 - `/predictions/K001/` through `/predictions/K084/`: supplied assessments, criteria, attribution, source provenance, separate deadline/review outcomes, limitations, and legacy relations.
 - Original `/predictions/AUD-…/`, `/predictions/DEC-…/`, and `/predictions/EXE-…/` routes: unchanged original content plus reconciliation history and related-version links.
 - `/categories/`: compatibility route to `/#by-field`, retaining query parameters. The comparison is now part of the homepage.
 - `/sources/`: 103 live source links (98 imported plus five supplemental), 5 incremental source-coverage entries, provenance limits, original reports, and versioned downloads.
 - `/methodology/`: eligibility, uncertainty, editorial review states, date rules, and population limits.
+
+Evidence panels show the selected judgment, criterion, deadline/review outcomes and named source links. Source notes and the original attribution expand in place. Close, Escape, backdrop click or Back return to the originating row; Forward reopens the panel. On mobile the panel fills the screen. Full records and assessment history remain available through an explicit link and normal modified-click behavior. `evidence=K002&evidenceReading=strict` opens a panel on the current page without changing its `reading` filter. Summary JSON is generated at build time under `/evidence/<id>/summary.json` and loaded on demand; no server is required.
 
 Query parameters: `q`, `category`, `tag`, `source`, `publication`, `target`, `verification`, `verdict`, `type`, `horizon`, `cohort`, `reading`, `view`, `sort`, `order`, `page`, `size`. `reading=reference|strict|broader` selects the outcome interpretation. `cohort=common` selects the equal 67-record comparison; `on-time`, `realized`, `new`, and `undated` identify contributing populations. `view=intake` selects history; the legacy `view=verified` URL now displays supplied editorial assessments, not a claim of independent verification. Filters combine with AND. CSV exports include every filtered row and escape formula prefixes.
 
@@ -95,4 +97,4 @@ A hosted build needs Node 22+ and Python 3. Alternatively, run the importer loca
 
 ## Implementation
 
-Next.js App Router, TypeScript, Tailwind CSS, TanStack Table v8, Zod, Lucide, locally bundled Inter and Newsreader fonts. Charts use accessible HTML/CSS. The hero illustration is conceptual, not observed data.
+Next.js App Router, TypeScript, Tailwind CSS, TanStack Table v8, Zod, Lucide, locally bundled Inter and Newsreader fonts. Charts use accessible HTML/CSS; the evidence panel uses a native modal dialog.
