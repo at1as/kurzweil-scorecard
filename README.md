@@ -4,7 +4,7 @@ Which of Ray Kurzweil's predictions came true—and in which fields? This intera
 
 The starting point is a comparison across fields. Open a prediction to read its evidence without leaving the chart, or use the ledger to search, filter and export the records.
 
-![Field comparison showing individual forecast outcomes, sample sizes and realization rates](docs/images/field-comparison.png)
+![Field comparison showing individual forecast outcomes, sample sizes and realization rates](docs/images/field-comparison.jpg)
 
 _One square per assessed forecast. The screenshot shows part of the field comparison under the default interpretation._
 

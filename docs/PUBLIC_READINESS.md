@@ -1,44 +1,43 @@
 # Public repository review — 2026-10-19
 
-The review found no exposed credentials in the scanned repository content. The original review identified the commit email and project license as maintainer decisions; both are resolved in the follow-up below. The README has been revised for public readers.
+No publication blocker was found in the reviewed repository content. The repository remains **private**; this review does not change visibility or deploy the website. The MIT License is present and recognized by GitHub, the repository name is corrected, and the maintainer has approved retaining the existing commit email.
 
-The audit itself changed no visibility settings, Git history, remote name, or license. Nothing was published or pushed during that review.
+## Reviewed checkpoint
 
-## Scope and results
+The time-chart checkpoint is `dd0ea53` in `at1as/kurzweil-scorecard`. At review time, local HEAD and GitHub's only advertised branch, `main`, matched that commit; there were no advertised tags. The scan covered all eight locally reachable commits, 264 unique historical file blobs, and all 185 tracked files at that checkpoint. The documentation and screenshot filename corrections accompanying this review were checked separately.
 
-- Reviewed all six locally reachable commits and 214 unique historical file blobs, plus publishable working files (tracked files and non-ignored additions).
-- Confirmed that GitHub's only advertised branch, `main`, points to the same `2d83eec` checkpoint as local HEAD. The remote had no advertised tags. GitHub reported the repository as private.
-- Scanned for common service tokens, private keys, JWTs, credential assignments, credentials in URLs, email addresses, phone/SSN patterns and user-specific local paths. No credential, private-contact-record or personal-path matches were found in the files.
-- Commit author and committer metadata contain the maintainer's name and personal email in every commit. The project intentionally includes the author's public name and website in its UI and documentation.
-- Inspected the XML contents and metadata of the eight Office files in the working tree, including duplicate release downloads. No comments, hidden-sheet declarations, macros or embedded-object payloads were found. Creator fields contain project/tool names; the Word files retain generic template timestamps. The immutable research packages were not altered.
-- No build output, caches, dependencies, `.env` files or credential files are tracked. The largest historical blob is about 2 MB; all historical blobs total about 9.8 MB uncompressed. The retained research snapshots account for most of that size.
-- `npm audit` reported zero known vulnerabilities across production and development dependencies on the review date. This is a dated advisory result, not a guarantee about future vulnerabilities.
-- A targeted frontend review found no `dangerouslySetInnerHTML`, `eval`, cookie access or local/session storage. The checked canonical data uses HTTPS source URLs.
+## Credentials, personal information and repository contents
 
-This was a pattern scan plus targeted manual review, including zipped Office XML. It is not a penetration test or a proof that arbitrary encoded secrets cannot exist. Ignored local working files and unrelated repositories are outside the public-file audit. Detailed scanner output is kept in ignored `work/public-audit/`; no sensitive values are reproduced here.
+- Pattern scans found no credentials, private contact records or user-specific absolute paths in the reviewed file contents. Checks covered common service tokens, private keys, JWTs, credential assignments, credentials in URLs, email addresses, phone/SSN patterns and local paths.
+- Commit metadata contains the maintainer's name and approved personal email. The author's public name and website also appear intentionally in the interface and documentation.
+- The eight tracked Office files, including duplicate downloads, were opened as ZIP containers and their XML and properties inspected. No comments, hidden-sheet declarations, macros or embedded-object payloads were found. Creator fields contain project/tool names; the Word documents retain generic template timestamps, which are not evidence of research dates. The research packages were not modified.
+- No dependencies, build output, caches, credential files or local environment files are tracked. There are no tracked symlinks. The largest historical blob is about 2 MB; historical blobs total about 10.5 MB uncompressed, mostly research snapshots.
+- GitHub returned no issues or pull requests, releases, or workflow runs. Wikis and discussions are disabled. These checks found no additional repository discussion or release material to review.
 
-## README and documentation
+This is a pattern scan plus targeted manual review, including historical blobs and zipped Office XML. It is not a penetration test or proof that arbitrary encoded secrets cannot exist. Ignored local files and unrelated repositories are outside the audit. Detailed scanner output remains in ignored `work/public-audit/`; sensitive values are not reproduced here.
 
-The README now introduces the question, shows the field comparison, states the collection's limitations, and gives a short path to running and checking the site. Detailed population, timing and URL documentation moved to `REFERENCE.md`. Maintainer-specific hosting instructions remain in `STATIC_EXPORT.md` rather than leading the public introduction.
+## Dependencies and application behavior
 
-The screenshot is a local PNG of the application, approximately 98 KB, with no embedded text/EXIF metadata. Relative documentation/image links were checked. The README does not claim an undeployed public URL is live. `PROMPT.md` is labeled as a historical brief so it is not mistaken for the current specification.
+A refreshed `npm audit` completed successfully and reported **zero known vulnerabilities** across production and development dependencies. The first request timed out; the successful retry supplies this result. Advisory status is time-dependent. Every resolved dependency URL in the lockfile uses the public npm registry.
 
-`CONTRIBUTING.md` explains how to propose evidence corrections and preserve assessment history. It does not describe the project as open source while its license remains undecided.
+A targeted frontend review found no `dangerouslySetInnerHTML`, `eval`, cookie access, local/session storage, or added analytics service. Evidence summaries load from the site's own static files. Preview servers bind to loopback. This remains a static application without an API-key or backend-account requirement.
 
-## Choices before sharing
+`npm run check` passed at the time-chart commit: data integrity, TypeScript and 76 unit tests. The preceding implementation verification also passed the production build, all 20 main browser tests, the prefixed static export and its three browser tests. No application code changed during this follow-up review.
 
-**Commit email.** Keep the existing attribution if the maintainer is comfortable with that email being visible. Using a GitHub-provided noreply address for future work does not change old commits. Removing the address from existing commits is a separate history rewrite and should be planned explicitly; no rewrite was performed. See [GitHub's commit-email documentation](https://docs.github.com/en/account-and-profile/how-tos/email-preferences/setting-your-commit-email-address).
+## Public README and media
 
-**License.** There is no project `LICENSE` file and GitHub reports no detected license. A public repository can be viewable without being offered under an open-source license. If reuse is intended, choose an explicit license for the code and state separately how research data and third-party quotations are treated. No rights to original source works should be implied by a code license. See [GitHub's licensing guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository).
+The README explains the question, shows the field comparison, gives sample sizes and limitations, and documents installation, checks, deployment and contributions. It includes a screenshot and links to the research trail without leading with maintainer-specific hosting details. It does not claim an undeployed demo URL is live.
 
-**Repository name.** The GitHub slug is `at1as/kurtzweil-scorecard`, with an extra “t” compared with Kurzweil's name. Consider correcting it before sharing links. The site title and planned public URL use the correct spelling. The remote was not renamed.
+The screenshot was visually checked and remains accurate for the field comparison. Its contents are JPEG data, so its former `.png` filename was corrected to `docs/images/field-comparison.jpg` without changing the image bytes. It is approximately 98 KB and contains no EXIF, XMP, IPTC or comment metadata. Relative links in the top-level and maintained documentation resolve. `PROMPT.md` is labeled as a historical brief.
 
-**Research framing.** Keep the selected-subset and AI-assisted-assessment disclosures. The corpus is incomplete and category samples are uneven; this project does not establish lifetime accuracy. Original editions and some attribution details still need independent checking. Existing research gaps are documented in `V03_INTEGRATION_REVIEW.md`.
+`LICENSE`, package metadata, README and CONTRIBUTING agree on MIT. The public documentation distinguishes third-party quotations and original source works from the project license. The earlier audit's license, email and repository-name decisions are resolved; no history rewrite was needed.
 
-**Automation.** The repository has local checks and browser tests but no GitHub Actions CI workflow. CI would be useful when accepting outside changes; its absence does not prevent readers from running the documented checks.
+## Remaining limitations
 
-The export/CTA work and this documentation pass were uncommitted at review time. Review and commit the intended changes before making the repository public. Publishing the website is a separate operation.
+**Research completeness.** This is a selected collection with AI-assisted editorial judgments. Original book editions still need independent collation; coverage and category sizes are uneven. The README and interface state these limits. They must remain visible when sharing the project. See [the integration review](V03_INTEGRATION_REVIEW.md) for source gaps and [the time-view notes](TIME_VIEW.md) for why the chart does not extrapolate future accuracy.
 
-## Follow-up — license and repository checkpoint
+**Public contents.** Making the repository public would expose its complete reachable history, historical build brief, research packages and prior assessments as well as the current application. The review includes those materials; the original research trail is intentionally preserved. Existing approval covers the commit email.
 
-Jason approved retaining the existing commit email and selected the MIT License. `LICENSE`, package metadata and public documentation now reflect that choice; third-party source rights remain separate. GitHub confirmed the renamed repository is `at1as/kurzweil-scorecard`, and the local remote was updated to that URL. The repository remains private. No history rewrite or website deployment is part of this checkpoint.
+**Contribution checks.** Local checks and browser tests are documented, but there is no GitHub Actions CI workflow. CI would be useful before relying on outside contributions; its absence does not prevent readers from running or inspecting this project.
+
+Changing repository visibility and publishing the website are separate actions. Neither was performed by this review.

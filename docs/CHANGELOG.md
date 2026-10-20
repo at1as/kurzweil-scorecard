@@ -1,5 +1,9 @@
 # Dataset and site history
 
+## 2026-10-19 — Public-readiness follow-up
+
+Reviewed the pushed time-chart checkpoint, reachable history, research-document metadata, dependencies and GitHub repository contents. Refreshed `PUBLIC_READINESS.md` to reflect the resolved license, email and repository name. Corrected the README screenshot extension to match its JPEG content. No data, assessments, application behavior or visibility settings changed.
+
 ## 2026-10-19 — Outcomes by target year
 
 Private checkpoint before this visualization: `9ca04d6`. Added a Story chart grouping due forecasts by their target year, with count and percentage views. Selecting a year opens its records in place; evidence uses the existing panel. Field and year charts share interpretation and common-cohort settings and the same eligible record population.
