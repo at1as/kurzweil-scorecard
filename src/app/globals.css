@@ -4103,6 +4103,15 @@ button.category-name:hover {
   background: var(--green);
   color: var(--paper);
 }
+.header-author {
+  background: var(--green);
+  color: var(--paper);
+}
+.header-author:hover,
+.header-author:focus-visible {
+  background: transparent;
+  color: var(--green);
+}
 .footer-author {
   display: flex;
   justify-content: space-between;
