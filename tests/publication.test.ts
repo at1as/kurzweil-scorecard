@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { AS_OF, predictions, categories } from "../src/lib/data";
-import { categoryResults, OUTCOME_ORDER } from "../src/lib/publication";
+import {
+  categoryResults,
+  targetYearResults,
+  OUTCOME_ORDER,
+} from "../src/lib/publication";
 import { commonCohort, selectReading } from "../src/lib/interpretations";
 import { eligibleRecords, summarize } from "../src/lib/scoring";
 import { READINGS } from "../src/lib/evidence-model";
@@ -117,5 +121,68 @@ describe("publication charts", () => {
         onTime,
         realized,
       });
+  });
+});
+
+describe("target-year comparison", () => {
+  it("regroups exactly the eligible records in every reading and cohort", () => {
+    for (const reading of READINGS)
+      for (const common of [false, true]) {
+        const years = targetYearResults(
+          categoryResults(predictions, names, AS_OF, reading, common),
+        );
+        const expected = eligibleRecords(
+          (common ? commonCohort(predictions) : predictions).map((p) =>
+            selectReading(p, reading),
+          ),
+          AS_OF,
+        );
+        const actual = years.flatMap((year) => year.records);
+        expect(actual.map((p) => p.id).sort()).toEqual(
+          expected.map((p) => p.id).sort(),
+        );
+        expect(new Set(actual.map((p) => p.id)).size).toBe(actual.length);
+        expect(years.map((g) => g.year)).toEqual(
+          [...years.map((g) => g.year)].sort((a, b) => a - b),
+        );
+        for (const year of years) {
+          expect(
+            Object.values(year.counts).reduce((sum, n) => sum + n, 0),
+          ).toBe(year.records.length);
+          expect(
+            year.records.every((p) => Number(p.target) === year.year),
+          ).toBe(true);
+        }
+        expect(years.some((g) => g.year === 2025)).toBe(
+          reading !== "strict" && !common,
+        );
+        expect(
+          years.some((g) => g.records.some((p) => p.outsideComparison)),
+        ).toBe(false);
+      }
+  });
+  it("preserves the large target-year groups and the distinction between late and missed", () => {
+    const years = targetYearResults(categoryResults(predictions, names, AS_OF));
+    expect(years.find((g) => g.year === 2009)?.counts).toEqual({
+      CORRECT: 16,
+      LATE: 9,
+      PARTIAL: 8,
+      MISSED: 5,
+    });
+    expect(years.find((g) => g.year === 2019)?.counts).toEqual({
+      CORRECT: 7,
+      LATE: 0,
+      PARTIAL: 6,
+      MISSED: 10,
+    });
+    expect(years.map((g) => [g.year, g.records.length])).toEqual([
+      [1998, 1],
+      [2009, 38],
+      [2010, 4],
+      [2019, 23],
+      [2020, 1],
+      [2025, 1],
+    ]);
+    expect(targetYearResults([])).toEqual([]);
   });
 });

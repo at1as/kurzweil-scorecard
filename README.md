@@ -16,7 +16,7 @@ At the **October 15, 2026** research cutoff, the default reading includes 68 for
 
 The site includes:
 
-- Expandable comparisons across 13 fields, with counts and percentages.
+- Expandable comparisons across 13 fields and by target year, with counts and percentages.
 - Evidence panels with criteria, source links, timing and alternative readings.
 - A searchable ledger with shareable filters, CSV export and stable record URLs.
 - The original intake, versioned research packages and assessment history.

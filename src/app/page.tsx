@@ -18,6 +18,8 @@ import {
   OUTCOME_MARKS,
   type CategoryResult,
 } from "@/lib/publication";
+import { StoryComparisonProvider } from "@/components/story-comparison-context";
+import { TargetYearChart } from "@/components/target-year-chart";
 import { CategoryExplorer } from "@/components/category-explorer";
 import { GroupAnalysis } from "@/components/group-analysis";
 import { READINGS, type Reading } from "@/lib/evidence-model";
@@ -156,37 +158,42 @@ export default function Overview() {
           undated. <Link href="/methodology/">Scope & sources</Link>
         </p>
       </section>
-      <section id="by-field" className="story-section">
-        <div className="story-section-heading">
-          <Eyebrow>THE DATA</Eyebrow>
-          <h2>How the fields compare</h2>
-          <p>
-            In our default reading, {networks.realized} of {networks.due}{" "}
-            network forecasts and {medicine.realized} of {medicine.due} medical
-            forecasts were fully realized by the review date. Robotics and
-            transport: {robotics.realized} of {robotics.due}. These are small
-            groups drawn from an incomplete collection.
-          </p>
-        </div>
-        <CategoryExplorer views={views} commonViews={commonViews} />
-        <details className="editorial-disclosure">
-          <summary>
-            More breakdowns: decade, forecast horizon & claim type
-          </summary>
-          <GroupAnalysis records={predictions} asOf={AS_OF} />
-        </details>
-        <details className="editorial-disclosure">
-          <summary>How the {categories.length} categories are defined</summary>
-          <div className="taxonomy-definitions">
-            {categories.map((c) => (
-              <div key={c.name}>
-                <h3>{c.name}</h3>
-                <p>{c.rule}</p>
-              </div>
-            ))}
+      <StoryComparisonProvider views={views} commonViews={commonViews}>
+        <section id="by-field" className="story-section">
+          <div className="story-section-heading">
+            <Eyebrow>THE DATA</Eyebrow>
+            <h2>How the fields compare</h2>
+            <p>
+              In our default reading, {networks.realized} of {networks.due}{" "}
+              network forecasts and {medicine.realized} of {medicine.due}{" "}
+              medical forecasts were fully realized by the review date. Robotics
+              and transport: {robotics.realized} of {robotics.due}. These are
+              small groups drawn from an incomplete collection.
+            </p>
           </div>
-        </details>
-      </section>
+          <CategoryExplorer />
+          <details className="editorial-disclosure">
+            <summary>
+              More breakdowns: decade, forecast horizon & claim type
+            </summary>
+            <GroupAnalysis records={predictions} asOf={AS_OF} />
+          </details>
+          <details className="editorial-disclosure">
+            <summary>
+              How the {categories.length} categories are defined
+            </summary>
+            <div className="taxonomy-definitions">
+              {categories.map((c) => (
+                <div key={c.name}>
+                  <h3>{c.name}</h3>
+                  <p>{c.rule}</p>
+                </div>
+              ))}
+            </div>
+          </details>
+        </section>
+        <TargetYearChart asOfLabel={AS_OF_LABEL} />
+      </StoryComparisonProvider>
       <div className="explanation-area" id="about-the-judgments">
         <div className="explanation-divider">
           <span>Judgments & sources</span>

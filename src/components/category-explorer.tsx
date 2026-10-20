@@ -1,47 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useStoryComparison } from "./story-comparison-context";
 import { EvidenceLink } from "./evidence-panel";
 import { CategoryChart } from "./category-chart";
-import type { CategoryResult } from "@/lib/publication";
 import { PUBLIC_READINGS } from "@/lib/publication";
 import { READINGS, type Reading } from "@/lib/evidence-model";
-export function CategoryExplorer({
-  views,
-  commonViews,
-}: {
-  views: Record<Reading, CategoryResult[]>;
-  commonViews: Record<Reading, CategoryResult[]>;
-}) {
-  const [reading, setReading] = useState<Reading>("reference");
-  const [common, setCommon] = useState(false);
-  useEffect(() => {
-    function readUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const value = params.get("reading");
-      setReading(
-        READINGS.includes(value as Reading) ? (value as Reading) : "reference",
-      );
-      setCommon(params.get("cohort") === "common");
-    }
-    readUrl();
-    window.addEventListener("popstate", readUrl);
-    return () => window.removeEventListener("popstate", readUrl);
-  }, []);
-  function update(nextReading: Reading, nextCommon: boolean) {
-    setReading(nextReading);
-    setCommon(nextCommon);
-    const url = new URL(window.location.href);
-    if (nextReading === "reference") url.searchParams.delete("reading");
-    else url.searchParams.set("reading", nextReading);
-    if (nextCommon) url.searchParams.set("cohort", "common");
-    else url.searchParams.delete("cohort");
-    window.history.replaceState(null, "", url);
-  }
-  const commonCount = commonViews.reference.reduce(
-    (sum, row) => sum + row.due,
-    0,
-  );
-  const rows = (common ? commonViews : views)[reading];
+export function CategoryExplorer() {
+  const { reading, common, update, commonCount, rows } = useStoryComparison();
   const due = rows.reduce((sum, row) => sum + row.due, 0);
   return (
     <section className="domain-explorer" aria-label="Outcomes by field">

@@ -785,3 +785,99 @@ test("original intake opens reviewed versions in the same panel without losing t
   );
   await expect(trigger).toBeFocused();
 });
+
+test("target-year columns share the comparison population and keep evidence in place", async ({
+  page,
+}) => {
+  await page.goto("/#by-target-year");
+  const chart = page.locator("#by-target-year");
+  await expect(chart).toContainText("61 of these 68 forecasts");
+  await expect(chart.locator(".time-year")).toHaveCount(6);
+  const year = chart.getByRole("button", { name: /^2009: 38 predictions;/ });
+  await year.click();
+  await expect(year).toHaveAttribute("aria-expanded", "true");
+  await expect(chart.locator(".time-records tbody tr")).toHaveCount(38);
+  const trigger = chart
+    .locator(".time-records")
+    .getByRole("link", { name: /K002/ });
+  await trigger.click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await expect(year).toHaveAttribute("aria-expanded", "true");
+  await chart
+    .getByRole("button", { name: "Close target-year predictions" })
+    .click();
+  await expect(year).toBeFocused();
+  await expect(year).toHaveAttribute("aria-expanded", "false");
+  await chart
+    .getByRole("button", { name: "Share of each group", exact: true })
+    .click();
+  await expect(chart.locator(".time-axis-title")).toContainText(
+    "% of predictions",
+  );
+  await expect(
+    chart.getByRole("button", { name: /^2019: 23 predictions;/ }),
+  ).toContainText("43%");
+  await page.getByLabel("Target-year interpretation").selectOption("strict");
+  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
+    "strict",
+  );
+  await expect(chart.locator(".time-year")).toHaveCount(5);
+  await expect(chart).toContainText("61 of these 67 forecasts");
+  await expect(
+    chart.getByRole("button", { name: /^2009: 38 predictions;/ }),
+  ).toHaveAccessibleName(/11 on time, 8 late, 13 partial, 6 missed/);
+  await page.reload();
+  await expect(page.getByLabel("Target-year interpretation")).toHaveValue(
+    "strict",
+  );
+  await page
+    .getByLabel("Interpretation", { exact: true })
+    .selectOption("broader");
+  await expect(page.getByLabel("Target-year interpretation")).toHaveValue(
+    "broader",
+  );
+  await page
+    .getByText("Which predictions are counted?", { exact: true })
+    .click();
+  await page.getByLabel("Keep the same 67 predictions").check();
+  await expect(chart.locator(".time-year")).toHaveCount(5);
+  await expect(chart).toContainText("Same 67 predictions in every reading");
+});
+
+test("target-year visualization is readable and accessible on desktop and mobile", async ({
+  page,
+}) => {
+  await page.goto("/#by-target-year");
+  const chart = page.locator("#by-target-year");
+  await chart.screenshot({ path: "work/screenshots/target-years-desktop.png" });
+  await chart
+    .getByRole("button", { name: "Share of each group", exact: true })
+    .click();
+  await chart.screenshot({ path: "work/screenshots/target-years-share.png" });
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const year = chart.getByRole("button", { name: /^2019: 23 predictions;/ });
+    if ((await year.getAttribute("aria-expanded")) !== "true")
+      await year.click();
+    await expect(chart.locator(".time-records tbody tr")).toHaveCount(23);
+    const result = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      .analyze();
+    expect(result.violations).toEqual([]);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await chart
+      .getByRole("button", { name: "Close target-year predictions" })
+      .click();
+  }
+  await chart
+    .getByRole("button", { name: "Number of predictions", exact: true })
+    .click();
+  await chart.screenshot({ path: "work/screenshots/target-years-mobile.png" });
+});

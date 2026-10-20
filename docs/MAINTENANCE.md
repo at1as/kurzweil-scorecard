@@ -40,6 +40,8 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 
 The filename table is a map, not a replacement for reading the relevant code. [DATA_MODEL.md](DATA_MODEL.md) describes the intake model; the evidence schema and [V03_INTEGRATION_REVIEW.md](V03_INTEGRATION_REVIEW.md) cover the later release.
 
+The field and target-year charts share interpretation/cohort state through `src/components/story-comparison-context.tsx`. The time view in `src/components/target-year-chart.tsx` regroups the same eligible records via `targetYearResults` in `src/lib/publication.ts`. See [TIME_VIEW.md](TIME_VIEW.md) for the chart choice and why no drift regression or extrapolation is shown.
+
 ## Preserve the research trail
 
 Original CSV/workbook inputs, supplied v0.2/v0.3 packages, and `data/releases/` are historical evidence. Never edit them to introduce a new judgment. Generated data under `data/generated/` and public download copies are outputs of the importer, not editing surfaces.

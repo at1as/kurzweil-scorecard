@@ -1,5 +1,11 @@
 # Dataset and site history
 
+## 2026-10-19 — Outcomes by target year
+
+Private checkpoint before this visualization: `9ca04d6`. Added a Story chart grouping due forecasts by their target year, with count and percentage views. Selecting a year opens its records in place; evidence uses the existing panel. Field and year charts share interpretation and common-cohort settings and the same eligible record population.
+
+The largest reference groups are 2009 (38 records) and 2019 (23). Sample sizes stay visible, and the interface explains that older deadlines have had longer to catch up. No dates, judgments or eligibility flags changed. `TIME_VIEW.md` documents why the available timing evidence does not support an exact-drift regression or extrapolation.
+
 ## 2026-10-19 — MIT license and private repository checkpoint
 
 Added the MIT License with Jason Willems as copyright holder, updated package metadata and public documentation, and retained the approved commit email. Updated the local Git remote to the corrected `at1as/kurzweil-scorecard` repository. This checkpoint includes the author CTAs, static-export tooling, public README, screenshot and maintenance documentation. The GitHub repository remains private; the personal-site checkout is unchanged.

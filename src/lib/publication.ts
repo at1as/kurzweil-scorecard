@@ -99,3 +99,41 @@ export function categoryResults(
     })
     .sort((a, b) => b.due - a.due || a.name.localeCompare(b.name));
 }
+
+export type ScoredOutcome = (typeof OUTCOME_ORDER)[number];
+export type TargetYearResult = {
+  year: number;
+  records: ForecastSummary[];
+  counts: Record<ScoredOutcome, number>;
+};
+/** Regroup the exact scored field population; do not introduce another denominator. */
+export function targetYearResults(rows: CategoryResult[]): TargetYearResult[] {
+  const groups = new Map<number, TargetYearResult>();
+  for (const record of rows.flatMap((row) => row.records)) {
+    const year = Number(record.target);
+    if (!Number.isInteger(year))
+      throw Error("Scored forecasts need a target year");
+    let group = groups.get(year);
+    if (!group) {
+      group = {
+        year,
+        records: [],
+        counts: { CORRECT: 0, LATE: 0, PARTIAL: 0, MISSED: 0 },
+      };
+      groups.set(year, group);
+    }
+    group.records.push(record);
+    group.counts[record.verdict as ScoredOutcome]++;
+  }
+  return [...groups.values()]
+    .sort((a, b) => a.year - b.year)
+    .map((group) => ({
+      ...group,
+      records: [...group.records].sort(
+        (a, b) =>
+          OUTCOME_ORDER.indexOf(a.verdict as ScoredOutcome) -
+            OUTCOME_ORDER.indexOf(b.verdict as ScoredOutcome) ||
+          a.id.localeCompare(b.id),
+      ),
+    }));
+}

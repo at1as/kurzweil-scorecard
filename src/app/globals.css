@@ -4204,3 +4204,236 @@ button.category-name:hover {
     gap: 16px;
   }
 }
+
+.time-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.time-plot {
+  margin: 30px 0 18px;
+}
+.time-axis-title,
+.time-x-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+.time-axis-title {
+  margin-bottom: 22px;
+}
+.time-chart-body {
+  position: relative;
+  padding-left: 44px;
+}
+.time-grid {
+  position: absolute;
+  top: 0;
+  left: 44px;
+  right: 0;
+  height: 280px;
+  pointer-events: none;
+}
+.time-grid-line {
+  position: absolute;
+  width: 100%;
+  border-top: 1px solid var(--line);
+}
+.time-grid-line span {
+  position: absolute;
+  right: calc(100% + 10px);
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--muted);
+}
+.time-columns {
+  position: relative;
+  display: grid;
+  gap: 12px;
+}
+.time-year {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 0;
+  background: none;
+  padding: 0 4px 5px;
+  border-radius: 2px;
+}
+.time-column {
+  width: 100%;
+  max-width: 106px;
+  height: 280px;
+  display: flex;
+  align-items: flex-end;
+}
+.time-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  min-height: 2px;
+  outline: 1px solid var(--paper);
+}
+.time-segment {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  border-top: 1px solid var(--paper);
+  font-size: 12px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  min-height: 0;
+}
+.time-segment i {
+  font-style: normal;
+  opacity: 0.85;
+}
+.time-correct {
+  background: #385c45;
+}
+.time-late {
+  background: #3d617d;
+}
+.time-partial {
+  background: #86632b;
+}
+.time-missed {
+  background: #994a3f;
+}
+.time-year:hover .time-stack,
+.time-year[aria-expanded="true"] .time-stack {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.time-year-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.time-year[aria-expanded="true"] .time-year-label svg {
+  transform: rotate(90deg);
+}
+.time-sample {
+  font-size: 11px;
+  color: var(--muted);
+}
+.time-x-label {
+  text-align: center;
+  padding-left: 44px;
+  margin-top: 12px;
+}
+.time-footnote {
+  max-width: 900px;
+}
+.time-details {
+  background: #eeefe7;
+  border: 1px solid var(--line);
+  margin-top: 24px;
+  padding: 22px 24px 0;
+}
+.time-detail-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.time-detail-heading h3 {
+  font-size: 17px;
+}
+.time-detail-heading h3 span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.time-close {
+  padding: 10px;
+  background: none;
+  border: 1px solid var(--line);
+}
+.time-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 18px 0;
+}
+.time-counts > span {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 12px;
+}
+.time-counts i {
+  font-style: normal;
+}
+.time-counts small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.time-record-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+}
+.time-records th:first-child {
+  width: 78%;
+}
+.time-records th:last-child {
+  width: 22%;
+}
+.time-records thead {
+  position: sticky;
+  top: 0;
+  background: #eeefe7;
+  z-index: 1;
+}
+@media (max-width: 760px) {
+  .time-controls {
+    align-items: flex-start;
+  }
+  .time-columns {
+    gap: 6px;
+  }
+  .time-year {
+    padding-left: 1px;
+    padding-right: 1px;
+  }
+  .time-segment {
+    font-size: 10px;
+  }
+  .time-segment i {
+    display: none;
+  }
+  .time-year-label {
+    font-size: 11px;
+    gap: 0;
+  }
+  .time-year-label svg {
+    display: none;
+  }
+  .time-sample {
+    font-size: 10px;
+  }
+  .time-details {
+    padding: 16px 10px 0;
+  }
+  .time-detail-heading h3 span {
+    display: block;
+    margin-top: 4px;
+  }
+  .time-counts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .time-records th:first-child {
+    width: 70%;
+  }
+  .time-records th:last-child {
+    width: 30%;
+  }
+}
