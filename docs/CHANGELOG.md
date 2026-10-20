@@ -1,5 +1,11 @@
 # Dataset and site history
 
+## 2026-10-20 — Simplify optional collection breakdowns
+
+Checkpoint before this change: `f3a4f53`. Moved “More breakdowns” after the target-year chart and made prediction type its default grouping. A single table shows due forecasts and the four outcomes; future and undated counts sit beneath group names. Removed the redundant view modes, empty unreviewed/unknown columns and unresolved forecast-horizon option. Field, target-decade and publication-decade groupings remain available.
+
+The table now follows the same interpretation as the field and year charts. Every count links to that exact population and reading in the ledger. Research records, assessments, eligibility and history are unchanged.
+
 ## 2026-10-20 — Simplify Story population controls
 
 Removed “Keep the same 67 predictions” and its explanatory block: it only excluded K036 from the reference and broader readings. The Story field and year charts now always show each reading's eligible forecasts (68 reference/broader, 67 strict at this snapshot). Old Story/category links discard the retired cohort parameter while preserving the interpretation and evidence. Research data, historical assessments and the methodology's fixed-population comparison remain unchanged.

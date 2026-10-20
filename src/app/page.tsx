@@ -168,12 +168,6 @@ export default function Overview() {
           <CategoryExplorer />
           <details className="editorial-disclosure">
             <summary>
-              More breakdowns: decade, forecast horizon & claim type
-            </summary>
-            <GroupAnalysis records={predictions} asOf={AS_OF} />
-          </details>
-          <details className="editorial-disclosure">
-            <summary>
               How the {categories.length} categories are defined
             </summary>
             <div className="taxonomy-definitions">
@@ -187,6 +181,13 @@ export default function Overview() {
           </details>
         </section>
         <TargetYearChart asOfLabel={AS_OF_LABEL} />
+        <details
+          id="more-breakdowns"
+          className="editorial-disclosure story-breakdowns"
+        >
+          <summary>More breakdowns: prediction type & decade</summary>
+          <GroupAnalysis records={predictions} asOf={AS_OF} />
+        </details>
       </StoryComparisonProvider>
       <div className="explanation-area" id="about-the-judgments">
         <div className="explanation-divider">

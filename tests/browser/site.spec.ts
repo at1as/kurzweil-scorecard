@@ -153,44 +153,139 @@ test("detail URLs are stable and expose unchanged provenance", async ({
     404,
   );
 });
-test("category comparisons retain zero categories and show outcome counts without rankings", async ({
+test("optional breakdowns default to prediction type after the target-year chart", async ({
   page,
 }) => {
   await page.goto("/categories/");
   await expect(page.locator(".category-rows > li")).toHaveCount(13);
-  await page
-    .getByText("More breakdowns: decade, forecast horizon & claim type", {
-      exact: true,
-    })
-    .click();
-  await expect(page.locator("#by-field .analysis-table tbody tr")).toHaveCount(
-    13,
+  const section = page.locator("#more-breakdowns");
+  await expect(section).not.toHaveAttribute("open");
+  await expect(page.locator("#by-target-year + #more-breakdowns")).toHaveCount(
+    1,
+  );
+  await section.locator("summary").click();
+  await expect(section.getByLabel("Group by")).toHaveValue("type");
+  await expect(section.locator("select option")).toHaveText([
+    "Prediction type",
+    "Target decade",
+    "Publication decade",
+    "Field",
+  ]);
+  await expect(section.locator("tbody tr")).toHaveCount(6);
+  await expect(section.locator("thead th")).toHaveText([
+    "Prediction type",
+    "Due",
+    "✓ On time",
+    "↗ Late",
+    "◐ Partial",
+    "× Missed",
+  ]);
+  await expect(section.getByRole("button")).toHaveCount(0);
+  await expect(section).not.toContainText("Unreviewed");
+  await section.getByLabel("Group by").selectOption("category");
+  await expect(section.locator("tbody tr")).toHaveCount(13);
+  await expect(
+    section
+      .locator("tbody tr")
+      .filter({ hasText: "Manufacturing & materials" }),
+  ).toContainText("No records");
+  await expect(
+    section.locator("tbody tr").filter({ hasText: "Energy & environment" }),
+  ).toContainText("2 future");
+});
+
+test("breakdown counts and ledger links follow the shared interpretation", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const section = page.locator("#more-breakdowns");
+  await section.locator("summary").click();
+  await expect(section.locator(".analysis-controls")).toContainText(
+    "68 with deadlines passed · Our judgment",
+  );
+  await section.getByLabel("Group by").selectOption("category");
+  const neuroscience = section
+    .locator("tbody tr")
+    .filter({ hasText: "Neuroscience & human augmentation" });
+  await expect(
+    neuroscience.getByRole("link", { name: /2 due predictions/ }),
+  ).toBeVisible();
+  await page.getByLabel("Target-year interpretation").selectOption("strict");
+  await expect(section.locator(".analysis-controls")).toContainText(
+    "67 with deadlines passed · Stricter / alternative",
   );
   await expect(
-    page
-      .locator("#by-field .analysis-table tbody tr")
-      .filter({ hasText: "Manufacturing & materials" }),
-  ).toContainText("0");
-  await page.getByRole("button", { name: "Due outcomes", exact: true }).click();
-  await expect(page.locator("#by-field .analysis-table")).toContainText(
-    "Current outcome unknown",
+    neuroscience.getByRole("link", { name: /1 due predictions/ }),
+  ).toBeVisible();
+  await expect(
+    neuroscience.getByRole("link", { name: "4 future", exact: true }),
+  ).toHaveAttribute("href", /reading=strict.*view=future/);
+  for (const href of await section
+    .locator("a")
+    .evaluateAll((links) => links.map((link) => link.getAttribute("href")))) {
+    expect(new URL(href!, "http://localhost").searchParams.get("reading")).toBe(
+      "strict",
+    );
+  }
+  await neuroscience.getByRole("link", { name: /1 due predictions/ }).click();
+  await expect(page).toHaveURL(/reading=strict/);
+  await expect(page.locator(".results-toolbar")).toContainText(
+    "1 of 84 records",
   );
-  await expect(page.locator("#by-field .analysis-table")).not.toContainText(
-    "%",
+  await expect(page.locator(".prediction-cell")).toContainText("K073");
+  await page.goBack();
+  await expect(page.getByLabel("Target-year interpretation")).toHaveValue(
+    "strict",
   );
-  await expect(page.locator("#by-field .analysis-table thead")).toContainText(
-    "Late",
+  await page.reload();
+  await section.locator("summary").click();
+  await expect(section.getByLabel("Group by")).toHaveValue("type");
+  await expect(section.locator(".analysis-controls")).toContainText(
+    "67 with deadlines passed",
   );
-  await page.getByRole("button", { name: "Verdicts", exact: true }).click();
-  await expect(page.locator("#by-field .analysis-table")).toContainText(
-    "Pending",
-  );
-  await page.getByLabel("Group by").selectOption("horizon");
-  await page.getByRole("button", { name: "Collection", exact: true }).click();
-  await expect(page.locator("#by-field .analysis-table")).toContainText(
-    "Unresolved",
+  await page
+    .getByLabel("Interpretation", { exact: true })
+    .selectOption("broader");
+  await expect(section.locator(".analysis-controls")).toContainText(
+    "68 with deadlines passed · Broader / directional",
   );
 });
+
+test("expanded collection breakdown remains accessible on desktop and mobile", async ({
+  page,
+}) => {
+  await fs.mkdir("work/screenshots", { recursive: true });
+  await page.goto("/#more-breakdowns");
+  const section = page.locator("#more-breakdowns");
+  await section.locator("summary").click();
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const tableSize = await section
+      .locator(".table-scroll")
+      .evaluate((element) => ({
+        width: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+      }));
+    expect(
+      tableSize.scrollWidth,
+      JSON.stringify({ viewport: width, ...tableSize }),
+    ).toBeLessThanOrEqual(tableSize.width);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    const results = await new AxeBuilder({ page })
+      .include("#more-breakdowns")
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      .analyze();
+    expect(results.violations).toEqual([]);
+    await section.screenshot({
+      path: `work/screenshots/collection-breakdown-${width}.png`,
+    });
+  }
+});
+
 test("curated evidence preserves source limits, interval timing, and related versions", async ({
   page,
 }) => {

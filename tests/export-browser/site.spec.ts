@@ -98,6 +98,27 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
     "strict",
   );
+  const breakdown = page.locator("#more-breakdowns");
+  await breakdown.locator("summary").click();
+  await expect(breakdown.locator(".analysis-controls")).toContainText(
+    "67 with deadlines passed",
+  );
+  await breakdown.getByLabel("Group by").selectOption("category");
+  const due = breakdown.getByRole("link", {
+    name: "Neuroscience & human augmentation: 1 due predictions",
+    exact: true,
+  });
+  await expect(due).toHaveAttribute(
+    "href",
+    new RegExp(`^${base}/predictions/`),
+  );
+  await due.click();
+  await expect(page).toHaveURL(
+    new RegExp(`${base}/predictions/.*reading=strict`),
+  );
+  await expect(page.locator(".results-toolbar")).toContainText(
+    "1 of 84 records",
+  );
   await page.goto(`${base}/predictions/K002/`);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",

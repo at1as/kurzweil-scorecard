@@ -19,7 +19,7 @@ Stacked columns show composition and sample size together. Counts are the defaul
 
 Selecting a column opens that year's records below the chart, grouped by judgment. Their links use the evidence panel, keeping the chart and selected year in place. A close control restores focus to the year button. The count/percentage choice and selected year are local presentation state; the reading persists in the existing URL parameter. Each reading uses its eligible forecasts; the former common-cohort toggle was removed because it only excluded K036.
 
-Field and year comparisons share `StoryComparisonProvider`. `targetYearResults` regroups the field chart's exact eligible records, so the chart cannot quietly introduce a second denominator. Future and undated forecasts remain outside it. K036's 2025 column disappears in the strict reading, where its deadline is 2026 and has not passed at the research cutoff. Both interpretation controls update the same state.
+Field and year comparisons share `StoryComparisonProvider`. `targetYearResults` regroups the field chart's exact eligible records, so the chart cannot quietly introduce a second denominator. Future and undated forecasts remain outside it. K036's 2025 column disappears in the strict reading, where its deadline is 2026 and has not passed at the research cutoff. Both interpretation controls update the same state, including the optional collection breakdown below the year chart. That disclosure defaults to prediction type, and its outcome counts and ledger links use the selected reading.
 
 ## Why there is no drift regression or extrapolation
 

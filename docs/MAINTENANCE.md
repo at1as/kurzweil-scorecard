@@ -25,6 +25,7 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 | ------------------------------------------- | ------------------------------------------------------------------------- |
 | Story, outcome summaries, examples          | `src/app/page.tsx`                                                        |
 | Expandable field comparison                 | `src/components/category-explorer.tsx`                                    |
+| Optional collection breakdowns              | `src/components/group-analysis.tsx`, `src/lib/collection-breakdown.ts`    |
 | Ledger and URL filters                      | `src/components/scorecard.tsx`                                            |
 | Evidence drawer, focus and browser history  | `src/components/evidence-panel.tsx`                                       |
 | Summary data projected into the drawer      | `src/lib/evidence-summary.ts`                                             |
@@ -40,7 +41,9 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 
 The filename table is a map, not a replacement for reading the relevant code. [DATA_MODEL.md](DATA_MODEL.md) describes the intake model; the evidence schema and [V03_INTEGRATION_REVIEW.md](V03_INTEGRATION_REVIEW.md) cover the later release.
 
-The field and target-year charts share interpretation state through `src/components/story-comparison-context.tsx`. The time view in `src/components/target-year-chart.tsx` regroups the same eligible records via `targetYearResults` in `src/lib/publication.ts`. See [TIME_VIEW.md](TIME_VIEW.md) for the chart choice and why no drift regression or extrapolation is shown.
+The field chart, target-year chart and optional collection breakdowns share interpretation state through `src/components/story-comparison-context.tsx`. The time view in `src/components/target-year-chart.tsx` regroups the same eligible records via `targetYearResults` in `src/lib/publication.ts`. See [TIME_VIEW.md](TIME_VIEW.md) for the chart choice and why no drift regression or extrapolation is shown.
+
+The optional breakdown follows the year chart and defaults to prediction type. It has one due-outcome table, with future and undated links beneath each group. Counts and ledger links use the same interpretation and eligibility filters; forecast horizon remains available in the research ledger, not the Story breakdown.
 
 ## Preserve the research trail
 

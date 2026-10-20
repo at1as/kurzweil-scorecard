@@ -828,12 +828,6 @@ summary {
   color: var(--muted);
   margin-top: 3px;
 }
-.collection-bar-cell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  justify-content: flex-end;
-}
 .mini-bar {
   height: 4px;
   background: #eeeee5;
@@ -844,10 +838,6 @@ summary {
   display: block;
   height: 100%;
   background: #7e9177;
-}
-.collection-bar-cell strong {
-  font-weight: 500;
-  width: 20px;
 }
 .muted {
   color: var(--muted);
@@ -2796,22 +2786,6 @@ summary {
 .rate-mark .mini-bar {
   width: 60px;
 }
-.group-distribution {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-}
-.group-distribution a {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.group-distribution strong {
-  font-size: 10px;
-  font-weight: 500;
-}
-
 /* Evidence release annotations reuse the existing editorial layout. */
 .qualifier {
   display: block;
@@ -4397,5 +4371,68 @@ button.category-name:hover {
   }
   .time-records th:last-child {
     width: 30%;
+  }
+}
+
+/* Optional breakdowns follow the two main Story charts. */
+.story-breakdowns {
+  border-top: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 24px 0;
+}
+.collection-outcomes {
+  min-width: 540px;
+  font-size: 13px;
+}
+.collection-outcomes thead th {
+  font-size: 11px;
+}
+.collection-outcomes tbody th {
+  width: 38%;
+}
+.collection-outcomes .group-outside {
+  font-size: 11px;
+  margin-top: 5px;
+}
+.collection-outcomes td a {
+  display: inline-block;
+  min-width: 28px;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+.group-analysis .analysis-controls p,
+.group-analysis .analysis-note,
+.group-analysis .footnote {
+  font-size: 12px;
+}
+@media (max-width: 640px) {
+  .collection-outcomes {
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 12px;
+  }
+  .collection-outcomes thead th:first-child,
+  .collection-outcomes tbody th {
+    width: 34%;
+  }
+  .collection-outcomes thead th,
+  .collection-outcomes tbody th,
+  .collection-outcomes td {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+  .collection-outcomes thead th {
+    white-space: normal;
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .collection-outcomes td a {
+    min-width: 24px;
+  }
+  .collection-outcomes thead th span,
+  .collection-outcomes tbody th > a > svg {
+    display: none;
   }
 }
