@@ -1,5 +1,21 @@
 # Dataset and site history
 
+## 2026-10-19 — MIT license and private repository checkpoint
+
+Added the MIT License with Jason Willems as copyright holder, updated package metadata and public documentation, and retained the approved commit email. Updated the local Git remote to the corrected `at1as/kurzweil-scorecard` repository. This checkpoint includes the author CTAs, static-export tooling, public README, screenshot and maintenance documentation. The GitHub repository remains private; the personal-site checkout is unchanged.
+
+## 2026-10-19 — Public repository review
+
+Reviewed reachable Git history, publishable working files, Office-document contents and metadata, and dependency advisories. No credential pattern matches were found; the maintainer's personal commit email is a publication choice. Repository visibility and Git history were not changed. See `PUBLIC_READINESS.md` for scope and findings.
+
+Replaced the internal-facing README with a public introduction, a field-comparison screenshot, setup/check commands, research limits and documentation links. Preserved its detailed data/interface material in `REFERENCE.md`, added contribution guidance, and labeled the original build prompt as historical. Code, research data and assessments are unchanged by this review.
+
+## 2026-10-19 — Author links and public-site export preparation
+
+Evidence-panel checkpoint: `2d83eec`. Added “More from Jason” in the header and a footer author/blog invitation, following the public `what-if-i-joined` site. Prepared a separate static build for `/sites/kurzweil/`, including native asset/download paths, evidence fetches, filter history and production canonical links. The root preview remains available.
+
+Added a validated export, hash manifest, guarded dry-run/copy command, subpath browser checks and an isolated Jekyll compatibility check. Copying requires an explicit `--write`; no changes were made to the Pages checkout and nothing was published. Added maintenance and deployment guides plus repository instructions. Research data, judgments and eligibility are unchanged.
+
 ## 2026-10-19 — Evidence without leaving the page
 
 Story squares, expanded prediction rows, judgment examples and ledger records now open an evidence side panel. Closing it restores the same expanded field or filtered table, scroll position and keyboard focus. Browser Back/Forward and direct panel links work; full record URLs and history remain available. The panel carries over the chosen interpretation and separates its controls from the underlying comparison. Static summaries load per record, with recovery for failed loads. All imported data and judgments are unchanged.

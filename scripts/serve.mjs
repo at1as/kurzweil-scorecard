@@ -1,8 +1,18 @@
 import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
-const root = path.resolve("out");
-const port = Number(process.env.PORT || 3000);
+const exported = process.argv.includes("--export");
+const settings = exported
+  ? JSON.parse(
+      await fs.readFile(
+        new URL("../config/public-site.json", import.meta.url),
+        "utf8",
+      ),
+    )
+  : null;
+const root = path.resolve(exported ? "work/public-build" : "out");
+const basePath = settings?.basePath ?? "";
+const port = Number(process.env.PORT || (exported ? 3100 : 3000));
 const types = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
@@ -21,7 +31,18 @@ http
       const pathname = decodeURIComponent(
         new URL(req.url, "http://localhost").pathname,
       );
-      let file = path.resolve(root, "." + pathname);
+      if (basePath && pathname === basePath) {
+        res.writeHead(308, { Location: `${basePath}/` }).end();
+        return;
+      }
+      if (basePath && !pathname.startsWith(`${basePath}/`)) {
+        res.writeHead(404).end("Outside this site");
+        return;
+      }
+      let file = path.resolve(
+        root,
+        "." + (pathname.slice(basePath.length) || "/"),
+      );
       if (!file.startsWith(root + path.sep) && file !== root) {
         res.writeHead(403).end();
         return;
@@ -46,5 +67,5 @@ http
     }
   })
   .listen(port, "127.0.0.1", () =>
-    console.log(`Local: http://127.0.0.1:${port}`),
+    console.log(`Local: http://127.0.0.1:${port}${basePath}/`),
   );

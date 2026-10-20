@@ -4150,3 +4150,57 @@ button.category-name:hover {
     font-size: 13px;
   }
 }
+
+.author-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.author-cta:hover {
+  background: var(--green);
+  color: var(--paper);
+}
+.footer-author {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+.footer-author p {
+  font-size: 15px;
+  color: var(--ink);
+}
+.footer-author p a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.footer-author span {
+  font-size: 12px;
+  display: block;
+  margin-top: 5px;
+}
+@media (max-width: 760px) {
+  .site-header nav {
+    order: 1;
+  }
+  .header-author {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+  .footer-author {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+}

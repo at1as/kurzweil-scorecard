@@ -1,3 +1,5 @@
+> **Historical build brief.** This is the original project request. The current interface and research state are documented in [README.md](README.md) and [docs/MAINTENANCE.md](docs/MAINTENANCE.md); some requirements below have since changed.
+
 # Build an Interactive Ray Kurzweil Predictions Scorecard
 
 ## Objective

@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { sitePath } from "@/lib/site-path";
 import { EvidenceLink } from "./evidence-panel";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -92,7 +93,7 @@ export function Scorecard() {
     window.history.replaceState(
       null,
       "",
-      `${pathname}${query ? `?${query}` : ""}`,
+      sitePath(`${pathname}${query ? `?${query}` : ""}`),
     );
   }
   const filtered = useMemo(

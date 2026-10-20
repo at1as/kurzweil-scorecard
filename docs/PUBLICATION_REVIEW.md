@@ -58,3 +58,13 @@ The recommended side panel is now the default detail interaction from the Story 
 The underlying page remains mounted. Close, Escape, backdrop click and browser Back restore the originating row, keyboard focus and scroll position, including URLs with a section anchor. Forward reopens the panel. Reading changes inside it do not change the underlying comparison. A native modal dialog makes background content inert; an explicit Tab loop keeps keyboard focus inside. On mobile it fills the viewport. Failed loads offer retry and a full-record fallback.
 
 Each record summary is generated during static export and fetched only when needed. No application server or new dependency is introduced. The 172 existing record pages and all original data remain intact. Tests cover summary fidelity across all readings, deadline exclusions, Story/ledger return behavior, browser history, focus containment, clipboard links, mobile accessibility and loading failures.
+
+## Public-site export preparation
+
+The header now links to Jason's blog with “More from Jason.” The footer adds his author link and a second blog invitation. Desktop and mobile screenshots were inspected; the existing visual design and research presentation are retained.
+
+The dedicated export targets `/sites/kurzweil/` and keeps the ordinary root preview intact. Native download paths, evidence JSON requests, compatibility redirects and filter-history URLs honor the prefix. Each page has a canonical public URL. Packaging checks all curated and original record outputs and public-download hashes, then writes a manifest. The separate copy command defaults to a dry run and protects destination edits; temporary-directory tests cover installation, replacement and rejected writes.
+
+Validation: data integrity and TypeScript passed, with 74 unit tests, 18 root-preview browser tests and 3 export-browser tests passing. The subpath suite fetched all 1,137 exported files and verified their hashes. An isolated Jekyll 4.2.2 build with the parent site's include rules preserved those files and the manifest byte for byte. It did not build the full personal site. That integration check remains part of later publication.
+
+No research data, eligibility rules or judgments changed. The `at1as.github.io` checkout was left untouched; its Git status matched the initial snapshot. No deployment was performed. Maintenance and static-export guides document the next steps and the remaining research limits.

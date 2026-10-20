@@ -1,10 +1,14 @@
+import { pageMetadata } from "@/lib/site-meta";
 import Link from "next/link";
 import { predictions } from "@/lib/data";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Scorecard } from "@/components/scorecard";
 import { Eyebrow } from "@/components/ui";
-export const metadata: Metadata = { title: "The prediction ledger" };
+export const metadata: Metadata = pageMetadata(
+  "/predictions/",
+  "The prediction ledger",
+);
 export default function PredictionsPage() {
   return (
     <div className="container page-container predictions-page">

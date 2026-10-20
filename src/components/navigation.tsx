@@ -1,4 +1,5 @@
 "use client";
+import { AUTHOR_BLOG } from "@/lib/site-path";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
@@ -42,8 +43,8 @@ export function Navigation() {
             </Link>
           ))}
         </nav>
-        <a href="/data/predictions.json" className="header-data" download>
-          Open dataset <ArrowUpRight size={15} />
+        <a href={AUTHOR_BLOG} className="author-cta header-author">
+          More from Jason <ArrowUpRight size={15} aria-hidden="true" />
         </a>
       </div>
     </header>

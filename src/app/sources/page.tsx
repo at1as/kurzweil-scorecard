@@ -1,3 +1,5 @@
+import { pageMetadata } from "@/lib/site-meta";
+import { sitePath } from "@/lib/site-path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowDownToLine, BookOpen } from "lucide-react";
@@ -12,7 +14,7 @@ import {
   researchSupplement,
 } from "@/lib/data";
 import { Eyebrow, External, Notice, SectionHeading } from "@/components/ui";
-export const metadata: Metadata = { title: "Sources & research coverage" };
+export const metadata: Metadata = pageMetadata("/sources/", "Sources");
 export default function Sources() {
   const legacy = coverage.filter((s) => s.id.startsWith("LEGACY"));
   return (
@@ -33,7 +35,10 @@ export default function Sources() {
         clarified source-specific support, and added{" "}
         {researchSupplement.sources.length} primary sources. Outcome assessments
         retain the {researchSupplement.outcome_cutoff} cutoff.{" "}
-        <a href="/data/research/citation-supplement-2026-10-18.json" download>
+        <a
+          href={sitePath("/data/research/citation-supplement-2026-10-18.json")}
+          download
+        >
           Download the supplement
         </a>
         .
@@ -156,12 +161,16 @@ export default function Sources() {
           <div className="hero-actions">
             <a
               className="button button-primary"
-              href="/data/intake.csv"
+              href={sitePath("/data/intake.csv")}
               download
             >
               Original intake CSV <ArrowDownToLine size={16} />
             </a>
-            <a className="button" href="/data/predictions.json" download>
+            <a
+              className="button"
+              href={sitePath("/data/predictions.json")}
+              download
+            >
               Current canonical JSON <ArrowDownToLine size={16} />
             </a>
           </div>
@@ -189,26 +198,31 @@ export default function Sources() {
               ],
             ].map(([file, label]) => (
               <li key={file}>
-                <a href={`/data/releases/v0.3/${file}`} download>
+                <a href={sitePath(`/data/releases/v0.3/${file}`)} download>
                   {label}
                 </a>
               </li>
             ))}
             <li>
               <a
-                href="/data/releases/v0.2/predictions.canonical.v0.2.json"
+                href={sitePath(
+                  "/data/releases/v0.2/predictions.canonical.v0.2.json",
+                )}
                 download
               >
                 v0.2 previous assessments
               </a>
             </li>
             <li>
-              <a href="/data/releases/v0.1/predictions.json" download>
+              <a
+                href={sitePath("/data/releases/v0.1/predictions.json")}
+                download
+              >
                 v0.1 original site snapshot
               </a>
             </li>
             <li>
-              <a href="/data/metrics.json" download>
+              <a href={sitePath("/data/metrics.json")} download>
                 Recomputed current subset metrics
               </a>
             </li>

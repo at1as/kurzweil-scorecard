@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, Check, Copy, X } from "lucide-react";
 import type { Reading } from "@/lib/evidence-model";
 import type { EvidenceSummary } from "@/lib/evidence-summary";
+import { sitePath } from "@/lib/site-path";
 import { PUBLIC_READINGS } from "@/lib/publication";
 import { Badge, External } from "./ui";
 
@@ -34,7 +35,9 @@ function selectionFromUrl(): Selection | null {
   };
 }
 function recordUrl({ id, reading }: Selection) {
-  return `/predictions/${id}/${reading === "reference" ? "" : `?reading=${reading}`}`;
+  return sitePath(
+    `/predictions/${id}/${reading === "reference" ? "" : `?reading=${reading}`}`,
+  );
 }
 function panelUrl(selection: Selection) {
   const url = new URL(window.location.href);
@@ -222,7 +225,7 @@ function EvidencePanel({
     const cached = cache.get(selection.id);
     setRecord(cached ?? null);
     if (!cached) {
-      fetch(`/evidence/${selection.id}/summary.json`, {
+      fetch(sitePath(`/evidence/${selection.id}/summary.json`), {
         signal: controller.signal,
       })
         .then((response) => {

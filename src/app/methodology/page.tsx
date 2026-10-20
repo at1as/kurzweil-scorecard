@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/site-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AS_OF, AS_OF_LABEL, predictions, originalIntake } from "@/lib/data";
@@ -6,7 +7,7 @@ import { scorecardUrl } from "@/lib/filters";
 import { Badge, Eyebrow } from "@/components/ui";
 import { ModeComparison } from "@/components/mode-comparison";
 import type { Verdict } from "@/lib/model";
-export const metadata: Metadata = { title: "How we judge predictions" };
+export const metadata: Metadata = pageMetadata("/methodology/", "Methodology");
 const definitions: { v: Verdict; text: string }[] = [
   {
     v: "CORRECT",

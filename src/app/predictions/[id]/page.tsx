@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/site-meta";
 import Link from "next/link";
 import { InterpretationPanels } from "@/components/interpretation-panels";
 import { notFound } from "next/navigation";
@@ -36,7 +37,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const p = allRecords.find((p) => p.id === id);
-  return { title: p ? `${id}: ${claim(p)}` : "Prediction not found" };
+  return pageMetadata(
+    `/predictions/${id}/`,
+    p ? `${id}: ${claim(p)}` : "Prediction not found",
+  );
 }
 export default async function PredictionPage({
   params,

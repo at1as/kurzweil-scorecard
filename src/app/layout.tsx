@@ -1,3 +1,5 @@
+import { AUTHOR_HOME, AUTHOR_BLOG, sitePath } from "@/lib/site-path";
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import "@fontsource-variable/inter";
@@ -42,8 +44,19 @@ export default function RootLayout({
             <div className="footer-links">
               <Link href="/methodology/">Methodology</Link>
               <Link href="/sources/">Source coverage</Link>
-              <a href="/data/predictions.json" download>
+              <a href={sitePath("/data/predictions.json")} download>
                 Canonical JSON ↗
+              </a>
+            </div>
+            <div className="footer-author">
+              <div>
+                <p>
+                  Built by <a href={AUTHOR_HOME}>Jason Willems</a>.
+                </p>
+                <span>I write about software, AI and building products.</span>
+              </div>
+              <a className="author-cta" href={AUTHOR_BLOG}>
+                Read my blog <ArrowRight size={15} aria-hidden="true" />
               </a>
             </div>
             <div className="footer-bottom">

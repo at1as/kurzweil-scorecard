@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/site-meta";
 import Link from "next/link";
 import { EvidenceLink } from "@/components/evidence-panel";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
@@ -22,6 +23,8 @@ import { GroupAnalysis } from "@/components/group-analysis";
 import { READINGS, type Reading } from "@/lib/evidence-model";
 import { ModeComparison } from "@/components/mode-comparison";
 import { Eyebrow, Badge } from "@/components/ui";
+
+export const metadata = pageMetadata("/", "Where was Ray Kurzweil right?");
 
 export default function Overview() {
   const stats = summarize(predictions, AS_OF);
