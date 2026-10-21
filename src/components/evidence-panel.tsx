@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Check, Copy, X } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, Copy, X } from "lucide-react";
 import type { Reading } from "@/lib/evidence-model";
 import type { EvidenceSummary } from "@/lib/evidence-summary";
 import { sitePath } from "@/lib/site-path";
@@ -301,10 +301,16 @@ function EvidencePanel({
           type="button"
           onClick={onClose}
           className="evidence-close"
-          aria-label="Close evidence"
+          aria-label="Close evidence — back to predictions"
         >
-          <X size={20} aria-hidden="true" />
-          <span>Close</span>
+          <X className="evidence-close-desktop" size={20} aria-hidden="true" />
+          <span className="evidence-close-desktop">Close</span>
+          <ArrowLeft
+            className="evidence-close-mobile"
+            size={20}
+            aria-hidden="true"
+          />
+          <span className="evidence-close-mobile">Back to predictions</span>
         </button>
       </header>
       <div

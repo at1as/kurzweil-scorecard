@@ -1,5 +1,9 @@
 # Dataset and site history
 
+## 2026-10-20 — Mobile evidence navigation
+
+On screens up to 700px wide, evidence opens in a bottom sheet with the underlying predictions still visible and a persistent “Back to predictions” control. The return control and footer actions have larger touch targets; the interpretation select avoids text-entry zoom on phones. Existing history, scroll/focus restoration and desktop drawer behavior are preserved.
+
 ## 2026-10-20 — Analytics and social previews
 
 - Public exports include the existing GA tag on the production host. Enhanced Measurement handles navigation; local previews remain untracked.
