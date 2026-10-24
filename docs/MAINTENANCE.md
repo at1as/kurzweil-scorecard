@@ -27,7 +27,7 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 | Expandable field comparison                 | `src/components/category-explorer.tsx`                                    |
 | Optional collection breakdowns              | `src/components/group-analysis.tsx`, `src/lib/collection-breakdown.ts`    |
 | Ledger and URL filters                      | `src/components/scorecard.tsx`                                            |
-| Evidence drawer, focus and browser history  | `src/components/evidence-panel.tsx`                                       |
+| Evidence drawer, focus and browser history  | `src/components/evidence-panel.tsx`, `evidence-link.tsx`, `evidence-dialog.tsx`                                       |
 | Summary data projected into the drawer      | `src/lib/evidence-summary.ts`                                             |
 | Production analytics and share card         | `src/components/page-views.tsx`, `src/app/share-card.png/route.tsx`          |
 | Static summary endpoint                     | `src/app/evidence/[id]/summary.json/route.ts`                             |
@@ -39,6 +39,8 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 | Evidence schemas and adaptation             | `src/lib/evidence-model.ts`, `src/lib/evidence.ts`                        |
 | Import, integrity and release checks        | `scripts/import-data.ts`, `scripts/validate-data.ts`                      |
 | Hosting location, public links and metadata | `config/public-site.json`, `src/lib/site-path.ts`, `src/lib/site-meta.ts` |
+
+The evidence provider and links load with the page; the dialog code is imported only when evidence is opened. Story and header links disable speculative route prefetching so the ledger bundle does not compete with the initial page. Inter and Newsreader use Next local-font preloads for their Latin variable fonts.
 
 The filename table is a map, not a replacement for reading the relevant code. [DATA_MODEL.md](DATA_MODEL.md) describes the intake model; the evidence schema and [V03_INTEGRATION_REVIEW.md](V03_INTEGRATION_REVIEW.md) cover the later release.
 

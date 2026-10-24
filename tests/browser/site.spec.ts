@@ -810,7 +810,8 @@ test("mobile evidence supports direct panel links, source disclosures, and recov
   );
   const bounds = await dialog.boundingBox();
   expect(bounds?.width).toBe(390);
-  expect(bounds?.height).toBe(844);
+  expect(bounds?.height).toBeCloseTo(844 * 0.9, 0);
+  expect(bounds!.y + bounds!.height).toBeCloseTo(844, 0);
   await dialog
     .getByText("The original claim & source", { exact: true })
     .click();

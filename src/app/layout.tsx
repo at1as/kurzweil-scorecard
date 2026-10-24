@@ -3,12 +3,24 @@ import { AUTHOR_HOME, AUTHOR_BLOG, sitePath } from "@/lib/site-path";
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import "@fontsource-variable/inter";
-import "@fontsource-variable/newsreader";
+import localFont from "next/font/local";
 import "./globals.css";
 import { EvidenceProvider } from "@/components/evidence-panel";
 import { Navigation } from "@/components/navigation";
 import { AS_OF_LABEL, datasetVersion } from "@/lib/data";
+const inter = localFont({
+  src: "../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
+  variable: "--font-inter",
+  weight: "100 900",
+  display: "swap",
+});
+const newsreader = localFont({
+  src: "../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2",
+  variable: "--font-newsreader",
+  weight: "200 800",
+  display: "swap",
+  adjustFontFallback: "Times New Roman",
+});
 export const metadata: Metadata = {
   title: {
     default: "Ray Kurzweil Prediction Scorecard",
@@ -22,7 +34,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${newsreader.variable}`}>
       <body>
         <PageViews />
         <EvidenceProvider>
