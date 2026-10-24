@@ -22,6 +22,7 @@ import { StoryComparisonProvider } from "@/components/story-comparison-context";
 import { TargetYearChart } from "@/components/target-year-chart";
 import { CategoryExplorer } from "@/components/category-explorer";
 import { GroupAnalysis } from "@/components/group-analysis";
+import { breakdownViews } from "@/lib/collection-breakdown";
 import { READINGS, type Reading } from "@/lib/evidence-model";
 import { ModeComparison } from "@/components/mode-comparison";
 import { Eyebrow, Badge } from "@/components/ui";
@@ -196,7 +197,7 @@ export default function Overview() {
           className="editorial-disclosure story-breakdowns"
         >
           <summary>Compare by prediction type or decade</summary>
-          <GroupAnalysis records={predictions} asOf={AS_OF} />
+          <GroupAnalysis views={breakdownViews(predictions, AS_OF, names)} />
         </details>
       </StoryComparisonProvider>
       <div className="explanation-area" id="about-the-judgments">

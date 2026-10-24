@@ -22,6 +22,13 @@ test("every exported file is served intact under the configured subpath", async 
   }
   expect((await request.get("/predictions/")).status()).toBe(404);
 });
+test("Story HTML stays compact without the full research payload", async ({
+  request,
+}) => {
+  const response = await request.get(`${base}/`);
+  expect(response.status()).toBe(200);
+  expect((await response.body()).byteLength).toBeLessThan(500_000);
+});
 test("author CTAs, navigation, filters, evidence and downloads work at the production path", async ({
   page,
 }) => {
