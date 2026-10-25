@@ -1,12 +1,11 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import type { Prediction } from "@/lib/model";
 import { scorecardUrl, type Filters } from "@/lib/filters";
 import {
   BREAKDOWN_GROUPS,
-  collectionBreakdown,
+  type BreakdownViews,
   type BreakdownGroup,
 } from "@/lib/collection-breakdown";
 import {
@@ -17,26 +16,10 @@ import {
 } from "@/lib/publication";
 import { useStoryComparison } from "./story-comparison-context";
 
-export function GroupAnalysis({
-  records,
-  asOf,
-}: {
-  records: Prediction[];
-  asOf: string;
-}) {
-  const { reading, rows: fields } = useStoryComparison();
+export function GroupAnalysis({ views }: { views: BreakdownViews }) {
+  const { reading } = useStoryComparison();
   const [group, setGroup] = useState<BreakdownGroup>("type");
-  const { summary, groups } = useMemo(
-    () =>
-      collectionBreakdown(
-        records,
-        asOf,
-        reading,
-        group,
-        fields.map((field) => field.name),
-      ),
-    [records, asOf, reading, group, fields],
-  );
+  const { summary, groups } = views[reading][group];
   const link = (key: string, filters: Partial<Filters> = {}) =>
     scorecardUrl({ [group]: key, ...filters, reading });
   return (

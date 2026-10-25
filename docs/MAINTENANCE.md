@@ -21,30 +21,32 @@ Strict, reference and broader interpretations can change criteria and eligibilit
 
 ## Where to work
 
-| Concern                                     | Entry point                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
-| Story, outcome summaries, examples          | `src/app/page.tsx`                                                        |
-| Expandable field comparison                 | `src/components/category-explorer.tsx`                                    |
-| Optional collection breakdowns              | `src/components/group-analysis.tsx`, `src/lib/collection-breakdown.ts`    |
-| Ledger and URL filters                      | `src/components/scorecard.tsx`                                            |
-| Evidence drawer, focus and browser history  | `src/components/evidence-panel.tsx`                                       |
-| Summary data projected into the drawer      | `src/lib/evidence-summary.ts`                                             |
-| Production analytics and share card         | `src/components/page-views.tsx`, `src/app/share-card.png/route.tsx`          |
-| Static summary endpoint                     | `src/app/evidence/[id]/summary.json/route.ts`                             |
-| Full records and historical assessments     | `src/app/predictions/[id]/page.tsx`                                       |
-| Navigation and author CTAs                  | `src/components/navigation.tsx`, `src/app/layout.tsx`                     |
-| Visual styles                               | `src/app/globals.css`                                                     |
-| Eligibility and metrics                     | `src/lib/scoring.ts`                                                      |
-| Record/source joins and coverage            | `src/lib/data.ts`                                                         |
-| Evidence schemas and adaptation             | `src/lib/evidence-model.ts`, `src/lib/evidence.ts`                        |
-| Import, integrity and release checks        | `scripts/import-data.ts`, `scripts/validate-data.ts`                      |
-| Hosting location, public links and metadata | `config/public-site.json`, `src/lib/site-path.ts`, `src/lib/site-meta.ts` |
+| Concern                                     | Entry point                                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| Story, outcome summaries, examples          | `src/app/page.tsx`                                                              |
+| Expandable field comparison                 | `src/components/category-explorer.tsx`                                          |
+| Optional collection breakdowns              | `src/components/group-analysis.tsx`, `src/lib/collection-breakdown.ts`          |
+| Ledger and URL filters                      | `src/components/scorecard.tsx`                                                  |
+| Evidence drawer, focus and browser history  | `src/components/evidence-panel.tsx`, `evidence-link.tsx`, `evidence-dialog.tsx` |
+| Summary data projected into the drawer      | `src/lib/evidence-summary.ts`                                                   |
+| Production analytics and share card         | `src/components/page-views.tsx`, `src/app/share-card.png/route.tsx`             |
+| Static summary endpoint                     | `src/app/evidence/[id]/summary.json/route.ts`                                   |
+| Full records and historical assessments     | `src/app/predictions/[id]/page.tsx`                                             |
+| Navigation and author CTAs                  | `src/components/navigation.tsx`, `src/app/layout.tsx`                           |
+| Visual styles                               | `src/app/globals.css`                                                           |
+| Eligibility and metrics                     | `src/lib/scoring.ts`                                                            |
+| Record/source joins and coverage            | `src/lib/data.ts`                                                               |
+| Evidence schemas and adaptation             | `src/lib/evidence-model.ts`, `src/lib/evidence.ts`                              |
+| Import, integrity and release checks        | `scripts/import-data.ts`, `scripts/validate-data.ts`                            |
+| Hosting location, public links and metadata | `config/public-site.json`, `src/lib/site-path.ts`, `src/lib/site-meta.ts`       |
+
+The evidence provider and links load with the page; the dialog code is imported only when evidence is opened. Story and header links disable speculative route prefetching so the ledger bundle does not compete with the initial page. Inter and Newsreader use Next local-font preloads for their Latin variable fonts.
 
 The filename table is a map, not a replacement for reading the relevant code. [DATA_MODEL.md](DATA_MODEL.md) describes the intake model; the evidence schema and [V03_INTEGRATION_REVIEW.md](V03_INTEGRATION_REVIEW.md) cover the later release.
 
 The field chart, target-year chart and optional collection breakdowns share interpretation state through `src/components/story-comparison-context.tsx`. The time view in `src/components/target-year-chart.tsx` regroups the same eligible records via `targetYearResults` in `src/lib/publication.ts`. See [TIME_VIEW.md](TIME_VIEW.md) for the chart choice and why no drift regression or extrapolation is shown.
 
-The optional breakdown follows the year chart and defaults to prediction type. It has one due-outcome table, with future and undated links beneath each group. Counts and ledger links use the same interpretation and eligibility filters; forecast horizon remains available in the research ledger, not the Story breakdown.
+The optional breakdown follows the year chart and defaults to prediction type. Its counts for every group and reading are computed at build time; full prediction and evidence records are not serialized into the Story. It has one due-outcome table, with future and undated links beneath each group. Counts and ledger links use the same interpretation and eligibility filters; forecast horizon remains available in the research ledger, not the Story breakdown.
 
 ## Preserve the research trail
 

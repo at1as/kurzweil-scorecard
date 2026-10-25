@@ -22,6 +22,7 @@ import { StoryComparisonProvider } from "@/components/story-comparison-context";
 import { TargetYearChart } from "@/components/target-year-chart";
 import { CategoryExplorer } from "@/components/category-explorer";
 import { GroupAnalysis } from "@/components/group-analysis";
+import { breakdownViews } from "@/lib/collection-breakdown";
 import { READINGS, type Reading } from "@/lib/evidence-model";
 import { ModeComparison } from "@/components/mode-comparison";
 import { Eyebrow, Badge } from "@/components/ui";
@@ -107,7 +108,11 @@ export default function Overview() {
           <a className="text-link" href="#by-field">
             See the breakdown <ArrowRight size={16} />
           </a>
-          <Link className="text-link muted" href="/predictions/">
+          <Link
+            prefetch={false}
+            className="text-link muted"
+            href="/predictions/"
+          >
             Browse all {stats.collected} predictions <ArrowUpRight size={16} />
           </Link>
         </div>
@@ -124,11 +129,14 @@ export default function Overview() {
               {stats.eligible} predictions with deadlines passed · Our judgment
             </p>
           </div>
-          <Link href="/methodology/">How we judge them ↗</Link>
+          <Link prefetch={false} href="/methodology/">
+            How we judge them ↗
+          </Link>
         </div>
         <div className="outcome-summary">
           {OUTCOME_ORDER.map((v) => (
             <Link
+              prefetch={false}
               key={v}
               className={`summary-outcome summary-${v.toLowerCase()}`}
               href={scorecardUrl({ cohort: "eligible", verdict: v })}
@@ -149,7 +157,10 @@ export default function Overview() {
         <p className="scope-caption">
           Our judgments on a selected collection, not a lifetime accuracy score.{" "}
           {stats.collected - stats.eligible} other records are future or
-          undated. <Link href="/methodology/">Scope & sources</Link>
+          undated.{" "}
+          <Link prefetch={false} href="/methodology/">
+            Scope & sources
+          </Link>
         </p>
       </section>
       <StoryComparisonProvider views={views}>
@@ -186,7 +197,7 @@ export default function Overview() {
           className="editorial-disclosure story-breakdowns"
         >
           <summary>Compare by prediction type or decade</summary>
-          <GroupAnalysis records={predictions} asOf={AS_OF} />
+          <GroupAnalysis views={breakdownViews(predictions, AS_OF, names)} />
         </details>
       </StoryComparisonProvider>
       <div className="explanation-area" id="about-the-judgments">
@@ -243,7 +254,11 @@ export default function Overview() {
               earlier assessments. Open one to check the reasoning or compare
               alternative readings.
             </p>
-            <Link className="button button-primary" href="/predictions/">
+            <Link
+              prefetch={false}
+              className="button button-primary"
+              href="/predictions/"
+            >
               Explore the predictions <ArrowRight size={17} />
             </Link>
           </div>
@@ -263,9 +278,11 @@ export default function Overview() {
             </p>
             <p>
               Outcomes are assessed through {AS_OF_LABEL}. The{" "}
-              <Link href="/sources/">sources and downloads</Link> include all{" "}
-              {originalIntake.length} original intake records and earlier
-              assessments.
+              <Link prefetch={false} href="/sources/">
+                sources and downloads
+              </Link>{" "}
+              include all {originalIntake.length} original intake records and
+              earlier assessments.
             </p>
           </div>
         </section>

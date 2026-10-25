@@ -14,7 +14,12 @@ export function Navigation() {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link href="/" className="brand" aria-label="Kurzweil Scorecard home">
+        <Link
+          prefetch={false}
+          href="/"
+          className="brand"
+          aria-label="Kurzweil Scorecard home"
+        >
           <span className="brand-symbol" aria-hidden="true">
             k<span>.</span>
           </span>
@@ -27,6 +32,7 @@ export function Navigation() {
         <nav aria-label="Main navigation">
           {items.map(([href, label]) => (
             <Link
+              prefetch={false}
               key={href}
               href={href}
               aria-current={

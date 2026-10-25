@@ -1,6 +1,6 @@
 import type { Prediction } from "./model";
 import { TYPE_LABELS } from "./model";
-import type { Reading } from "./evidence-model";
+import { READINGS, type Reading } from "./evidence-model";
 import { selectReading } from "./interpretations";
 import { futureCandidate, publicationDecade, targetDecade } from "./filters";
 import { summarize } from "./scoring";
@@ -62,4 +62,27 @@ export function collectionBreakdown(
       }))
       .sort((a, b) => a.label.localeCompare(b.label)),
   };
+}
+
+export type BreakdownViews = Record<
+  Reading,
+  Record<BreakdownGroup, ReturnType<typeof collectionBreakdown>>
+>;
+/** Send only presentation counts to the Story, keeping full evidence records on the server. */
+export function breakdownViews(
+  records: Prediction[],
+  asOf: string,
+  categoryNames: string[],
+): BreakdownViews {
+  return Object.fromEntries(
+    READINGS.map((reading) => [
+      reading,
+      Object.fromEntries(
+        (Object.keys(BREAKDOWN_GROUPS) as BreakdownGroup[]).map((group) => [
+          group,
+          collectionBreakdown(records, asOf, reading, group, categoryNames),
+        ]),
+      ),
+    ]),
+  ) as BreakdownViews;
 }
