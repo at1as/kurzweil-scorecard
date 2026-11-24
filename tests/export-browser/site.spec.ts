@@ -72,7 +72,7 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   );
   await expect(
     dialog.getByRole("link", { name: /Full record & history/ }),
-  ).toHaveAttribute("href", `${base}/predictions/K002/`);
+  ).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(trigger).toBeFocused();
@@ -131,14 +131,20 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   await expect(page.locator(".results-toolbar")).toContainText(
     "1 of 81 records",
   );
-  await page.goto(`${base}/predictions/K002/`);
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    "href",
-    `${deployment.origin}${base}/predictions/K002/`,
+  await page.goto(`${base}/predictions/?evidence=K002`);
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(
+    page.getByRole("dialog").getByRole("heading", { level: 2 }),
+  ).toContainText("Portable computers");
+  expect((await page.request.get(`${base}/predictions/K002/`)).status()).toBe(
+    404,
   );
   expect((await page.request.get(`${base}/predictions/AUD-001/`)).status()).toBe(
     404,
   );
+  expect(
+    (await page.request.get(`${base}/evidence/K002/summary.json`)).status(),
+  ).toBe(200);
   expect(
     (await page.request.get(`${base}/evidence/AUD-001/summary.json`)).status(),
   ).toBe(200);
@@ -178,12 +184,7 @@ test("export header and footer stay accessible on desktop and mobile", async ({
 test("social cards are in crawler HTML and the exported PNG is 1200 by 630", async ({
   request,
 }) => {
-  for (const path of [
-    "/",
-    "/predictions/",
-    "/predictions/K002/",
-    "/methodology/",
-  ]) {
+  for (const path of ["/", "/predictions/", "/methodology/", "/sources/"]) {
     const response = await request.get(`${base}${path}`, {
       headers: { "User-Agent": "Twitterbot/1.0" },
     });

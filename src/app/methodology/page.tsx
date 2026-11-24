@@ -5,6 +5,7 @@ import { AS_OF, AS_OF_LABEL, predictions, originalIntake } from "@/lib/data";
 import { summarize } from "@/lib/scoring";
 import { scorecardUrl } from "@/lib/filters";
 import { Badge, Eyebrow } from "@/components/ui";
+import { EvidenceLink } from "@/components/evidence-panel";
 import { ModeComparison } from "@/components/mode-comparison";
 import type { Verdict } from "@/lib/model";
 
@@ -71,15 +72,17 @@ export default function Methodology() {
               use.
             </p>
             <p>
-              <Link href="/predictions/K009/">Wireless keyboards and mice</Link>{" "}
+              <EvidenceLink predictionId="K009">
+                Wireless keyboards and mice
+              </EvidenceLink>{" "}
               were practical and widely used by 2009. Kurzweil called the
               technology right, even though wired peripherals didn’t disappear.
               The Balanced reading credits that shift toward wireless; the
               Literal reading tests how completely cables vanished. The
               household robot forecast set a much higher bar:{" "}
-              <Link href="/predictions/K080/">
+              <EvidenceLink predictionId="K080">
                 robots in nearly every home
-              </Link>
+              </EvidenceLink>
               , handling a wide range of chores.
             </p>
             <p>
@@ -142,13 +145,17 @@ export default function Methodology() {
               target year.
             </p>
             <p>
-              <Link href="/predictions/K033/">The supercomputing forecast</Link>{" "}
+              <EvidenceLink predictionId="K033">
+                The supercomputing forecast
+              </EvidenceLink>{" "}
               targeted 2009 and crossed 20 petaflops on sustained LINPACK in
               2013—four years late.{" "}
-              <Link href="/predictions/K001/">The chess forecast</Link> was
-              fulfilled in 1997 under both of its cited 1998 and 2000 deadlines,
-              leaving its outcome clear even though the exact edition date
-              varies.
+              <EvidenceLink predictionId="K001">
+                The chess forecast
+              </EvidenceLink>{" "}
+              was fulfilled in 1997 under both of its cited 1998 and 2000
+              deadlines, leaving its outcome clear even though the exact edition
+              date varies.
             </p>
             <p>
               “Documented by 2008” means our earliest cited evidence dates to

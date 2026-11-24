@@ -27,7 +27,10 @@ import {
   SectionHeading,
 } from "@/components/ui";
 export const dynamicParams = false;
+const EXPORT_PLACEHOLDER_ID = "__internal";
 export function generateStaticParams() {
+  if (process.env.PUBLIC_SITE_EXPORT === "1")
+    return [{ id: EXPORT_PLACEHOLDER_ID }];
   return predictions.map((p) => ({ id: p.id }));
 }
 export async function generateMetadata({
@@ -35,6 +38,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
+  if (process.env.PUBLIC_SITE_EXPORT === "1") return {};
   const { id } = await params;
   const p = predictions.find((p) => p.id === id);
   return pageMetadata(
@@ -50,6 +54,7 @@ export default async function PredictionPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  if (process.env.PUBLIC_SITE_EXPORT === "1") return null;
   const { id } = await params;
   const p = predictions.find((p) => p.id === id);
   if (!p) notFound();

@@ -14,6 +14,7 @@ import { Badge, External } from "./ui";
 import { EvidenceLink } from "./evidence-link";
 const cache = new Map<string, EvidenceSummary>();
 const readings: readonly Reading[] = READINGS;
+const PUBLIC_EXPORT = process.env.NEXT_PUBLIC_SITE_EXPORT === "1";
 
 function outcomeLabel(outcome: string) {
   const labels: Record<string, string> = {
@@ -128,7 +129,11 @@ export function EvidencePanel({
       );
       setCopyStatus("Link copied");
     } catch {
-      setCopyStatus("Could not copy. Use the full record link below.");
+      setCopyStatus(
+        PUBLIC_EXPORT
+          ? "Could not copy. Copy the URL from your address bar."
+          : "Could not copy. Use the full record link below.",
+      );
     }
   }
   return (
@@ -338,7 +343,11 @@ export function EvidencePanel({
             </h2>
             {failed && (
               <>
-                <p>You can retry or open the full record.</p>
+                <p>
+                  {PUBLIC_EXPORT
+                    ? "You can try loading this summary again."
+                    : "You can retry or open the full record."}
+                </p>
                 <button
                   className="button"
                   onClick={() => setAttempt((value) => value + 1)}
@@ -367,12 +376,12 @@ export function EvidencePanel({
           >
             Open in original intake <ArrowUpRight size={15} />
           </a>
-        ) : (
+        ) : !PUBLIC_EXPORT ? (
           <a href={fullUrl} target="_blank" rel="noopener noreferrer">
             Full record & history <ArrowUpRight size={15} />
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
-        )}
+        ) : null}
         <span
           role="status"
           className={

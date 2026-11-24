@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import deployment from "../config/public-site.json";
 import dataConfig from "../data/config.json";
@@ -39,12 +39,19 @@ for (const directory of ["src", "public", "data", "config"])
       .update(readFileSync(`${directory}/${file}`));
 for (const file of ["next.config.ts", "package-lock.json"])
   hash.update(file).update(readFileSync(file));
+rmSync("work/public-build", { recursive: true, force: true });
 run(["node_modules/next/dist/bin/next", "build"], {
   ...process.env,
   NEXT_TELEMETRY_DISABLED: "1",
   NEXT_PUBLIC_SITE_BASE_PATH: basePath,
+  NEXT_PUBLIC_SITE_EXPORT: "1",
   PUBLIC_SITE_EXPORT: "1",
   PUBLIC_SITE_BUILD_ID: hash.digest("hex").slice(0, 24),
+});
+// Standalone /predictions/[id]/ detail pages are local-only research notes; remove the static-export placeholder.
+rmSync("work/public-build/predictions/__internal", {
+  recursive: true,
+  force: true,
 });
 const files = validateBundle("work/public-build", "public", basePath);
 createManifest("work/public-build", basePath, dataConfig.asOf);
