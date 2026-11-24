@@ -221,7 +221,10 @@ test("breakdown counts and ledger links follow the shared interpretation", async
   await expect(
     neuroscience.getByRole("link", { name: /1 due prediction/ }),
   ).toBeVisible();
-  await page.getByLabel("Target-year interpretation").selectOption("strict");
+  await page
+    .getByRole("group", { name: "Target-year interpretation", exact: true })
+    .getByRole("button", { name: "Literal", exact: true })
+    .click();
   await expect(section.locator(".analysis-controls")).toContainText(
     "64 with deadlines passed · Literal",
   );
@@ -245,9 +248,11 @@ test("breakdown counts and ledger links follow the shared interpretation", async
   );
   await expect(page.locator(".prediction-cell")).toContainText("K073");
   await page.goBack();
-  await expect(page.getByLabel("Target-year interpretation")).toHaveValue(
-    "strict",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Target-year interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.reload();
   await section.locator("summary").click();
   await expect(section.getByLabel("Group by")).toHaveValue("type");
@@ -255,8 +260,9 @@ test("breakdown counts and ledger links follow the shared interpretation", async
     "64 with deadlines passed",
   );
   await page
-    .getByLabel("Interpretation", { exact: true })
-    .selectOption("broader");
+    .getByRole("group", { name: "Interpretation", exact: true })
+    .getByRole("button", { name: "Charitable", exact: true })
+    .click();
   await expect(section.locator(".analysis-controls")).toContainText(
     "64 with deadlines passed · Charitable",
   );
@@ -457,8 +463,9 @@ test("reading controls preserve boundary dates, expose scope changes and drill d
   await page.goto("/predictions/?q=K036");
   await expect(page.locator(".results-toolbar")).toContainText("1 of 81");
   await page
-    .getByLabel("Interpretation", { exact: true })
-    .selectOption("strict");
+    .getByRole("group", { name: "Interpretation", exact: true })
+    .getByRole("button", { name: "Literal", exact: true })
+    .click();
   await expect(page).toHaveURL(/reading=strict/);
   await expect(page.locator(".scorecard-table tbody")).toContainText("2026");
   await expect(page.locator(".scorecard-table tbody")).toContainText("Pending");
@@ -470,9 +477,11 @@ test("reading controls preserve boundary dates, expose scope changes and drill d
     "By review date",
   );
   await page.reload();
-  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
-    "strict",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.goto("/predictions/K036/");
   await page
     .getByRole("button", { name: "Literal", exact: true })
@@ -502,9 +511,11 @@ test("reading controls preserve boundary dates, expose scope changes and drill d
   await expect(modeRows).toHaveCount(3);
   await modeRows.nth(0).getByRole("link", { name: "64", exact: true }).click();
   await expect(page.locator(".results-toolbar")).toContainText("64 of 81");
-  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
-    "strict",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
 });
 test("canonical record URLs survive and legacy leads remain in JSON summaries without duplicate HTML", async ({
   page,
@@ -579,18 +590,22 @@ test("category interpretations use their eligible records and preserve reading o
   const chart = page.locator(".domain-explorer");
   await expect(chart.locator("a.forecast-dot")).toHaveCount(64);
   await page
-    .getByLabel("Interpretation", { exact: true })
-    .selectOption("strict");
+    .getByRole("group", { name: "Interpretation", exact: true })
+    .getByRole("button", { name: "Literal", exact: true })
+    .click();
   await expect(chart.locator("a.forecast-dot")).toHaveCount(64);
   await page
-    .getByLabel("Interpretation", { exact: true })
-    .selectOption("broader");
+    .getByRole("group", { name: "Interpretation", exact: true })
+    .getByRole("button", { name: "Charitable", exact: true })
+    .click();
   await expect(chart.locator("a.forecast-dot")).toHaveCount(64);
   await expect(chart.locator("a.forecast-dot.dot-correct")).toHaveCount(26);
   await page.reload();
-  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
-    "broader",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Interpretation", exact: true })
+      .getByRole("button", { name: "Charitable", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect(chart.locator("a.forecast-dot")).toHaveCount(64);
   await chart.getByRole("link", { name: /K004:/ }).click();
   await expect(page).toHaveURL(/evidence=K004&evidenceReading=broader/);
@@ -672,9 +687,11 @@ test("old category links preserve interpretation and discard the retired cohort 
 }) => {
   await page.goto("/categories/?reading=strict&cohort=common");
   await expect(page).toHaveURL(/\/\?reading=strict#by-field$/);
-  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
-    "strict",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("a.forecast-dot")).toHaveCount(64);
   await page
     .getByRole("button", {
@@ -788,9 +805,11 @@ test("ledger evidence retains filters, ordering, pagination, and the table inter
   await dialog.getByRole("button", { name: "Close evidence" }).click();
   await expect(dialog).not.toBeVisible();
   await expect(page).toHaveURL(originalUrl);
-  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
-    "strict",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   expect(await first.innerText()).toBe(label);
   await expect(first).toBeFocused();
   await expect(page.locator(".scorecard-table tbody tr")).toHaveCount(1);
@@ -908,25 +927,35 @@ test("target-year columns share the comparison population and keep evidence in p
   await expect(
     chart.getByRole("button", { name: /^2019: 22 predictions;/ }),
   ).toContainText("45%");
-  await page.getByLabel("Target-year interpretation").selectOption("strict");
-  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
-    "strict",
-  );
+  await page
+    .getByRole("group", { name: "Target-year interpretation", exact: true })
+    .getByRole("button", { name: "Literal", exact: true })
+    .click();
+  await expect(
+    page
+      .getByRole("group", { name: "Interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect(chart.locator(".time-year")).toHaveCount(4);
   await expect(chart).toContainText("60 of these 64 forecasts");
   await expect(
     chart.getByRole("button", { name: /^1998: 1 prediction;/ }),
   ).toBeVisible();
   await page.reload();
-  await expect(page.getByLabel("Target-year interpretation")).toHaveValue(
-    "strict",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Target-year interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page
-    .getByLabel("Interpretation", { exact: true })
-    .selectOption("broader");
-  await expect(page.getByLabel("Target-year interpretation")).toHaveValue(
-    "broader",
-  );
+    .getByRole("group", { name: "Interpretation", exact: true })
+    .getByRole("button", { name: "Charitable", exact: true })
+    .click();
+  await expect(
+    page
+      .getByRole("group", { name: "Target-year interpretation", exact: true })
+      .getByRole("button", { name: "Charitable", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect(chart.locator(".time-year")).toHaveCount(4);
   await expect(chart).toContainText("64 predictions with deadlines passed");
 });

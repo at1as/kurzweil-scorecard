@@ -1,7 +1,6 @@
 "use client";
 import { useId, useRef, useState } from "react";
 import { ChevronRight, X } from "lucide-react";
-import { READINGS, type Reading } from "@/lib/evidence-model";
 import {
   OUTCOME_LABELS,
   OUTCOME_MARKS,
@@ -13,6 +12,8 @@ import {
 import { useStoryComparison } from "./story-comparison-context";
 import { OutcomeLegend } from "./category-chart";
 import { EvidenceLink } from "./evidence-panel";
+import { ReadingSegmented } from "./reading-segmented";
+import { Eyebrow } from "./ui";
 
 export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
   const { rows, reading, update } = useStoryComparison();
@@ -45,6 +46,7 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
       aria-labelledby={`${prefix}-heading`}
     >
       <div className="story-section-heading">
+        <Eyebrow>BY DEADLINE</Eyebrow>
         <h2 id={`${prefix}-heading`}>How the target years compare</h2>
         {largest.length === 2 && (
           <p>
@@ -77,20 +79,11 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
             Share of each group
           </button>
         </div>
-        <label className="inline-select">
-          Interpretation
-          <select
-            aria-label="Target-year interpretation"
-            value={reading}
-            onChange={(e) => update(e.target.value as Reading)}
-          >
-            {READINGS.map((r) => (
-              <option key={r} value={r}>
-                {PUBLIC_READINGS[r]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ReadingSegmented
+          value={reading}
+          onChange={update}
+          ariaLabel="Target-year interpretation"
+        />
       </div>
       <OutcomeLegend />
       <p className="chart-instruction">

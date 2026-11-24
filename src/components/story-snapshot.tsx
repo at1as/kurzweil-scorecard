@@ -1,16 +1,16 @@
 "use client";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { READINGS, type Reading } from "@/lib/evidence-model";
+import type { Reading } from "@/lib/evidence-model";
 import {
   OUTCOME_LABELS,
   OUTCOME_MARKS,
   OUTCOME_ORDER,
-  PUBLIC_READINGS,
   type ScoredOutcome,
 } from "@/lib/publication";
 import { scorecardUrl } from "@/lib/filters";
 import type { SnapshotCounts } from "@/lib/ledger-data";
+import { ReadingSegmented } from "./reading-segmented";
 import { useStoryComparison } from "./story-comparison-context";
 
 const TIER_DESCRIPTIONS: Record<Reading, string> = {
@@ -74,25 +74,11 @@ export function StorySnapshot({
               <strong>{realizedPct}% eventually realized</strong>
             </p>
           </div>
-          <div className="snapshot-tier-bar">
-            <span className="snapshot-tier-label">Reading</span>
-            <div
-              className="segmented tier-segmented"
-              role="group"
-              aria-label="Interpretation reading"
-            >
-              {READINGS.map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  aria-pressed={reading === mode}
-                  onClick={() => update(mode)}
-                >
-                  {PUBLIC_READINGS[mode]}
-                </button>
-              ))}
-            </div>
-          </div>
+          <ReadingSegmented
+            value={reading}
+            onChange={update}
+            ariaLabel="Interpretation reading"
+          />
         </div>
         <p className="snapshot-tier-note">{TIER_DESCRIPTIONS[reading]}</p>
       </div>

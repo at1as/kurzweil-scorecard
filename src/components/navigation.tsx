@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 export function Navigation() {
   const path = usePathname();
   const items = [
-    ["/", "The story"],
+    ["/", "The Story"],
     ["/predictions/", "Predictions"],
     ["/methodology/", "Methodology"],
     ["/sources/", "Sources"],

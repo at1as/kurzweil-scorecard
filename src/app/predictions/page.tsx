@@ -4,12 +4,15 @@ import { AS_OF, categories, originalIntake, predictions } from "@/lib/data";
 import { toLedgerRecord } from "@/lib/ledger-data";
 import type { Metadata } from "next";
 import { Scorecard } from "@/components/scorecard";
+import { JsonLd } from "@/components/json-ld";
 import { Eyebrow } from "@/components/ui";
+
+const DESCRIPTION = `Search ${predictions.length} Ray Kurzweil forecasts by field, deadline, and outcome. Inspect our judgments, evidence, and source links for every record.`;
 
 export const metadata: Metadata = pageMetadata(
   "/predictions/",
   "All predictions",
-  `Search ${predictions.length} Ray Kurzweil forecasts by field, deadline, and outcome. Inspect our judgments, evidence, and source links for every record.`,
+  DESCRIPTION,
 );
 
 export default function PredictionsPage() {
@@ -18,6 +21,12 @@ export default function PredictionsPage() {
   const categoryNames = categories.map((c) => c.name);
   return (
     <div className="container page-container predictions-page">
+      <JsonLd
+        path="/predictions/"
+        name="All predictions"
+        description={DESCRIPTION}
+        dateModified={AS_OF}
+      />
       <div className="page-intro">
         <Eyebrow>THE FULL LIST</Eyebrow>
         <h1>All predictions</h1>

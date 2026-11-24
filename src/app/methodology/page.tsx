@@ -7,6 +7,7 @@ import { scorecardUrl } from "@/lib/filters";
 import { Badge, Eyebrow } from "@/components/ui";
 import { EvidenceLink } from "@/components/evidence-panel";
 import { ModeComparison } from "@/components/mode-comparison";
+import { JsonLd } from "@/components/json-ld";
 import type { Verdict } from "@/lib/model";
 
 export const metadata: Metadata = pageMetadata(
@@ -42,6 +43,12 @@ export default function Methodology() {
   const stats = summarize(predictions, AS_OF);
   return (
     <div className="container page-container publication-page">
+      <JsonLd
+        path="/methodology/"
+        name="Methodology"
+        description="How this scorecard judges Kurzweil’s predictions: deadlines, outcomes, Literal/Balanced/Charitable readings, scoring rules, and limits."
+        dateModified={AS_OF}
+      />
       <div className="page-intro editorial-intro">
         <Eyebrow>HOW WE JUDGE</Eyebrow>
         <h1>How we judge a prediction</h1>

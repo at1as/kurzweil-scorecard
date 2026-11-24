@@ -34,6 +34,7 @@ import { TargetYearChart } from "@/components/target-year-chart";
 import { GroupAnalysis } from "@/components/group-analysis";
 import { WhatsAhead } from "@/components/whats-ahead";
 import { ModeComparison } from "@/components/mode-comparison";
+import { JsonLd } from "@/components/json-ld";
 import { Eyebrow, Badge } from "@/components/ui";
 
 export const metadata = pageMetadata("/", "Where was Ray Kurzweil right?");
@@ -152,6 +153,11 @@ export default function Overview() {
 
   return (
     <div className="container publication-page">
+      <JsonLd
+        path="/"
+        name="Where was Ray Kurzweil right?"
+        dateModified={AS_OF}
+      />
       <section className="story-hero">
         <Eyebrow>THE KURZWEIL SCORECARD · {AS_OF_LABEL}</Eyebrow>
         <h1>Where was Ray Kurzweil right?</h1>
@@ -162,11 +168,11 @@ export default function Overview() {
           happened.
         </p>
         <p className="story-thesis">
-          He’s far sharper at predicting what technology will be able to do than
-          whether people will actually adopt it. Among the {stats.eligible}{" "}
-          predictions past their deadlines, {capPct}% of his technical
-          capability calls came true—compared with just {adoptPct}% of his
-          adoption calls.
+          One clear pattern stands out: he’s far sharper at predicting what
+          technology will be able to do than whether people will actually adopt
+          it. Among the {stats.eligible} predictions past their deadlines,{" "}
+          {capPct}% of his technical capability calls came true—compared with
+          just {adoptPct}% of his adoption calls.
         </p>
         <div className="story-links">
           <a className="text-link" href="#by-field">

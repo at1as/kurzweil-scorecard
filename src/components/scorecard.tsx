@@ -53,7 +53,7 @@ import {
   reviewOutcome,
   displayOutcome,
 } from "@/lib/interpretations";
-import { READING_LABELS, READINGS } from "@/lib/evidence-model";
+import { ReadingSegmented } from "./reading-segmented";
 import { Badge } from "./ui";
 
 const VIEW_LABELS = {
@@ -369,22 +369,11 @@ export function Scorecard({
   return (
     <div className="scorecard">
       <div className="ledger-controls">
-        <label className="inline-select reading-control">
-          Interpretation
-          <select
-            aria-label="Interpretation"
-            value={filters.reading}
-            onChange={(e) =>
-              update({ reading: e.target.value as Filters["reading"] })
-            }
-          >
-            {READINGS.map((mode) => (
-              <option key={mode} value={mode}>
-                {READING_LABELS[mode]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ReadingSegmented
+          value={filters.reading}
+          onChange={(reading) => update({ reading })}
+          ariaLabel="Interpretation"
+        />
         <button
           className="text-button"
           aria-pressed={researchColumns}
