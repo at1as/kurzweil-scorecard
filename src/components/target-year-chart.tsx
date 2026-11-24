@@ -1,7 +1,6 @@
 "use client";
 import { useId, useRef, useState } from "react";
 import { ChevronRight, X } from "lucide-react";
-import { READINGS, type Reading } from "@/lib/evidence-model";
 import {
   OUTCOME_LABELS,
   OUTCOME_MARKS,
@@ -13,6 +12,8 @@ import {
 import { useStoryComparison } from "./story-comparison-context";
 import { OutcomeLegend } from "./category-chart";
 import { EvidenceLink } from "./evidence-panel";
+import { ReadingSegmented } from "./reading-segmented";
+import { Eyebrow } from "./ui";
 
 export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
   const { rows, reading, update } = useStoryComparison();
@@ -32,6 +33,8 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
   );
   const ceiling = metric === "share" ? 100 : maximum;
   const ticks = [0, 0.25, 0.5, 0.75, 1];
+  const countLabel = (n: number) =>
+    `${n} ${n === 1 ? "prediction" : "predictions"}`;
   function close() {
     setSelectedYear(null);
     if (selectedYear !== null) buttons.current.get(selectedYear)?.focus();
@@ -43,14 +46,15 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
       aria-labelledby={`${prefix}-heading`}
     >
       <div className="story-section-heading">
+        <Eyebrow>BY DEADLINE</Eyebrow>
         <h2 id={`${prefix}-heading`}>How the target years compare</h2>
         {largest.length === 2 && (
           <p>
-            The two largest groups target {largest[0].year} and{" "}
+            Most of these forecasts targeted {largest[0].year} or{" "}
             {largest[1].year}:{" "}
-            {largest[0].records.length + largest[1].records.length} of these{" "}
-            {total} forecasts. Each column shows the outcomes for one target
-            year, assessed through {asOfLabel}.
+            {largest[0].records.length + largest[1].records.length} of the{" "}
+            {total} due predictions. Older deadlines have had longer to catch
+            up, which is why late hits cluster in {largest[0].year}.
           </p>
         )}
       </div>
@@ -75,20 +79,11 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
             Share of each group
           </button>
         </div>
-        <label className="inline-select">
-          Interpretation
-          <select
-            aria-label="Target-year interpretation"
-            value={reading}
-            onChange={(e) => update(e.target.value as Reading)}
-          >
-            {READINGS.map((r) => (
-              <option key={r} value={r}>
-                {PUBLIC_READINGS[r]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ReadingSegmented
+          value={reading}
+          onChange={update}
+          ariaLabel="Target-year interpretation"
+        />
       </div>
       <OutcomeLegend />
       <p className="chart-instruction">
@@ -141,10 +136,10 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
                     else buttons.current.delete(group.year);
                   }}
                   className="time-year"
-                  aria-label={`${group.year}: ${n} predictions; ${description}`}
+                  aria-label={`${group.year}: ${countLabel(n)}; ${description}`}
                   aria-expanded={open}
                   aria-controls={`${prefix}-records`}
-                  title={`${group.year} · ${n} predictions\n${description}`}
+                  title={`${group.year} · ${countLabel(n)}\n${description}`}
                   onClick={() => setSelectedYear(open ? null : group.year)}
                 >
                   <span className="time-column" aria-hidden="true">
@@ -194,9 +189,8 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
         <p className="time-x-label">Target year · one column per group</p>
       </div>
       <p className="chart-footnote time-footnote">
-        Older targets have had longer to catch up, and each group contains
-        different claims. Only due forecasts are shown; year columns are equally
-        spaced.
+        Assessed through {asOfLabel}. Only past-due forecasts are shown; year
+        columns are equally spaced.
       </p>
       <div id={`${prefix}-records`} hidden={!selected} className="time-details">
         {selected && (
@@ -204,7 +198,7 @@ export function TargetYearChart({ asOfLabel }: { asOfLabel: string }) {
             <div className="time-detail-heading">
               <h3>
                 {selected.year} forecasts{" "}
-                <span>· {selected.records.length} predictions</span>
+                <span>· {countLabel(selected.records.length)}</span>
               </h3>
               <button
                 className="time-close"

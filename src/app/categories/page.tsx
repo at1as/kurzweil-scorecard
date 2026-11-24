@@ -2,7 +2,10 @@ import { pageMetadata } from "@/lib/site-meta";
 import type { Metadata } from "next";
 import { CategoryRedirect } from "@/components/category-redirect";
 
-export const metadata: Metadata = pageMetadata("/", "How the fields compare");
+export const metadata: Metadata = {
+  ...pageMetadata("/", "How the fields compare"),
+  robots: { index: false, follow: true },
+};
 export default function CategoriesPage() {
   return (
     <div className="container page-container">

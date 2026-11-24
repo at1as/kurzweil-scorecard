@@ -7,7 +7,7 @@ export const citationSupplementSchema = z
   .object({
     id: text,
     version: text,
-    base_release: z.literal("0.3"),
+    base_release: z.enum(["0.3", "0.4"]),
     checked_at: date,
     outcome_cutoff: date,
     scope: text,

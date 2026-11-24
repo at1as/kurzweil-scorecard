@@ -111,7 +111,7 @@ describe("publication charts", () => {
   it("the published contrasts reconcile to their actual records", () => {
     const rows = categoryResults(predictions, names, AS_OF);
     for (const [name, due, onTime, realized] of [
-      ["Computing hardware", 16, 5, 10],
+      ["Computing hardware", 15, 5, 10],
       ["Biology & medicine", 5, 3, 4],
       ["Networks & communications", 4, 2, 3],
       ["Robotics & transportation", 5, 1, 1],
@@ -153,9 +153,7 @@ describe("target-year comparison", () => {
             year.records.every((p) => Number(p.target) === year.year),
           ).toBe(true);
         }
-        expect(years.some((g) => g.year === 2025)).toBe(
-          reading !== "strict" && !common,
-        );
+        expect(years.some((g) => g.year === 2025)).toBe(false);
         expect(
           years.some((g) => g.records.some((p) => p.outsideComparison)),
         ).toBe(false);
@@ -164,13 +162,13 @@ describe("target-year comparison", () => {
   it("preserves the large target-year groups and the distinction between late and missed", () => {
     const years = targetYearResults(categoryResults(predictions, names, AS_OF));
     expect(years.find((g) => g.year === 2009)?.counts).toEqual({
-      CORRECT: 16,
+      CORRECT: 14,
       LATE: 9,
-      PARTIAL: 8,
+      PARTIAL: 10,
       MISSED: 5,
     });
     expect(years.find((g) => g.year === 2019)?.counts).toEqual({
-      CORRECT: 7,
+      CORRECT: 6,
       LATE: 0,
       PARTIAL: 6,
       MISSED: 10,
@@ -178,10 +176,8 @@ describe("target-year comparison", () => {
     expect(years.map((g) => [g.year, g.records.length])).toEqual([
       [1998, 1],
       [2009, 38],
-      [2010, 4],
-      [2019, 23],
-      [2020, 1],
-      [2025, 1],
+      [2010, 3],
+      [2019, 22],
     ]);
     expect(targetYearResults([])).toEqual([]);
   });

@@ -127,7 +127,7 @@ export function GET() {
           color: "#5e685c",
         }}
       >
-        <span>{predictions.length} selected forecasts · Our judgment</span>
+        <span>{predictions.length} predictions · Balanced reading</span>
         <span>Review: {AS_OF_LABEL}</span>
       </div>
     </div>,

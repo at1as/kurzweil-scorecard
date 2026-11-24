@@ -28,6 +28,11 @@ test("Story HTML stays compact without the full research payload", async ({
   const response = await request.get(`${base}/`);
   expect(response.status()).toBe(200);
   expect((await response.body()).byteLength).toBeLessThan(500_000);
+  const predictionsHtml = await (
+    await request.get(`${base}/predictions/`)
+  ).text();
+  expect(predictionsHtml).toContain("K001");
+  expect(predictionsHtml).not.toContain("Loading the prediction ledger");
 });
 test("author CTAs, navigation, filters, evidence and downloads work at the production path", async ({
   page,
@@ -49,7 +54,7 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
     page.getByRole("link", { name: "Read my blog", exact: true }),
   ).toHaveAttribute("href", "https://www.jasonwillems.com/blog/");
   await expect(
-    page.getByRole("link", { name: "The story", exact: true }),
+    page.getByRole("link", { name: "The Story", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   await page
     .getByRole("button", {
@@ -67,7 +72,7 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   );
   await expect(
     dialog.getByRole("link", { name: /Full record & history/ }),
-  ).toHaveAttribute("href", `${base}/predictions/K002/`);
+  ).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(trigger).toBeFocused();
@@ -75,8 +80,9 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   await expect(page).toHaveURL(new RegExp(`${base}/predictions/`));
   await page.getByRole("searchbox").fill("K036");
   await page
-    .getByLabel("Interpretation", { exact: true })
-    .selectOption("strict");
+    .getByRole("group", { name: "Interpretation", exact: true })
+    .getByRole("button", { name: "Literal", exact: true })
+    .click();
   await expect(page.locator(".prediction-cell")).toHaveCount(1);
   expect(new URL(page.url()).pathname).toBe(`${base}/predictions/`);
   await page.locator(".prediction-cell").click();
@@ -89,7 +95,7 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   await page.reload();
   await expect(page.getByRole("searchbox")).toHaveValue("K036");
   await page.goto(`${base}/sources/`);
-  const download = page.getByRole("link", { name: /Current canonical JSON/ });
+  const download = page.getByRole("link", { name: /Current predictions JSON/ });
   await expect(download).toHaveAttribute(
     "href",
     `${base}/data/predictions.json`,
@@ -97,22 +103,24 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   const data = await (
     await page.request.get((await download.getAttribute("href"))!)
   ).json();
-  expect(data.predictions.length).toBe(84);
+  expect(data.predictions.length).toBe(81);
   await page.goto(`${base}/categories/?reading=strict&cohort=common`);
   await expect(page).toHaveURL(
     new RegExp(`${base}/\\?reading=strict#by-field$`),
   );
-  await expect(page.getByLabel("Interpretation", { exact: true })).toHaveValue(
-    "strict",
-  );
+  await expect(
+    page
+      .getByRole("group", { name: "Interpretation", exact: true })
+      .getByRole("button", { name: "Literal", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   const breakdown = page.locator("#more-breakdowns");
   await breakdown.locator("summary").click();
   await expect(breakdown.locator(".analysis-controls")).toContainText(
-    "67 with deadlines passed",
+    "64 with deadlines passed",
   );
   await breakdown.getByLabel("Group by").selectOption("category");
   const due = breakdown.getByRole("link", {
-    name: "Neuroscience & human augmentation: 1 due predictions",
+    name: "Neuroscience & human augmentation: 1 due prediction",
     exact: true,
   });
   await expect(due).toHaveAttribute(
@@ -124,13 +132,25 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
     new RegExp(`${base}/predictions/.*reading=strict`),
   );
   await expect(page.locator(".results-toolbar")).toContainText(
-    "1 of 84 records",
+    "1 of 81 records",
   );
-  await page.goto(`${base}/predictions/K002/`);
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    "href",
-    `${deployment.origin}${base}/predictions/K002/`,
+  await page.goto(`${base}/predictions/?evidence=K002`);
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(
+    page.getByRole("dialog").getByRole("heading", { level: 2 }),
+  ).toContainText("Portable computers");
+  expect((await page.request.get(`${base}/predictions/K002/`)).status()).toBe(
+    404,
   );
+  expect((await page.request.get(`${base}/predictions/AUD-001/`)).status()).toBe(
+    404,
+  );
+  expect(
+    (await page.request.get(`${base}/evidence/K002/summary.json`)).status(),
+  ).toBe(200);
+  expect(
+    (await page.request.get(`${base}/evidence/AUD-001/summary.json`)).status(),
+  ).toBe(200);
   expect(failures).toEqual([]);
 });
 test("export header and footer stay accessible on desktop and mobile", async ({
@@ -167,16 +187,17 @@ test("export header and footer stay accessible on desktop and mobile", async ({
 test("social cards are in crawler HTML and the exported PNG is 1200 by 630", async ({
   request,
 }) => {
-  for (const path of [
-    "/",
-    "/predictions/",
-    "/predictions/K002/",
-    "/methodology/",
-  ]) {
+  for (const path of ["/", "/predictions/", "/methodology/", "/sources/"]) {
     const response = await request.get(`${base}${path}`, {
       headers: { "User-Agent": "Twitterbot/1.0" },
     });
     const html = await response.text();
+    expect(html).toContain('name="author" content="Jason Willems"');
+    expect(html).toContain('type="application/ld+json"');
+    expect(html).toContain('"@type":"BreadcrumbList"');
+    if (path !== "/") {
+      expect(html).toContain("· The Kurzweil Scorecard");
+    }
     expect(html).toContain('name="twitter:card" content="summary_large_image"');
     expect(html).toContain(
       `property="og:image" content="${deployment.origin}${base}/share-card.png?v=`,
@@ -185,6 +206,10 @@ test("social cards are in crawler HTML and the exported PNG is 1200 by 630", asy
       `name="twitter:image" content="${deployment.origin}${base}/share-card.png?v=`,
     );
   }
+  const categoriesHtml = await (
+    await request.get(`${base}/categories/`)
+  ).text();
+  expect(categoriesHtml).toContain('name="robots" content="noindex, follow"');
   const response = await request.get(`${base}/share-card.png`);
   expect(response.status()).toBe(200);
   expect(response.headers()["content-type"]).toContain("image/png");

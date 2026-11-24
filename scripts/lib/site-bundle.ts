@@ -48,7 +48,7 @@ export function validateBundle(
   const files = filesIn(root).filter((f) => f !== MANIFEST);
   const publicFiles = new Set(filesIn(publicRoot));
   const page =
-    /^(?:(?:predictions\/[A-Z0-9-]+|predictions|methodology|sources|categories|404|_not-found)\/)?(?:index\.(?:html|txt)|__next[\w.$-]*\.txt)$|^404\.html$/;
+    /^(?:(?:predictions|methodology|sources|categories|404|_not-found)\/)?(?:index\.(?:html|txt)|__next[\w.$-]*\.txt)$|^404\.html$/;
   const asset =
     /^_next\/static\/(?:[\w.-]+\/)+[\w.-]+\.(?:js|css|woff2?|ttf|svg)$/;
   const summary = /^evidence\/[A-Z0-9-]+\/summary\.json$/;
@@ -84,6 +84,15 @@ export function validateBundle(
         if (text.startsWith("---"))
           throw Error(`Jekyll front matter is not allowed in ${file}`);
       }
+      if (/\.(?:html|js|txt)$/.test(file)) {
+        const leakedDetail = text.match(
+          /\/predictions\/(?:K\d+|(?:AUD|DEC|EXE)-\d+)\b/,
+        );
+        if (leakedDetail)
+          throw Error(
+            `Internal record page reference ${leakedDetail[0]} leaked into ${file}`,
+          );
+      }
     }
   }
   for (const required of [
@@ -112,16 +121,20 @@ export function validateBundle(
   );
   if (!Array.isArray(intake.predictions) || !intake.predictions.length)
     throw Error("Missing original intake inventory");
-  const ids = [...records.predictions, ...intake.predictions].map(
-    (r: { id: string }) => r.id,
-  );
-  for (const id of ids)
-    for (const file of [
-      `predictions/${id}/index.html`,
-      `evidence/${id}/summary.json`,
-    ]) {
-      if (!files.includes(file)) throw Error(`Missing record output: ${file}`);
-    }
+  const canonicalIds = records.predictions.map((r: { id: string }) => r.id);
+  const intakeIds = intake.predictions.map((r: { id: string }) => r.id);
+  for (const id of canonicalIds) {
+    if (!files.includes(`evidence/${id}/summary.json`))
+      throw Error(`Missing record output: evidence/${id}/summary.json`);
+    if (files.includes(`predictions/${id}/index.html`))
+      throw Error(`Internal record HTML page should not be exported: ${id}`);
+  }
+  for (const id of intakeIds) {
+    if (!files.includes(`evidence/${id}/summary.json`))
+      throw Error(`Missing intake summary: evidence/${id}/summary.json`);
+    if (files.includes(`predictions/${id}/index.html`))
+      throw Error(`Legacy intake HTML page should not be exported: ${id}`);
+  }
   if (
     !files.some((f) => f.endsWith(".js")) ||
     !files.some((f) => f.endsWith(".css"))

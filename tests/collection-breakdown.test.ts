@@ -27,9 +27,9 @@ describe("optional collection breakdown", () => {
           names,
         );
         expect(summary).toMatchObject({
-          total: 84,
-          due: reading === "strict" ? 67 : 68,
-          future: reading === "strict" ? 15 : 14,
+          total: 81,
+          due: 64,
+          future: 15,
           undated: 2,
         });
         for (const key of ["total", "due", "future", "undated"] as const)
@@ -58,7 +58,7 @@ describe("optional collection breakdown", () => {
     }
     expect(JSON.stringify(predictions)).toBe(before);
   });
-  it("keeps empty fields visible and moves the brain forecast outside due outcomes in the strict reading", () => {
+  it("keeps empty fields visible and uses the unified 2026 deadline for K036 across readings", () => {
     const reference = collectionBreakdown(
       predictions,
       AS_OF,
@@ -82,8 +82,8 @@ describe("optional collection breakdown", () => {
     const brain = predictions.find((p) => p.id === "K036")!.category;
     expect(reference.groups.find((g) => g.key === brain)).toMatchObject({
       total: 5,
-      due: 2,
-      future: 3,
+      due: 1,
+      future: 4,
     });
     expect(strict.groups.find((g) => g.key === brain)).toMatchObject({
       total: 5,

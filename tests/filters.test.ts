@@ -12,6 +12,9 @@ import {
   sortValue,
 } from "../src/lib/filters";
 import { fixture, intake, AS_OF } from "./fixtures";
+import { predictions, originalIntake } from "../src/lib/data";
+import { toLedgerRecord } from "../src/lib/ledger-data";
+import { READINGS } from "../src/lib/evidence-model";
 describe("search, filters and shareable state", () => {
   it("combines filters instead of treating them as alternatives", () => {
     const a = fixture("A"),
@@ -136,5 +139,27 @@ describe("filtered CSV export", () => {
       string
     >[];
     expect(result[0]["Prediction (editorial/imported)"]).toMatch(/^'/);
+  });
+  it("toLedgerRecord preserves filtering, sorting, and CSV export while shrinking payload", () => {
+    const rawAll = [...predictions, ...originalIntake];
+    const slimAll = rawAll.map(toLedgerRecord);
+    const rawSize = Buffer.byteLength(JSON.stringify(rawAll), "utf8");
+    const slimSize = Buffer.byteLength(JSON.stringify(slimAll), "utf8");
+    expect(slimSize).toBeLessThan(rawSize * 0.25);
+    for (const reading of READINGS) {
+      for (const view of ["all", "intake", "future", "misses"] as const) {
+        for (const cohort of ["", "eligible", "drift"] as const) {
+          const filters = { ...defaultFilters, reading, view, cohort };
+          const rawFiltered = filterRecords(rawAll, filters, AS_OF);
+          const slimFiltered = filterRecords(slimAll, filters, AS_OF);
+          expect(slimFiltered.map((p) => p.id)).toEqual(
+            rawFiltered.map((p) => p.id),
+          );
+          expect(exportCsv(slimFiltered, AS_OF)).toBe(
+            exportCsv(rawFiltered, AS_OF),
+          );
+        }
+      }
+    }
   });
 });

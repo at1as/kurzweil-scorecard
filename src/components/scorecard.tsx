@@ -1,8 +1,8 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { sitePath } from "@/lib/site-path";
 import { EvidenceLink } from "./evidence-panel";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   flexRender,
   getCoreRowModel,
@@ -26,13 +26,6 @@ import {
   X,
   ArrowUpRight,
 } from "lucide-react";
-import {
-  AS_OF,
-  categories,
-  predictions,
-  allRecords,
-  originalIntake,
-} from "@/lib/data";
 import {
   claim,
   CLAIM_TYPES,
@@ -60,52 +53,77 @@ import {
   reviewOutcome,
   displayOutcome,
 } from "@/lib/interpretations";
-import { READING_LABELS, READINGS } from "@/lib/evidence-model";
+import { ReadingSegmented } from "./reading-segmented";
 import { Badge } from "./ui";
+
 const VIEW_LABELS = {
-  all: "Curated records",
+  all: "Reviewed predictions",
   intake: "Original intake",
   verified: "Assessed",
   fulfilled: "Fulfilled",
-  misses: "Misses",
-  future: "Future targets",
+  misses: "Missed",
+  future: "Upcoming",
 };
 const unique = (items: string[]) => [...new Set(items)].sort();
 function cleanSource(value: string) {
   return value.replace(/\*/g, "").replace(/【[^】]*】/g, "");
 }
-export function Scorecard() {
-  const search = useSearchParams();
-  const router = useRouter();
+
+export function Scorecard({
+  records,
+  intake,
+  categoryNames,
+  asOf,
+}: {
+  records: Prediction[];
+  intake: Prediction[];
+  categoryNames: string[];
+  asOf: string;
+}) {
   const pathname = usePathname();
-  const filters = useMemo(
-    () => parseFilters(new URLSearchParams(search.toString())),
-    [search],
-  );
-  const population = filters.view === "intake" ? originalIntake : predictions;
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [more, setMore] = useState(false);
   const [researchColumns, setResearchColumns] = useState(false);
   const [copyStatus, setCopyStatus] = useState("");
+
+  useEffect(() => {
+    const sync = () =>
+      setFilters(parseFilters(new URLSearchParams(window.location.search)));
+    sync();
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
+  }, [pathname]);
+
+  const allRecords = useMemo(() => [...records, ...intake], [records, intake]);
+  const population = filters.view === "intake" ? intake : records;
+
   function update(values: Partial<Filters>, resetPage = true) {
     const current = parseFilters(new URLSearchParams(window.location.search));
     const next = { ...current, ...values, ...(resetPage ? { page: 1 } : {}) };
+    setFilters(next);
     const query = serializeFilters(next);
     window.history.replaceState(
-      null,
+      window.history.state,
       "",
       sitePath(`${pathname}${query ? `?${query}` : ""}`),
     );
   }
+
+  function resetAll() {
+    setFilters(defaultFilters);
+    window.history.replaceState(window.history.state, "", sitePath(pathname));
+  }
+
   const filtered = useMemo(
-    () => filterRecords(allRecords, filters, AS_OF),
-    [filters],
+    () => filterRecords(allRecords, filters, asOf),
+    [allRecords, filters, asOf],
   );
   const columns = useMemo<ColumnDef<Prediction>[]>(
     () => [
       {
         id: "prediction",
         header: "Prediction",
-        accessorFn: (p) => sortValue(p, "prediction", AS_OF),
+        accessorFn: (p) => sortValue(p, "prediction", asOf),
         cell: ({ row }) => (
           <EvidenceLink
             predictionId={row.original.id}
@@ -122,7 +140,7 @@ export function Scorecard() {
       },
       {
         id: "category",
-        header: "Category",
+        header: "Field",
         accessorFn: (p) => p.category,
         cell: ({ row }) => (
           <span className="category-cell">{row.original.category}</span>
@@ -131,7 +149,7 @@ export function Scorecard() {
       {
         id: "made",
         header: "Prediction made",
-        accessorFn: (p) => sortValue(p, "made", AS_OF),
+        accessorFn: (p) => sortValue(p, "made", asOf),
         sortUndefined: "last",
         cell: ({ row }) => (
           <span className="year-cell">
@@ -139,7 +157,7 @@ export function Scorecard() {
             <small>
               {row.original.sources[0].publicationYearVerified
                 ? "Confirmed"
-                : "Unconfirmed"}
+                : "Attributed"}
             </small>
           </span>
         ),
@@ -147,7 +165,7 @@ export function Scorecard() {
       {
         id: "target",
         header: "Target year",
-        accessorFn: (p) => sortValue(p, "target", AS_OF),
+        accessorFn: (p) => sortValue(p, "target", asOf),
         sortUndefined: "last",
         cell: ({ row }) => (
           <span className="year-cell">
@@ -156,8 +174,8 @@ export function Scorecard() {
               row.original.deadline.originalText}
             <small>
               {row.original.deadline.precision === "UNCONFIRMED"
-                ? "Unconfirmed"
-                : "Supplied reading year"}
+                ? "Undated"
+                : "Target year"}
             </small>
           </span>
         ),
@@ -165,7 +183,7 @@ export function Scorecard() {
       {
         id: "verdict",
         header: "Verdict",
-        accessorFn: (p) => verdict(p, AS_OF),
+        accessorFn: (p) => verdict(p, asOf),
         cell: ({ row }) => (
           <div>
             {row.original.reconciliation ? (
@@ -173,14 +191,12 @@ export function Scorecard() {
                 {row.original.reconciliation.conditional_outcome?.verdict?.replaceAll(
                   "_",
                   " ",
-                ) ?? "Linked / component outcomes"}
-                <small className="qualifier">
-                  Conditional legacy disposition
-                </small>
+                ) ?? "Linked / split claim"}
+                <small className="qualifier">Original intake record</small>
               </span>
             ) : (
               <Badge
-                verdict={verdict(row.original, AS_OF)}
+                verdict={verdict(row.original, asOf)}
                 disputed={row.original.assessment.disputed}
               />
             )}
@@ -195,9 +211,7 @@ export function Scorecard() {
             {row.original.release?.source_verification.state.startsWith(
               "REPORTED_ATTRIBUTION",
             ) && (
-              <small className="qualifier">
-                Provisional secondary attribution
-              </small>
+              <small className="qualifier">Secondary source attribution</small>
             )}
           </div>
         ),
@@ -225,7 +239,7 @@ export function Scorecard() {
       {
         id: "actual",
         header: "Actual year",
-        accessorFn: (p) => sortValue(p, "actual", AS_OF),
+        accessorFn: (p) => sortValue(p, "actual", asOf),
         sortUndefined: "last",
         cell: ({ row }) => (
           <span className="numeric">
@@ -236,17 +250,17 @@ export function Scorecard() {
       {
         id: "drift",
         header: "Timing / known by",
-        accessorFn: (p) => sortValue(p, "drift", AS_OF),
+        accessorFn: (p) => sortValue(p, "drift", asOf),
         sortUndefined: "last",
         cell: ({ row }) => (
           <span className="numeric">
             {row.original.release?.timing?.label ||
-              driftLabel(driftYears(row.original, AS_OF))}
+              driftLabel(driftYears(row.original, asOf))}
           </span>
         ),
       },
     ],
-    [],
+    [asOf],
   );
   const effectivePage = Math.min(
     filters.page - 1,
@@ -309,14 +323,14 @@ export function Scorecard() {
   function download() {
     const csv = exportCsv(
       table.getPrePaginationRowModel().rows.map((row) => row.original),
-      AS_OF,
+      asOf,
     );
     const url = URL.createObjectURL(
       new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }),
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `kurzweil-selection-${AS_OF}.csv`;
+    a.download = `kurzweil-selection-${asOf}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -355,22 +369,11 @@ export function Scorecard() {
   return (
     <div className="scorecard">
       <div className="ledger-controls">
-        <label className="inline-select reading-control">
-          Interpretation
-          <select
-            aria-label="Interpretation"
-            value={filters.reading}
-            onChange={(e) =>
-              update({ reading: e.target.value as Filters["reading"] })
-            }
-          >
-            {READINGS.map((mode) => (
-              <option key={mode} value={mode}>
-                {READING_LABELS[mode]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ReadingSegmented
+          value={filters.reading}
+          onChange={(reading) => update({ reading })}
+          ariaLabel="Interpretation"
+        />
         <button
           className="text-button"
           aria-pressed={researchColumns}
@@ -382,8 +385,8 @@ export function Scorecard() {
       {filters.reading !== "reference" && (
         <p className="table-note">
           {filters.reading === "strict"
-            ? "Alternative criteria can change the population or deadline, not just the severity of a judgment."
-            : "Broader outcomes can use a different mechanism or lower adoption threshold. Open a record to see the changed conditions."}
+            ? "Literal enforces the stated mechanism, form factor, scope, and adoption bar closely."
+            : "Charitable allows reasonable functional substitutes or scope relaxations. Select any row to see what changed."}
         </p>
       )}
       <div className="view-tabs" role="group" aria-label="Prediction views">
@@ -394,8 +397,8 @@ export function Scorecard() {
             onClick={() => update({ view })}
           >
             {VIEW_LABELS[view]}
-            {view === "all" && <span>{predictions.length}</span>}
-            {view === "intake" && <span>{originalIntake.length}</span>}
+            {view === "all" && <span>{records.length}</span>}
+            {view === "intake" && <span>{intake.length}</span>}
           </button>
         ))}
       </div>
@@ -433,11 +436,7 @@ export function Scorecard() {
           </button>
         </div>
         <div className="primary-filters">
-          {select(
-            "category",
-            "Categories",
-            opts(categories.map((c) => c.name)),
-          )}
+          {select("category", "Categories", opts(categoryNames))}
           {select(
             "verdict",
             "Verdicts",
@@ -477,18 +476,15 @@ export function Scorecard() {
             "Prediction types",
             CLAIM_TYPES.map((value) => ({ value, label: TYPE_LABELS[value] })),
           )}
-          {select("cohort", "Statistical populations", [
-            { value: "eligible", label: "Due & eligible selected subset" },
-            { value: "canonical", label: "Canonical only" },
-            { value: "common", label: "Common 67-record comparison cohort" },
-            { value: "new", label: "New in v0.3" },
+          {select("cohort", "Cohorts", [
+            { value: "eligible", label: "Deadlines passed (scored)" },
+            { value: "canonical", label: "Reviewed predictions only" },
+            { value: "common", label: "Common scored cohort (all 3 readings)" },
+            { value: "new", label: "Added in v0.3" },
             { value: "undated", label: "No usable deadline" },
-            { value: "on-time", label: "Eligible and fulfilled on time" },
-            {
-              value: "realized",
-              label: "Eligible and fully realized by review",
-            },
-            { value: "drift", label: "Eligible with exact timing drift" },
+            { value: "on-time", label: "Realized on time" },
+            { value: "realized", label: "Fully realized (on time or late)" },
+            { value: "drift", label: "With exact timing drift" },
           ])}
         </div>
         {activeKeys.length > 0 && (
@@ -500,10 +496,7 @@ export function Scorecard() {
                 <span className="sr-only">Remove filter</span>
               </button>
             ))}
-            <button
-              className="clear-filters"
-              onClick={() => router.replace(pathname, { scroll: false })}
-            >
+            <button className="clear-filters" onClick={resetAll}>
               Clear all
             </button>
           </div>
@@ -512,7 +505,7 @@ export function Scorecard() {
       <div className="results-toolbar">
         <p role="status" aria-live="polite">
           <strong>{filtered.length}</strong> of {population.length} records
-          <span> · Snapshot {AS_OF}</span>
+          <span> · Reviewed {asOf}</span>
         </p>
         <div>
           <span className="copy-status" aria-live="polite">
@@ -534,16 +527,15 @@ export function Scorecard() {
       </div>
       {filters.view === "intake" && (
         <p className="table-note">
-          Research history: all original leads remain unchanged and unscored.
-          Open a record for its reconciliation, related versions, and reasons.
-          Links do not imply equivalence.
+          These are the {intake.length} unreviewed intake leads we started from,
+          preserved as imported and kept out of the scores. Select any row to
+          see how it was reconciled.
         </p>
       )}
       {filters.view === "future" && (
         <p className="table-note">
-          Future targets are navigation labels. Pending assessments may still
-          have provisional secondary attribution; none enters the deadline
-          denominator.
+          Upcoming predictions whose deadlines have not arrived yet. They stay
+          out of the scorecard rates until their deadlines pass.
         </p>
       )}
       <div className="table-scroll scorecard-table-wrap">
@@ -551,7 +543,7 @@ export function Scorecard() {
           className={`scorecard-table ${researchColumns ? "research-table" : "concise-table"}`}
         >
           <caption className="sr-only">
-            Prediction scorecard. Click a prediction to inspect its evidence.
+            Prediction scorecard. Select any prediction to inspect its evidence.
             Sorting buttons are in column headings.
           </caption>
           <thead>
@@ -604,19 +596,16 @@ export function Scorecard() {
             <Search size={25} />
             <h3>
               {filters.q || activeKeys.length || filters.view === "all"
-                ? "No matching records."
-                : "No records in this view yet."}
+                ? "No matching predictions"
+                : "No predictions in this view"}
             </h3>
             <p>
               {filters.view === "all"
                 ? "Try a broader search or remove a filter."
-                : "Try another view or remove a filter. Original leads remain available in Original intake."}
+                : "Try another view or clear your filters."}
             </p>
-            <button
-              className="button button-small"
-              onClick={() => router.replace(pathname, { scroll: false })}
-            >
-              Show curated records <ArrowUpRight size={14} />
+            <button className="button button-small" onClick={resetAll}>
+              Show reviewed predictions <ArrowUpRight size={14} />
             </button>
           </div>
         )}
@@ -663,11 +652,8 @@ export function Scorecard() {
         </div>
       </div>
       <p className="footnote">
-        Publication years are attributed to the listed source; original editions
-        were not independently collated. The selected subset is not a lifetime
-        accuracy estimate. A blank actual year or drift means the required
-        evidence has not been established. Exports include all filtered records,
-        not just this page.
+        A blank actual year means no exact first-achievement date has been
+        established. CSV exports include every matching row, not just this page.
       </p>
     </div>
   );

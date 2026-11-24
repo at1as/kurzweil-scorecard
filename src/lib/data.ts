@@ -4,10 +4,9 @@ import raw from "../../data/generated/predictions.json";
 import reviewed from "../../data/generated/reviewed.json";
 import spec from "../../data/generated/specification.json";
 import config from "../../data/config.json";
-import releaseData from "../../kurzweil_verification_v0_3_package/predictions.canonical.v0.3.json";
-import sourceData from "../../kurzweil_verification_v0_3_package/sources.v0.3.json";
-import mappingData from "../../kurzweil_verification_v0_3_package/legacy-reconciliation.v0.3.json";
-import coverageData from "../../kurzweil_verification_v0_3_package/source-coverage.v0.3.json";
+import sourceData from "../../kurzweil_verification_v0_4_package/sources.v0.4.json";
+import mappingData from "../../kurzweil_verification_v0_4_package/legacy-reconciliation.v0.4.json";
+import coverageData from "../../kurzweil_verification_v0_4_package/source-coverage.v0.4.json";
 import previousMapping from "../../kurzweil_verification_v0_2/legacy-reconciliation.v0.2.json";
 import type { Prediction } from "./model";
 export const predictions = reviewed as Prediction[];
@@ -35,7 +34,7 @@ export const originalIntake: Prediction[] = (raw as Prediction[]).map((p) => {
 });
 export const allRecords = [...predictions, ...originalIntake];
 export const release = {
-  id: "0.3",
+  id: "0.4",
   scope:
     "Selected source-matched distinct forecast versions; not a lifetime accuracy estimate.",
   disclosure:

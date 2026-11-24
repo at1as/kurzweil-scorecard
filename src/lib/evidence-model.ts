@@ -6,12 +6,12 @@ const nullable = text.nullable();
 const reference = z
   .object({ source_id: text, locator: z.string(), role: text })
   .strict();
-export const READINGS = ["reference", "strict", "broader"] as const;
+export const READINGS = ["strict", "reference", "broader"] as const;
 export type Reading = (typeof READINGS)[number];
 export const READING_LABELS = {
-  reference: "Reference (stated reasonable reading)",
-  strict: "Strict / alternative reading",
-  broader: "Broader / directional reading",
+  strict: "Literal",
+  reference: "Balanced",
+  broader: "Charitable",
 };
 const completedOutcome = z.enum([
   "FULFILLED",
@@ -358,7 +358,7 @@ export const coverageSchema = z
 
 export const evidenceV03ReleaseSchema = z
   .object({
-    schema_version: z.literal("0.3"),
+    schema_version: z.enum(["0.3", "0.4"]),
     as_of: date,
     records_count: z.number().int(),
     supersedes: text,

@@ -32,21 +32,18 @@ describe("evidence panel summaries", () => {
     }
     expect(JSON.stringify(allRecords)).toBe(original);
   });
-  it("keeps the brain-modeling deadline disagreement and original intake exclusions visible", () => {
+  it("keeps K036 unified as pending across readings and original intake exclusions visible", () => {
     const brain = evidenceSummary(
       allRecords.find((p) => p.id === "K036")!,
       AS_OF,
     );
-    expect(brain.views.reference).toMatchObject({
-      deadline: 2025,
-      eligible: true,
-      verdict: "PARTIAL",
-    });
-    expect(brain.views.strict).toMatchObject({
-      deadline: 2026,
-      eligible: false,
-      verdict: "PENDING",
-    });
+    for (const mode of READINGS) {
+      expect(brain.views[mode]).toMatchObject({
+        deadline: 2026,
+        eligible: false,
+        verdict: "PENDING",
+      });
+    }
     const intake = evidenceSummary(
       allRecords.find((p) => p.id === "AUD-001")!,
       AS_OF,

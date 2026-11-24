@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
     "data:import": "python3 scripts/extract-workbook.py && tsx scripts/import-data.ts",
-    "data:validate": "python3 kurzweil_verification_v0_3_package/validate_v03.py && tsx scripts/validate-data.ts",
+    "data:validate": "python3 kurzweil_verification_v0_3_package/validate_v03.py && python3 kurzweil_verification_v0_4_package/validate_v04.py && tsx scripts/validate-data.ts",
     "prebuild": "npm run data:import",
     "build": "next build",
     "preview": "node scripts/serve.mjs",
@@ -29,7 +29,7 @@
     "@tanstack/react-table": "8.21.3",
     "csv-parse": "^7.0.3",
     "lucide-react": "^1.57.0",
-    "next": "^16.4.1",
+    "next": "^16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "zod": "^4.6.7"

@@ -48,12 +48,12 @@ export function GroupAnalysis({ views }: { views: BreakdownViews }) {
       </div>
       <p className="analysis-note">
         {group === "type"
-          ? "Capability asks whether a technology exists; adoption asks how widely people use it."
+          ? "Capability asks whether a technology works; adoption asks how widely people use it."
           : group === "publication"
-            ? "Publication years follow the current source attribution."
+            ? "Grouped by the decade Kurzweil published the prediction."
             : group === "target"
-              ? "Target decades follow the deadlines in this interpretation."
-              : "Each prediction belongs to one field. Groups vary in size."}
+              ? "Grouped by target decade."
+              : "Each prediction belongs to one primary field."}
       </p>
       <div
         className="table-scroll"
@@ -115,7 +115,7 @@ export function GroupAnalysis({ views }: { views: BreakdownViews }) {
                 <td>
                   {g.due ? (
                     <Link
-                      aria-label={`${g.label}: ${g.due} due predictions`}
+                      aria-label={`${g.label}: ${g.due} due ${g.due === 1 ? "prediction" : "predictions"}`}
                       href={link(g.key, { cohort: "eligible" })}
                     >
                       {g.due}
@@ -144,9 +144,9 @@ export function GroupAnalysis({ views }: { views: BreakdownViews }) {
         </table>
       </div>
       <p className="footnote">
-        {summary.future} future and {summary.undated} undated predictions are
-        outside the outcome counts. Select a count to explore its predictions in
-        the ledger.
+        {summary.future} upcoming and {summary.undated} undated predictions sit
+        outside these outcome counts. Select any number to inspect those
+        predictions.
       </p>
     </div>
   );

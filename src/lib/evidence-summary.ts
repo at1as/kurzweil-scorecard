@@ -54,7 +54,7 @@ export function evidenceSummary(p: Prediction, asOf: string) {
     hasInterpretations: Boolean(p.release?.interpretations),
     sourceCaveat: p.release?.source_verification
       .book_text_not_independently_collated
-      ? "The original book edition has not been independently checked. See the listed source and full record for attribution limits."
+      ? "The original book edition has not been independently checked. See the listed source on Sources for attribution limits."
       : p.wordingKind === "UNVERIFIED_PARAPHRASE"
         ? "This is an imported lead. Its wording and attribution have not been verified."
         : "Claims are shown as paraphrases unless identified as a verified quotation.",

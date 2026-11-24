@@ -10,99 +10,169 @@ import {
   originalIntake,
 } from "@/lib/data";
 import { summarize, verdict } from "@/lib/scoring";
-import { scorecardUrl } from "@/lib/filters";
+import { selectReading } from "@/lib/interpretations";
 import {
   categoryResults,
-  OUTCOME_LABELS,
   OUTCOME_ORDER,
-  OUTCOME_MARKS,
   type CategoryResult,
+  type ScoredOutcome,
 } from "@/lib/publication";
-import { StoryComparisonProvider } from "@/components/story-comparison-context";
-import { TargetYearChart } from "@/components/target-year-chart";
-import { CategoryExplorer } from "@/components/category-explorer";
-import { GroupAnalysis } from "@/components/group-analysis";
-import { breakdownViews } from "@/lib/collection-breakdown";
+import { claim } from "@/lib/model";
 import { READINGS, type Reading } from "@/lib/evidence-model";
+import { breakdownViews } from "@/lib/collection-breakdown";
+import type {
+  CapabilitySplitViews,
+  SnapshotCounts,
+  TypeSplit,
+  UpcomingBet,
+} from "@/lib/ledger-data";
+import { StoryComparisonProvider } from "@/components/story-comparison-context";
+import { StorySnapshot } from "@/components/story-snapshot";
+import { CategoryExplorer } from "@/components/category-explorer";
+import { CapabilityAdoption } from "@/components/capability-adoption";
+import { TargetYearChart } from "@/components/target-year-chart";
+import { GroupAnalysis } from "@/components/group-analysis";
+import { WhatsAhead } from "@/components/whats-ahead";
 import { ModeComparison } from "@/components/mode-comparison";
+import { JsonLd } from "@/components/json-ld";
 import { Eyebrow, Badge } from "@/components/ui";
 
 export const metadata = pageMetadata("/", "Where was Ray Kurzweil right?");
 
-export default function Overview() {
-  const stats = summarize(predictions, AS_OF);
-  const future = predictions.filter(
-    (p) => p.release?.assessment.at_deadline === "NOT_DUE",
-  ).length;
-  const undated = predictions.filter(
-    (p) => p.release?.assessment.at_deadline === "UNDATED",
-  ).length;
-  const domains = categoryResults(
-    predictions,
-    categories.map((c) => c.name),
+function splitForType(
+  rows: ReturnType<typeof selectReading>[],
+  type: "CAPABILITY" | "ADOPTION",
+): TypeSplit {
+  const stats = summarize(
+    rows.filter((p) => p.claimType === type),
     AS_OF,
   );
+  return {
+    due: stats.eligible,
+    counts: Object.fromEntries(
+      OUTCOME_ORDER.map((v) => [v, stats.eligibleBreakdown[v]]),
+    ) as Record<ScoredOutcome, number>,
+    onTime: stats.onTime,
+    realized: stats.realized,
+  };
+}
+
+export default function Overview() {
+  const stats = summarize(predictions, AS_OF);
   const names = categories.map((c) => c.name);
   const views = Object.fromEntries(
     READINGS.map((r) => [r, categoryResults(predictions, names, AS_OF, r)]),
   ) as Record<Reading, CategoryResult[]>;
-  const outcomeNotes = {
-    CORRECT: {
-      description: "Arrived by the deadline.",
-      example: "Wireless peripherals",
-    },
-    LATE: {
-      description: "Came true, behind schedule.",
-      example: "Brain-scale supercomputing",
-    },
-    PARTIAL: {
-      description: "Partly fulfilled by review.",
-      example: "Robots in every home",
-    },
-    MISSED: {
-      description: "Still unfulfilled at review.",
-      example: "Life expectancy over 100",
-    },
-  };
+
+  const summaries = Object.fromEntries(
+    READINGS.map((r) => {
+      const s = summarize(
+        predictions.map((p) => selectReading(p, r)),
+        AS_OF,
+      );
+      return [
+        r,
+        {
+          due: s.eligible,
+          counts: Object.fromEntries(
+            OUTCOME_ORDER.map((v) => [v, s.eligibleBreakdown[v]]),
+          ) as Record<ScoredOutcome, number>,
+          onTime: s.onTime,
+          realized: s.realized,
+        },
+      ];
+    }),
+  ) as Record<Reading, SnapshotCounts>;
+
+  const capabilitySplits = Object.fromEntries(
+    READINGS.map((r) => {
+      const rows = predictions.map((p) => selectReading(p, r));
+      const capability = splitForType(rows, "CAPABILITY");
+      const adoption = splitForType(rows, "ADOPTION");
+      return [
+        r,
+        {
+          capability,
+          adoption,
+          otherDue: summaries[r].due - capability.due - adoption.due,
+        },
+      ];
+    }),
+  ) as CapabilitySplitViews;
+
+  const upcomingBets: UpcomingBet[] = predictions
+    .filter((p) => p.release?.assessment.at_deadline === "NOT_DUE")
+    .map((p) => ({
+      id: p.id,
+      year: p.deadline.year ?? 2045,
+      claim: claim(p),
+      category: p.category,
+      progress: (p.release?.assessment.at_review === "FULFILLED"
+        ? "FULFILLED"
+        : p.release?.assessment.at_review === "PARTLY_FULFILLED"
+          ? "PARTLY_FULFILLED"
+          : "NOT_FULFILLED") as UpcomingBet["progress"],
+    }))
+    .sort((a, b) => a.year - b.year || a.id.localeCompare(b.id));
+
+  const undated = predictions.filter(
+    (p) => p.release?.assessment.at_deadline === "UNDATED",
+  ).length;
+
+  const capRef = capabilitySplits.reference.capability;
+  const adoptRef = capabilitySplits.reference.adoption;
+  const capPct = Math.round((capRef.realized / capRef.due) * 100);
+  const adoptPct = Math.round((adoptRef.realized / adoptRef.due) * 100);
+
+  const domains = views.reference;
   const get = (name: string) => domains.find((d) => d.name === name)!;
-  const hardware = get("Computing hardware"),
-    medicine = get("Biology & medicine"),
+  const medicine = get("Biology & medicine"),
     networks = get("Networks & communications"),
     robotics = get("Robotics & transportation");
+
   const examples = [
     {
       id: "K009",
       title: "Wireless peripherals",
-      note: "Wireless keyboards and mice were in ordinary use by 2009. He was right about the technology, but less accurate about consumer preference: wired devices remained in use.",
+      note: "Wireless keyboards and mice were in everyday use by 2009. Kurzweil called the technology right, even though wired peripherals didn’t vanish completely.",
       target: "2009",
     },
     {
       id: "K033",
       title: "Brain-scale supercomputing",
-      note: "Tianhe-2 exceeded the 20-petaflop benchmark in 2013, four years after the deadline. This measures computing performance, not a simulation of the human brain.",
+      note: "Tianhe-2 crossed the 20-petaflop benchmark in 2013—four years behind schedule. That tests raw hardware throughput, not a working simulation of the human brain.",
       target: "2009",
     },
     {
       id: "K080",
       title: "Robots in every home",
-      note: "Robot vacuums handle a specific chore. The forecast called for robots in nearly every household, doing a broad range of chores.",
+      note: "Robot vacuums handle one narrow chore well. The prediction called for reliable household robots in nearly every home, handling a wide range of chores.",
       target: "2019",
     },
   ];
+
   return (
     <div className="container publication-page">
+      <JsonLd
+        path="/"
+        name="Where was Ray Kurzweil right?"
+        dateModified={AS_OF}
+      />
       <section className="story-hero">
         <Eyebrow>THE KURZWEIL SCORECARD · {AS_OF_LABEL}</Eyebrow>
         <h1>Where was Ray Kurzweil right?</h1>
         <p className="story-deck">
-          Kurzweil put deadlines on wireless networks, wearable computers and
-          self-driving cars. We checked {stats.collected} of his forecasts
-          against what happened.
+          Kurzweil put hard deadlines on wireless networks, wearable computers,
+          self-driving cars, and artificial intelligence. We checked{" "}
+          {stats.collected} of his dated predictions against what actually
+          happened.
         </p>
         <p className="story-thesis">
-          Networks and medical tools fare better in this collection than
-          robotics and transport. Of {hardware.due} computing forecasts,{" "}
-          {hardware.realized} came true, {hardware.onTime} by the deadline.
+          One clear pattern stands out: he’s far sharper at predicting what
+          technology will be able to do than whether people will actually adopt
+          it. Among the {stats.eligible} predictions past their deadlines,{" "}
+          {capPct}% of his technical capability calls came true—compared with
+          just {adoptPct}% of his adoption calls.
         </p>
         <div className="story-links">
           <a className="text-link" href="#by-field">
@@ -117,70 +187,26 @@ export default function Overview() {
           </Link>
         </div>
       </section>
-      <section
-        id="state"
-        className="story-snapshot"
-        aria-labelledby="snapshot-title"
-      >
-        <div className="snapshot-title">
-          <div>
-            <h2 id="snapshot-title">How the predictions turned out</h2>
-            <p>
-              {stats.eligible} predictions with deadlines passed · Our judgment
-            </p>
-          </div>
-          <Link prefetch={false} href="/methodology/">
-            How we judge them ↗
-          </Link>
-        </div>
-        <div className="outcome-summary">
-          {OUTCOME_ORDER.map((v) => (
-            <Link
-              prefetch={false}
-              key={v}
-              className={`summary-outcome summary-${v.toLowerCase()}`}
-              href={scorecardUrl({ cohort: "eligible", verdict: v })}
-            >
-              <div className="summary-count">
-                <strong>{stats.eligibleBreakdown[v]}</strong>
-                <span aria-hidden="true">{OUTCOME_MARKS[v]}</span>
-              </div>
-              <h3>
-                {OUTCOME_LABELS[v]}
-                <ArrowUpRight size={17} aria-hidden="true" />
-              </h3>
-              <p>{outcomeNotes[v].description}</p>
-              <small>e.g. {outcomeNotes[v].example}</small>
-            </Link>
-          ))}
-        </div>
-        <p className="scope-caption">
-          Our judgments on a selected collection, not a lifetime accuracy score.{" "}
-          {stats.collected - stats.eligible} other records are future or
-          undated.{" "}
-          <Link prefetch={false} href="/methodology/">
-            Scope & sources
-          </Link>
-        </p>
-      </section>
       <StoryComparisonProvider views={views}>
+        <StorySnapshot
+          summaries={summaries}
+          upcomingCount={upcomingBets.length}
+          undatedCount={undated}
+        />
         <section id="by-field" className="story-section">
           <div className="story-section-heading">
             <Eyebrow>THE DATA</Eyebrow>
             <h2>How the fields compare</h2>
             <p>
-              In our default reading, {networks.realized} of {networks.due}{" "}
+              Under the Balanced reading, {networks.realized} of {networks.due}{" "}
               network forecasts and {medicine.realized} of {medicine.due}{" "}
-              medical forecasts were fully realized by the review date. Robotics
-              and transport: {robotics.realized} of {robotics.due}. These are
-              small groups drawn from an incomplete collection.
+              medical forecasts came true. Robotics and transport fared much
+              worse: {robotics.realized} of {robotics.due}.
             </p>
           </div>
           <CategoryExplorer />
           <details className="editorial-disclosure">
-            <summary>
-              How the {categories.length} categories are defined
-            </summary>
+            <summary>How the fields are defined</summary>
             <div className="taxonomy-definitions">
               {categories.map((c) => (
                 <div key={c.name}>
@@ -191,6 +217,7 @@ export default function Overview() {
             </div>
           </details>
         </section>
+        <CapabilityAdoption splits={capabilitySplits} />
         <TargetYearChart asOfLabel={AS_OF_LABEL} />
         <details
           id="more-breakdowns"
@@ -200,6 +227,7 @@ export default function Overview() {
           <GroupAnalysis views={breakdownViews(predictions, AS_OF, names)} />
         </details>
       </StoryComparisonProvider>
+      <WhatsAhead bets={upcomingBets} />
       <div className="explanation-area" id="about-the-judgments">
         <div className="explanation-divider">
           <span>Judgments & sources</span>
@@ -209,14 +237,16 @@ export default function Overview() {
           <div className="story-section-heading">
             <h2>What counts as a hit?</h2>
             <p>
-              We judge each claim against its deadline and intended scale. A
-              working product can satisfy a capability forecast; a prediction of
-              widespread use also needs evidence of adoption.
+              We judge every claim against its original deadline and stated
+              scale. A working product can satisfy a capability forecast; a
+              prediction of widespread use also needs evidence that people
+              actually adopted it.
             </p>
             <p>
-              Consumer preference and regulation can limit use even when a
-              technology works. We judge those cases individually and show
-              alternative readings where the result is ambiguous.
+              Preference, cost, and regulation can stall adoption even when a
+              technology works. Where wording leaves room for reasonable
+              disagreement, we show Literal, Balanced, and Charitable readings
+              side by side.
             </p>
           </div>
           <div className="editorial-examples">
@@ -242,7 +272,7 @@ export default function Overview() {
             })}
           </div>
           <details className="editorial-disclosure reading-sensitivity">
-            <summary>How much do the judgments change the score?</summary>
+            <summary>How much do the readings change the score?</summary>
             <ModeComparison records={predictions} asOf={AS_OF} />
           </details>
         </section>
@@ -250,39 +280,39 @@ export default function Overview() {
           <div>
             <h2>Check our work</h2>
             <p>
-              Each record includes the forecast, our judgment, source links and
-              earlier assessments. Open one to check the reasoning or compare
-              alternative readings.
+              Every prediction links to its source passage, scoring criteria,
+              real-world evidence, and revision history. Open any entry to test
+              the reasoning for yourself.
             </p>
             <Link
               prefetch={false}
               className="button button-primary"
               href="/predictions/"
             >
-              Explore the predictions <ArrowRight size={17} />
+              Explore all {stats.collected} predictions{" "}
+              <ArrowRight size={17} />
             </Link>
           </div>
           <div className="scope-notes">
-            <h3>What this collection can tell us</h3>
+            <h3>About this collection</h3>
             <p>
-              It compares {stats.collected} distinct forecast versions. Repeated
-              claims count once; materially different deadlines or thresholds
-              stay separate. {stats.eligible} are due, {future} are future, and{" "}
-              {undated} lack a usable deadline.
+              These {stats.collected} records span {stats.eligible} past-due
+              forecasts, {upcomingBets.length} upcoming bets, and {undated}{" "}
+              undated claims, reviewed through {AS_OF_LABEL}. Duplicate
+              restatements count once; decade-by-decade progressions stay
+              separate.
             </p>
             <p>
-              The selection is incomplete and uneven across fields. Most book
-              claims were checked through reprints or retrospectives; original
-              editions still need checking. The research and judgments are
-              AI-assisted and have not had independent human review.
-            </p>
-            <p>
-              Outcomes are assessed through {AS_OF_LABEL}. The{" "}
+              Read the full scoring rules and caveats in{" "}
+              <Link prefetch={false} href="/methodology/">
+                Methodology
+              </Link>
+              , or download every source, earlier release, and all{" "}
+              {originalIntake.length} original intake records on{" "}
               <Link prefetch={false} href="/sources/">
-                sources and downloads
-              </Link>{" "}
-              include all {originalIntake.length} original intake records and
-              earlier assessments.
+                Sources & downloads
+              </Link>
+              .
             </p>
           </div>
         </section>
