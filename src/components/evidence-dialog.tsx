@@ -1,15 +1,19 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowUpRight, Check, Copy, X } from "lucide-react";
-import type { Reading } from "@/lib/evidence-model";
+import { READINGS, type Reading } from "@/lib/evidence-model";
 import type { EvidenceSummary } from "@/lib/evidence-summary";
-import { recordUrl, type Selection } from "@/lib/evidence-navigation";
+import {
+  isLegacyId,
+  recordUrl,
+  type Selection,
+} from "@/lib/evidence-navigation";
 import { sitePath } from "@/lib/site-path";
 import { PUBLIC_READINGS } from "@/lib/publication";
 import { Badge, External } from "./ui";
 import { EvidenceLink } from "./evidence-link";
 const cache = new Map<string, EvidenceSummary>();
-const readings: Reading[] = ["reference", "strict", "broader"];
+const readings: readonly Reading[] = READINGS;
 
 function outcomeLabel(outcome: string) {
   const labels: Record<string, string> = {
@@ -355,10 +359,20 @@ export function EvidencePanel({
           )}{" "}
           Copy record link
         </button>
-        <a href={fullUrl} target="_blank" rel="noopener noreferrer">
-          Full record & history <ArrowUpRight size={15} />
-          <span className="sr-only"> (opens in a new tab)</span>
-        </a>
+        {isLegacyId(selection.id) ? (
+          <a
+            href={sitePath(
+              `/predictions/?view=intake&q=${encodeURIComponent(selection.id)}`,
+            )}
+          >
+            Open in original intake <ArrowUpRight size={15} />
+          </a>
+        ) : (
+          <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+            Full record & history <ArrowUpRight size={15} />
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+        )}
         <span
           role="status"
           className={

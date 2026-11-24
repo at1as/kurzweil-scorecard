@@ -7,9 +7,18 @@ import {
 } from "@/lib/data";
 import type { Prediction } from "@/lib/model";
 import { Notice, External } from "./ui";
-export function SourceProvenance({ id }: { id: string }) {
+import { EvidenceLink } from "./evidence-panel";
+export function SourceProvenance({
+  id,
+  omitNote,
+}: {
+  id: string;
+  omitNote?: string;
+}) {
   const s = evidenceSources.find((s) => s.id === id);
   if (!s) return null;
+  const prov = s.provenance_note.trim();
+  const showNote = Boolean(prov) && !(omitNote && omitNote.includes(prov));
   return (
     <div className="source-provenance">
       <span className="micro-label">{s.kind.replaceAll("_", " ")}</span>
@@ -19,7 +28,7 @@ export function SourceProvenance({ id }: { id: string }) {
           .replaceAll("_", " ")
           .toLowerCase()}
       </p>
-      {s.provenance_note && <p>{s.provenance_note}</p>}
+      {showNote && <p>{s.provenance_note}</p>}
       {researchSupplement.citations.some((c) => c.source_id === id) &&
         s.checked_as_of !== researchSupplement.checked_at && (
           <p>
@@ -27,7 +36,7 @@ export function SourceProvenance({ id }: { id: string }) {
             in the citation supplement.
           </p>
         )}
-      <Link href={`/sources/#${s.id}`}>Catalogue entry {s.id}</Link>
+      <Link href={`/sources/#${s.id}`}>Catalog entry {s.id}</Link>
     </div>
   );
 }
@@ -77,7 +86,7 @@ export function EvidenceContext({ p }: { p: Prediction }) {
   return (
     <div className="release-context">
       <Notice>
-        <strong>Editorial paraphrase · evidence v0.3.</strong>{" "}
+        <strong>Editorial paraphrase · evidence v{release.id}.</strong>{" "}
         {release.disclosure}
         <p>
           Source state: {r.source_verification.state.replaceAll("_", " ")}.{" "}
@@ -132,10 +141,10 @@ export function LegacyRelations({ p }: { p: Prediction }) {
       </p>
       {p.release.legacy_relations.map((rel) => (
         <div key={rel.legacy_id}>
-          <Link className="related-row" href={`/predictions/${rel.legacy_id}/`}>
+          <EvidenceLink className="related-row" predictionId={rel.legacy_id}>
             <span className="mono">{rel.legacy_id}</span>
             {rel.relation.replaceAll("_", " ")}
-          </Link>
+          </EvidenceLink>
         </div>
       ))}
     </div>

@@ -7,7 +7,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { EvidenceProvider } from "@/components/evidence-panel";
 import { Navigation } from "@/components/navigation";
-import { AS_OF_LABEL, datasetVersion } from "@/lib/data";
+import { AS_OF_LABEL, datasetVersion, predictions } from "@/lib/data";
 const inter = localFont({
   src: "../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
   variable: "--font-inter",
@@ -26,8 +26,7 @@ export const metadata: Metadata = {
     default: "Ray Kurzweil Prediction Scorecard",
     template: "%s · Kurzweil Scorecard",
   },
-  description:
-    "Where was Ray Kurzweil right? Compare 84 predictions by field, see what arrived on time or late, and inspect the evidence behind each judgment.",
+  description: `Where was Ray Kurzweil right? Compare ${predictions.length} predictions by field, see what arrived on time or late, and inspect the evidence behind each judgment.`,
   robots: { index: true, follow: true },
 };
 export default function RootLayout({
@@ -47,19 +46,20 @@ export default function RootLayout({
             <div>
               <Link href="/" className="footer-brand">
                 The Kurzweil Scorecard
-                <span>Predictions, judgments, and the evidence.</span>
+                <span>Predictions, judgments, and the evidence</span>
               </Link>
               <p>
-                An independent project. Not affiliated with Ray Kurzweil.
+                Independent, AI-assisted analysis. Not affiliated with Ray
+                Kurzweil.
                 <br />
-                Research snapshot: {AS_OF_LABEL} · Dataset v{datasetVersion}
+                Reviewed through {AS_OF_LABEL} · Dataset v{datasetVersion}
               </p>
             </div>
             <div className="footer-links">
               <Link href="/methodology/">Methodology</Link>
-              <Link href="/sources/">Source coverage</Link>
+              <Link href="/sources/">Sources & downloads</Link>
               <a href={sitePath("/data/predictions.json")} download>
-                Canonical JSON ↗
+                Download JSON ↗
               </a>
             </div>
             <div className="footer-author">
@@ -67,15 +67,15 @@ export default function RootLayout({
                 <p>
                   Built by <a href={AUTHOR_HOME}>Jason Willems</a>.
                 </p>
-                <span>I write about software, AI and building products.</span>
+                <span>I write about software, AI, and building products.</span>
               </div>
               <a className="author-cta" href={AUTHOR_BLOG}>
                 Read my blog <ArrowRight size={15} aria-hidden="true" />
               </a>
             </div>
             <div className="footer-bottom">
-              AI-assisted research · Selected forecasts · All assessments and
-              source history available
+              Curated collection of {predictions.length} predictions · Full
+              sources and revision history included
             </div>
           </footer>
         </EvidenceProvider>

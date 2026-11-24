@@ -1,5 +1,18 @@
 # Dataset and site history
 
+## Evidence v0.4 — calibration, deduplication, and correctness review (cutoff 2026-10-15)
+
+Created immutable `kurzweil_verification_v0_4_package/` superseding v0.3 while keeping v0.1, v0.2, and v0.3 untouched and preserving every prior assessment in `revision_history`.
+
+- **Deduplicated three duplicate restatements (84 → 81 canonical):** consolidated `K015` (2010 retinal glasses/contacts) into `K014` (2009), `K025` (2020 `$1,000` brain compute) into `K034` (2019), and `K077` (2019 speech translation) into `K048` (2009). Genuine decade-over-decade progressions (e.g., `K014` → `K030`, `K033` → `K034` → `K035`, `K027` → `K028`) remain separate.
+- **Unified `K036` deadline across all three readings:** `"mid-2020s"` now closes December 31, 2026 (`Pending` as of October 15, 2026) in all three readings—matching `K037`/`K043`'s window-endpoint rule (`"early 2030s"` → `2033`) and giving all three tiers an identical **64-record due cohort** (plus 15 pending and 2 undated).
+- **Recalibrated the three interpretation tiers and unified labels (`Literal` / `Balanced` / `Charitable` and `On time` / `Late` / `Partial` / `Missed` / `Pending`):**
+  - Downgraded overly generous default hits (`K014`, `K067` → `Partial` in Balanced, `Missed` in Literal) and enforced Literal mechanism/scope/adoption thresholds across 31 records (`14 / 64` realized, `21.9%`; `6` on time, `9.4%`).
+  - Balanced stands at `33 / 64` realized (`51.6%`; `22` on time, `34.4%`).
+  - Tightened Charitable (`45 / 64` realized, `70.3%`; `26` on time, `40.6%`) so it no longer rewrites failed claims into unrelated technologies (`K071`, `K074`, `K004`, `K011`, `K019`, `K029`, `K030`, `K047`, `K058`, `K059`, `K068`, `K075`, `K078`, `K079`, `K084`) or marks 2029 future claims (`K023`, `K045`) On time in 2026.
+- **Correctness & SEO fixes:** eliminated the `..` duplicated evidence-note bug and triple-printed provenance notes; fixed `driftYears()` so exact drift (`K033`: `+4y` Literal/Balanced, `+3y` Charitable) is computed in all readings; repaired regional Apple URLs (`N06`, `N71`, `N72`, `O08`) and replaced the `P02` mirror URL with the Internet Archive 1999 edition record; fixed `"1 predictions"` singular/plural labels; stopped exporting 88 duplicate legacy intake HTML pages (`/predictions/AUD-*`, `DEC-*`, `EXE-*`), keeping legacy leads inspectable in place via the Evidence Drawer (`evidence/*/summary.json`) and downloadable archives.
+- **Narrative flow, editorial copy, and performance pass:** synced the headline outcome cards with a live `Literal / Balanced / Charitable` switcher; promoted **Capability vs. Adoption** (`68%` vs. `38%` realized under Balanced) into the main scroll; omitted empty and upcoming-only fields from the primary field chart and added a **What’s still ahead (2026–2045)** chronological milestone strip; removed repetitive audit boilerplate and internal jargon in favor of plain US English with Oxford commas and period-free headings and single-phrase claim titles; decoupled client components from `@/lib/data` and stripped heavy archival fields from the `/predictions/` table payload so the table renders directly in static HTML without a loading flash or multi-megabyte client chunk.
+
 ## 2026-10-20 — Mobile evidence navigation
 
 On screens up to 700px wide, evidence opens in a bottom sheet with the underlying predictions still visible and a persistent “Back to predictions” control. The return control and footer actions have larger touch targets; the interpretation select avoids text-entry zoom on phones. Existing history, scroll/focus restoration and desktop drawer behavior are preserved.

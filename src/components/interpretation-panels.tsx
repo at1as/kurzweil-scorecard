@@ -4,8 +4,13 @@ import Link from "next/link";
 import type { Prediction, Verdict } from "@/lib/model";
 import { READINGS, READING_LABELS, type Reading } from "@/lib/evidence-model";
 import { Badge, External } from "./ui";
-import { evidenceSources } from "@/lib/data";
-export function InterpretationPanels({ p }: { p: Prediction }) {
+export function InterpretationPanels({
+  p,
+  sourceUrls,
+}: {
+  p: Prediction;
+  sourceUrls: Record<string, string>;
+}) {
   const [mode, setMode] = useState<Reading>("reference");
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get("reading");
@@ -90,8 +95,8 @@ export function InterpretationPanels({ p }: { p: Prediction }) {
         )}
         {mode === "broader" && v.relaxed_or_changed_conditions.length > 0 && (
           <p className="footnote">
-            Directional success under changed conditions is not full fulfillment
-            of the reference criterion.
+            Charitable verdicts under relaxed conditions are not full
+            fulfillment of the Balanced criterion.
           </p>
         )}
         {v.verdict === "CORRECT" && v.at_deadline === "NOT_DUE" && (
@@ -104,14 +109,16 @@ export function InterpretationPanels({ p }: { p: Prediction }) {
           Evidence:{" "}
           {v.evidence_source_ids.map((id) => (
             <span className="source-id-link" key={id}>
-              <External href={evidenceSources.find((s) => s.id === id)!.url}>
-                {id}
-              </External>
+              {sourceUrls[id] ? (
+                <External href={sourceUrls[id]}>{id}</External>
+              ) : (
+                id
+              )}
             </span>
           ))}
         </p>
         <Link href={`/predictions/?q=${p.id}&reading=${mode}`}>
-          View this reading in the scorecard →
+          View this reading in all predictions →
         </Link>
       </article>
       {r.non_scoring_comparators?.map((c, i) => (
@@ -128,9 +135,11 @@ export function InterpretationPanels({ p }: { p: Prediction }) {
           )}
           {c.evidence_source_ids?.map((id) => (
             <span className="source-id-link" key={id}>
-              <External href={evidenceSources.find((s) => s.id === id)!.url}>
-                {id}
-              </External>
+              {sourceUrls[id] ? (
+                <External href={sourceUrls[id]}>{id}</External>
+              ) : (
+                id
+              )}
             </span>
           ))}
         </details>

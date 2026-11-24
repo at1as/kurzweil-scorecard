@@ -10,9 +10,9 @@ export function pageMetadata(
   description = SITE_DESCRIPTION,
 ): Metadata {
   const url = `${deployment.origin}${deployment.basePath}${path}`;
-  const image = `${deployment.origin}${deployment.basePath}/share-card.png?v=${process.env.PUBLIC_SITE_BUILD_ID ?? "v03-2026-10-15"}`;
+  const image = `${deployment.origin}${deployment.basePath}/share-card.png?v=${process.env.PUBLIC_SITE_BUILD_ID ?? "v04-2026-10-15"}`;
   const alt =
-    "Where was Ray Kurzweil right? Forecast outcomes compared across computing hardware, medicine and robotics.";
+    "Where was Ray Kurzweil right? Forecast outcomes compared across computing hardware, medicine, and robotics.";
   return {
     title,
     description,

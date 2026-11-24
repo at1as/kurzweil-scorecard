@@ -4,7 +4,7 @@ import { InterpretationPanels } from "@/components/interpretation-panels";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowUpRight, Check, Minus, FileText } from "lucide-react";
-import { predictions, allRecords, AS_OF, AS_OF_LABEL } from "@/lib/data";
+import { predictions, evidenceSources, AS_OF, AS_OF_LABEL } from "@/lib/data";
 import {
   EvidenceContext,
   LegacyRelations,
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui";
 export const dynamicParams = false;
 export function generateStaticParams() {
-  return allRecords.map((p) => ({ id: p.id }));
+  return predictions.map((p) => ({ id: p.id }));
 }
 export async function generateMetadata({
   params,
@@ -36,7 +36,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const p = allRecords.find((p) => p.id === id);
+  const p = predictions.find((p) => p.id === id);
   return pageMetadata(
     `/predictions/${id}/`,
     p ? `${id}: ${claim(p)}` : "Prediction not found",
@@ -51,7 +51,7 @@ export default async function PredictionPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const p = allRecords.find((p) => p.id === id);
+  const p = predictions.find((p) => p.id === id);
   if (!p) notFound();
   const status = verdict(p, AS_OF);
   const source = p.sources[0];
@@ -66,6 +66,19 @@ export default async function PredictionPage({
         p.duplicateOf === other.id ||
         (p.parentStatementId &&
           other.parentStatementId === p.parentStatementId)),
+  );
+  const referencedSourceIds = new Set([
+    ...Object.values(p.release?.interpretations ?? {}).flatMap(
+      (v) => v.evidence_source_ids,
+    ),
+    ...(p.release?.non_scoring_comparators ?? []).flatMap(
+      (c) => c.evidence_source_ids ?? [],
+    ),
+  ]);
+  const sourceUrls = Object.fromEntries(
+    evidenceSources
+      .filter((s) => referencedSourceIds.has(s.id))
+      .map((s) => [s.id, s.url]),
   );
   const checks = p.release
     ? [
@@ -135,7 +148,7 @@ export default async function PredictionPage({
             <span className="badge">Legacy lead · see outcome disposition</span>
           ) : (
             <>
-              <span className="micro-label">Reference judgment</span>
+              <span className="micro-label">Balanced reading</span>
               <Badge verdict={status} disputed={p.assessment.disputed} />
             </>
           )}
@@ -159,14 +172,14 @@ export default async function PredictionPage({
       )}
       <div className="detail-grid">
         <div className="detail-main">
-          <InterpretationPanels p={p} />
+          <InterpretationPanels p={p} sourceUrls={sourceUrls} />
           <section className="detail-section">
             <SectionHeading
               index="01"
               title={
                 p.release
-                  ? "The forecast and its attribution."
-                  : "The original imported lead."
+                  ? "The forecast and its attribution"
+                  : "The original imported lead"
               }
             />
             <div className="quote-panel">
@@ -330,7 +343,7 @@ export default async function PredictionPage({
             </p>
           </section>
           <section className="detail-section">
-            <SectionHeading index="03" title="The evidence." />
+            <SectionHeading index="03" title="The evidence" />
             {p.evidence.length ? (
               <div className="evidence-list">
                 {p.evidence.map((e) => (
@@ -352,6 +365,7 @@ export default async function PredictionPage({
                             ?.source_id ??
                           ""
                         }
+                        omitNote={e.note}
                       />
                     )}
                   </article>
@@ -360,7 +374,7 @@ export default async function PredictionPage({
             ) : (
               <div className="evidence-empty">
                 <FileText size={24} />
-                <h3>No outcome evidence has been verified.</h3>
+                <h3>No outcome evidence has been verified</h3>
                 <p>
                   Legacy ratings are preserved in the source package. They have
                   not been accepted as evidence for this assessment.
@@ -446,7 +460,7 @@ export default async function PredictionPage({
             )}
           </section>
           <section className="detail-section">
-            <SectionHeading title="Related forecasts." />
+            <SectionHeading title="Related forecasts" />
             {related.length ? (
               related.map((other) => (
                 <Link
@@ -468,7 +482,7 @@ export default async function PredictionPage({
           </section>
         </div>
         <aside className="assessment-panel">
-          <Eyebrow>REFERENCE JUDGMENT</Eyebrow>
+          <Eyebrow>BALANCED READING</Eyebrow>
           {p.reconciliation ? (
             <span className="badge">Legacy lead · see outcome disposition</span>
           ) : (

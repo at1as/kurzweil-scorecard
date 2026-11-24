@@ -10,7 +10,10 @@ export function CategoryExplorer() {
     <section className="domain-explorer" aria-label="Outcomes by field">
       <div className="domain-controls">
         <p>
-          <strong>{due} predictions</strong> with deadlines passed
+          <strong>
+            {due} {due === 1 ? "prediction" : "predictions"}
+          </strong>{" "}
+          with deadlines passed
         </p>
         <label className="inline-select">
           Interpretation

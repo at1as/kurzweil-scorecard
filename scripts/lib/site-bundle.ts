@@ -112,16 +112,21 @@ export function validateBundle(
   );
   if (!Array.isArray(intake.predictions) || !intake.predictions.length)
     throw Error("Missing original intake inventory");
-  const ids = [...records.predictions, ...intake.predictions].map(
-    (r: { id: string }) => r.id,
-  );
-  for (const id of ids)
+  const canonicalIds = records.predictions.map((r: { id: string }) => r.id);
+  const intakeIds = intake.predictions.map((r: { id: string }) => r.id);
+  for (const id of canonicalIds)
     for (const file of [
       `predictions/${id}/index.html`,
       `evidence/${id}/summary.json`,
     ]) {
       if (!files.includes(file)) throw Error(`Missing record output: ${file}`);
     }
+  for (const id of intakeIds) {
+    if (!files.includes(`evidence/${id}/summary.json`))
+      throw Error(`Missing intake summary: evidence/${id}/summary.json`);
+    if (files.includes(`predictions/${id}/index.html`))
+      throw Error(`Legacy intake HTML page should not be exported: ${id}`);
+  }
   if (
     !files.some((f) => f.endsWith(".js")) ||
     !files.some((f) => f.endsWith(".css"))

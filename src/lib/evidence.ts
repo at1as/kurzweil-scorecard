@@ -65,6 +65,15 @@ export function adaptEvidence(
     },
     evidence: r.evidence.map((ref, i) => {
       const s = source(ref.source_id);
+      const loc = ref.locator.trim();
+      const prov = s.provenance_note.trim();
+      const note = !loc
+        ? prov || "Cited outcome evidence."
+        : !prov || loc === prov || prov.includes(loc)
+          ? prov || loc
+          : loc.includes(prov)
+            ? loc
+            : `${loc.replace(/\.+$/, "")}. ${prov}`;
       return {
         sourceId: s.id,
         id: `${s.id}-${i}`,
@@ -75,7 +84,7 @@ export function adaptEvidence(
           : null,
         accessedAt: s.checked_as_of,
         stance: "CONTEXT",
-        note: `${ref.locator}. ${s.provenance_note}`,
+        note,
       };
     }),
     assessment: {
@@ -119,7 +128,7 @@ export function adaptEvidence(
         })),
         {
           date: a.as_of,
-          note: `Evidence v${r.interpretations ? "0.3" : "0.2"}: ${a.review_state}; supplied verdict ${a.verdict}. ${a.rationale}`,
+          note: `Evidence v${r.interpretations ? "0.4" : "0.2"}: ${a.review_state}; supplied verdict ${a.verdict}. ${a.rationale}`,
         },
       ],
     },

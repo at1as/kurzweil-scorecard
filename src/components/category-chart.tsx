@@ -99,21 +99,22 @@ export function CategoryChart({
   }, [preview]);
   // A different reading must not leave a preview showing the previous judgment.
   useEffect(() => setPreview(null), [reading]);
+  const visibleRows = rows.filter((row) => row.due > 0);
 
   return (
     <div className="category-chart">
       <OutcomeLegend />
       <p className="chart-instruction">
-        Open a field to see its predictions. Hover a square for the claim;
-        select it for the evidence.
+        Open any field to see its predictions. Hover a square for the claim, or
+        select it to read the evidence.
       </p>
       <div className="category-chart-head" aria-hidden="true">
         <span>Field</span>
-        <span>Predictions with deadlines passed</span>
+        <span>Predictions past deadline</span>
         <span>Fully realized</span>
       </div>
       <ul className="category-rows">
-        {rows.map((row, index) => {
+        {visibleRows.map((row, index) => {
           const open = expanded === row.name;
           const canOpen = row.total > 0;
           const panelId = `${prefix}-field-${index}`;
@@ -266,7 +267,7 @@ export function CategoryChart({
                         ...(row.due ? { cohort: "eligible" } : {}),
                       })}
                     >
-                      Open in the prediction ledger <ArrowUpRight size={14} />
+                      Open in all predictions <ArrowUpRight size={14} />
                     </Link>
                     <button
                       type="button"
@@ -289,9 +290,9 @@ export function CategoryChart({
         })}
       </ul>
       <p className="chart-footnote">
-        Fully realized = on time + late. Partial gets no fractional credit. Both
-        percentages use the assessed predictions in that field. Sample sizes and
-        deadlines differ between fields.
+        Fully realized = on time + late. Partial gets no fractional credit.
+        Fields with only upcoming deadlines (such as Energy & environment)
+        appear below under What’s still ahead.
       </p>
       {preview &&
         createPortal(

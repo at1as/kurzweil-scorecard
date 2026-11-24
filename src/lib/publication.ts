@@ -18,9 +18,9 @@ export const OUTCOME_MARKS = {
   MISSED: "×",
 };
 export const PUBLIC_READINGS: Record<Reading, string> = {
-  reference: "Our judgment",
-  strict: "Stricter / alternative",
-  broader: "Broader / directional",
+  strict: "Literal",
+  reference: "Balanced",
+  broader: "Charitable",
 };
 export type ForecastSummary = {
   id: string;

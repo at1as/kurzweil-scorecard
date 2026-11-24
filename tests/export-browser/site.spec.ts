@@ -28,6 +28,11 @@ test("Story HTML stays compact without the full research payload", async ({
   const response = await request.get(`${base}/`);
   expect(response.status()).toBe(200);
   expect((await response.body()).byteLength).toBeLessThan(500_000);
+  const predictionsHtml = await (
+    await request.get(`${base}/predictions/`)
+  ).text();
+  expect(predictionsHtml).toContain("K001");
+  expect(predictionsHtml).not.toContain("Loading the prediction ledger");
 });
 test("author CTAs, navigation, filters, evidence and downloads work at the production path", async ({
   page,
@@ -89,7 +94,7 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   await page.reload();
   await expect(page.getByRole("searchbox")).toHaveValue("K036");
   await page.goto(`${base}/sources/`);
-  const download = page.getByRole("link", { name: /Current canonical JSON/ });
+  const download = page.getByRole("link", { name: /Current predictions JSON/ });
   await expect(download).toHaveAttribute(
     "href",
     `${base}/data/predictions.json`,
@@ -97,7 +102,7 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   const data = await (
     await page.request.get((await download.getAttribute("href"))!)
   ).json();
-  expect(data.predictions.length).toBe(84);
+  expect(data.predictions.length).toBe(81);
   await page.goto(`${base}/categories/?reading=strict&cohort=common`);
   await expect(page).toHaveURL(
     new RegExp(`${base}/\\?reading=strict#by-field$`),
@@ -108,11 +113,11 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
   const breakdown = page.locator("#more-breakdowns");
   await breakdown.locator("summary").click();
   await expect(breakdown.locator(".analysis-controls")).toContainText(
-    "67 with deadlines passed",
+    "64 with deadlines passed",
   );
   await breakdown.getByLabel("Group by").selectOption("category");
   const due = breakdown.getByRole("link", {
-    name: "Neuroscience & human augmentation: 1 due predictions",
+    name: "Neuroscience & human augmentation: 1 due prediction",
     exact: true,
   });
   await expect(due).toHaveAttribute(
@@ -124,13 +129,19 @@ test("author CTAs, navigation, filters, evidence and downloads work at the produ
     new RegExp(`${base}/predictions/.*reading=strict`),
   );
   await expect(page.locator(".results-toolbar")).toContainText(
-    "1 of 84 records",
+    "1 of 81 records",
   );
   await page.goto(`${base}/predictions/K002/`);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     `${deployment.origin}${base}/predictions/K002/`,
   );
+  expect((await page.request.get(`${base}/predictions/AUD-001/`)).status()).toBe(
+    404,
+  );
+  expect(
+    (await page.request.get(`${base}/evidence/AUD-001/summary.json`)).status(),
+  ).toBe(200);
   expect(failures).toEqual([]);
 });
 test("export header and footer stay accessible on desktop and mobile", async ({

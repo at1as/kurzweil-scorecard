@@ -19,8 +19,8 @@ export function ModeComparison({
     <div className="panel mode-comparison">
       <h3>How the reading changes the result</h3>
       <p>
-        Same {common.length} predictions in every reading. One brain-modeling
-        forecast is left out because its alternative deadline has not passed.
+        All three readings evaluate the exact same {common.length} due
+        predictions.
       </p>
       <div className="table-scroll">
         <table className="analysis-table">
@@ -87,9 +87,10 @@ export function ModeComparison({
         </table>
       </div>
       <p className="footnote">
-        The main comparison has {due} due predictions. This comparison uses the{" "}
-        {common.length} eligible in all three readings. Broader success may mean
-        meeting different conditions; open a record to see what changed.
+        All three readings share the same {due} due predictions. Literal holds
+        close to the stated mechanism, scope and adoption bar; Charitable allows
+        documented functional substitutes without rewriting failed claims. Open
+        any record to see what changed.
       </p>
     </div>
   );

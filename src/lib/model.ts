@@ -164,10 +164,10 @@ export const overrideSchema = z
   })
   .strict();
 export const LABELS: Record<Verdict, string> = {
-  CORRECT: "Correct",
+  CORRECT: "On time",
   LATE: "Late",
   PARTIAL: "Partial",
-  MISSED: "Wrong / missed",
+  MISSED: "Missed",
   PENDING: "Pending",
   UNSCORABLE: "Unscorable",
   UNREVIEWED: "Unreviewed",

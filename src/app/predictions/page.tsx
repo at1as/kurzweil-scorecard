@@ -1,38 +1,38 @@
 import { pageMetadata } from "@/lib/site-meta";
 import Link from "next/link";
-import { predictions } from "@/lib/data";
-import { Suspense } from "react";
+import { AS_OF, categories, originalIntake, predictions } from "@/lib/data";
+import { toLedgerRecord } from "@/lib/ledger-data";
 import type { Metadata } from "next";
 import { Scorecard } from "@/components/scorecard";
 import { Eyebrow } from "@/components/ui";
+
 export const metadata: Metadata = pageMetadata(
   "/predictions/",
-  "The prediction ledger",
-  `Search ${predictions.length} selected Ray Kurzweil forecasts by field, deadline and outcome. Read assessments, source links and earlier versions of each record.`,
+  "All predictions",
+  `Search ${predictions.length} Ray Kurzweil forecasts by field, deadline, and outcome. Inspect our judgments, evidence, and source links for every record.`,
 );
+
 export default function PredictionsPage() {
+  const leanPredictions = predictions.map(toLedgerRecord);
+  const leanIntake = originalIntake.map(toLedgerRecord);
+  const categoryNames = categories.map((c) => c.name);
   return (
     <div className="container page-container predictions-page">
       <div className="page-intro">
-        <Eyebrow>THE FORECAST RECORD</Eyebrow>
-        <h1>The predictions.</h1>
+        <Eyebrow>THE FULL LIST</Eyebrow>
+        <h1>All predictions</h1>
         <p>
-          Search by claim, field or verdict. Open any prediction for our
-          judgment and the evidence behind it.
+          Search by claim, field, or verdict. Select any prediction to read the
+          judgment and the evidence behind it, or review{" "}
+          <Link href="/methodology/">how we score them</Link>.
         </p>
       </div>
-      <p className="ledger-note">
-        A selected collection of {predictions.length} forecast versions. Default
-        verdicts reflect our interpretation of each claim.{" "}
-        <Link href="/methodology/">Scoring rules & limitations</Link>
-      </p>
-      <Suspense
-        fallback={
-          <div className="loading-state">Loading the prediction ledger…</div>
-        }
-      >
-        <Scorecard />
-      </Suspense>
+      <Scorecard
+        records={leanPredictions}
+        intake={leanIntake}
+        categoryNames={categoryNames}
+        asOf={AS_OF}
+      />
     </div>
   );
 }

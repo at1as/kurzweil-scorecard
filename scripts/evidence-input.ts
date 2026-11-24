@@ -8,27 +8,34 @@ import {
   sourceSchema,
   reconciliationSchema,
 } from "../src/lib/evidence-model";
-export const EVIDENCE_DIR = "kurzweil_verification_v0_3_package";
-export const evidenceFile = `${EVIDENCE_DIR}/predictions.canonical.v0.3.json`;
+export const EVIDENCE_DIR = "kurzweil_verification_v0_4_package";
+export const PREVIOUS_EVIDENCE_DIR = "kurzweil_verification_v0_3_package";
+export const evidenceFile = `${EVIDENCE_DIR}/predictions.canonical.v0.4.json`;
 export const sha = (file: string) =>
   createHash("sha256").update(fs.readFileSync(file)).digest("hex");
-export function loadEvidence() {
-  const read = (file: string) =>
-    JSON.parse(fs.readFileSync(path.join(EVIDENCE_DIR, file), "utf8"));
-  const manifest = read("MANIFEST.json");
+function verifyManifestDir(dir: string, label: string) {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(dir, "MANIFEST.json"), "utf8"),
+  );
   for (const f of manifest.files)
     if (
-      sha(`${EVIDENCE_DIR}/${f.name}`) !== f.sha256 ||
-      fs.statSync(`${EVIDENCE_DIR}/${f.name}`).size !== f.bytes
+      sha(`${dir}/${f.name}`) !== f.sha256 ||
+      fs.statSync(`${dir}/${f.name}`).size !== f.bytes
     )
-      throw new Error(`Immutable v0.3 release altered: ${f.name}`);
+      throw new Error(`Immutable ${label} release altered: ${f.name}`);
+}
+export function loadEvidence() {
+  verifyManifestDir(PREVIOUS_EVIDENCE_DIR, "v0.3");
+  verifyManifestDir(EVIDENCE_DIR, "v0.4");
+  const read = (file: string) =>
+    JSON.parse(fs.readFileSync(path.join(EVIDENCE_DIR, file), "utf8"));
   const release = evidenceV03ReleaseSchema.parse(
-    read("predictions.canonical.v0.3.json"),
+    read("predictions.canonical.v0.4.json"),
   );
-  const sources = sourceSchema.array().parse(read("sources.v0.3.json").sources);
+  const sources = sourceSchema.array().parse(read("sources.v0.4.json").sources);
   const mappings = reconciliationSchema
     .array()
-    .parse(read("legacy-reconciliation.v0.3.json").mapping);
+    .parse(read("legacy-reconciliation.v0.4.json").mapping);
   const ids = new Set(release.records.map((r) => r.id)),
     sids = new Set(sources.map((s) => s.id));
   if (

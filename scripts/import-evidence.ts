@@ -8,6 +8,7 @@ import { commonCohort, selectReading } from "../src/lib/interpretations";
 import { READINGS } from "../src/lib/evidence-model";
 import {
   EVIDENCE_DIR,
+  PREVIOUS_EVIDENCE_DIR,
   evidenceFile,
   loadEvidence,
   sha,
@@ -43,12 +44,12 @@ export function importEvidence(
     ),
   ).records;
   for (const p of previous) {
-    const r = release.records.find((r) => r.id === p.id);
-    if (
-      !r?.revision_history?.some((h) =>
+    const preserved = release.records.some((r) =>
+      r.revision_history?.some((h) =>
         isDeepStrictEqual(h.previous_assessment, p.assessment),
-      )
-    )
+      ),
+    );
+    if (!preserved)
       throw new Error(`${p.id}: missing v0.2 assessment history`);
   }
   const records = validateDataset(
@@ -70,7 +71,7 @@ export function importEvidence(
     JSON.stringify(
       {
         asOf,
-        release: "0.3",
+        release: "0.4",
         researchSupplement: {
           id: supplement.id,
           checkedAt: supplement.checked_at,
@@ -119,11 +120,14 @@ export function importEvidence(
     "data/research/citation-supplement-2026-10-18.json",
     "public/data/research/citation-supplement-2026-10-18.json",
   );
-  fs.cpSync(EVIDENCE_DIR, "public/data/releases/v0.3", { recursive: true });
+  fs.cpSync(PREVIOUS_EVIDENCE_DIR, "public/data/releases/v0.3", {
+    recursive: true,
+  });
+  fs.cpSync(EVIDENCE_DIR, "public/data/releases/v0.4", { recursive: true });
   fs.cpSync("data/releases/v0.2", "public/data/releases/v0.2/site-snapshot", {
     recursive: true,
   });
   console.log(
-    `Evidence v0.3: ${records.length} canonical versions; ${mappings.length} original routes retained; ${summarize(records, asOf).eligible} reference-eligible.`,
+    `Evidence v0.4: ${records.length} canonical versions; ${mappings.length} original intake summaries retained; ${summarize(records, asOf).eligible} balanced-eligible.`,
   );
 }

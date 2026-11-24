@@ -75,12 +75,31 @@ export function eligibleRecords(records: Prediction[], asOf: string) {
   );
 }
 export function driftYears(p: Prediction, asOf: string): number | null {
-  if (p.release?.timing)
-    return (p.selectedReading ?? "reference") === "reference" &&
-      p.release.timing.kind === "EXACT_EVENT" &&
-      eligibleRecords([p], asOf).length
-      ? p.release.timing.drift_years
-      : null;
+  if (p.release?.timing) {
+    if (
+      p.release.timing.kind !== "EXACT_EVENT" ||
+      !eligibleRecords([p], asOf).length ||
+      !fullyRealized(p)
+    )
+      return null;
+    const mode = p.selectedReading ?? "reference";
+    if (
+      mode === "reference" ||
+      p.release.interpretations?.[mode]?.same_as_reference
+    ) {
+      return p.release.timing.drift_years;
+    }
+    const reading = readingOf(p);
+    const target = deadlineYear(p);
+    if (
+      reading?.documented_by_year != null &&
+      target !== null &&
+      p.release.timing.drift_years !== null
+    ) {
+      return reading.documented_by_year - target;
+    }
+    return p.release.timing.drift_years;
+  }
   if (p.release)
     return isVerified(p, asOf) &&
       p.release.assessment.eligible_for_deadline_metrics
